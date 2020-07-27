@@ -21,6 +21,7 @@ import ghidra.app.plugin.ProgramPlugin;
 import ghidra.app.script.AskDialog;
 import ghidra.framework.cmd.BackgroundCommand;
 import ghidra.framework.model.DomainObject;
+import ghidra.framework.model.Transaction;
 import ghidra.framework.plugintool.PluginInfo;
 import ghidra.framework.plugintool.PluginTool;
 import ghidra.framework.plugintool.util.PluginStatus;
@@ -178,7 +179,20 @@ public class OOAnalyzerGhidraPlugin extends ProgramPlugin {
             throw new IllegalStateException("OOAnalyzer could not find any classes");
         }
       } finally {
-        OOAnalyzerGhidraPlugin.this.currentProgram.endTransaction(tid, (result > 0));
+        Msg.debug (null, "hasTransactionTerminated: " + OOAnalyzerGhidraPlugin.this.currentProgram.hasTerminatedTransaction ());
+        Transaction transaction = OOAnalyzerGhidraPlugin.this.currentProgram.getCurrentTransaction ();
+        if (transaction != null) {
+          Msg.debug (this, "Transaction description: " + transaction.getDescription ());
+          Msg.debug (this, "ID: " + transaction.getID ());
+          for (String s : transaction.getOpenSubTransactions ()) {
+            Msg.debug (this, "Open sub-transaction: " + s);
+          }
+          Msg.debug (this, "Status: " + transaction.getStatus ());
+          Msg.debug (this, "has Committed: " + transaction.hasCommittedDBTransaction ());
+        } else {
+          Msg.debug (this, "Current transaction is null");
+        }
+        OOAnalyzerGhidraPlugin.this.currentProgram.endTransaction(tid, result > 0);
       }
     }
   }
