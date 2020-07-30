@@ -10,6 +10,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
 import javax.swing.JOptionPane;
 
 import docking.ActionContext;
@@ -22,6 +25,7 @@ import ghidra.app.script.AskDialog;
 import ghidra.framework.cmd.BackgroundCommand;
 import ghidra.framework.model.DomainObject;
 import ghidra.framework.model.Transaction;
+import ghidra.framework.model.AbortedTransactionListener;
 import ghidra.framework.plugintool.PluginInfo;
 import ghidra.framework.plugintool.PluginTool;
 import ghidra.framework.plugintool.util.PluginStatus;
@@ -41,6 +45,17 @@ import ghidra.util.task.TaskMonitor;
  *
  */
 public class OOAnalyzerGhidraPlugin extends ProgramPlugin {
+
+  private class MyListener implements AbortedTransactionListener {
+    @Override
+    public void transactionAborted(long tid) {
+      Msg.warn (this, "Transaction was just aborted!");
+    }
+
+    public void finalize() {
+      Msg.warn (this, "MyListener was finalized!");
+    }
+  }
 
   private static final String CERT_MENU = "&CERT";
   public static final String NAME = "OOAnalyzer";
@@ -101,10 +116,37 @@ public class OOAnalyzerGhidraPlugin extends ProgramPlugin {
       return true;
     }
 
+
+    private void addAbortListener(Program program, AbortedTransactionListener listener) throws Exception {
+      //ProgramDB db = (ProgramDB) program;
+      Object transaction = program.getCurrentTransaction();
+      Field abortListenersField = Class.forName("ghidra.framework.data.DomainObjectDBTransaction").getDeclaredField("abortedTransactionListeners");
+      //Field abortListenersField = transaction.getClass().getDeclaredField("abortedTransactionListeners");
+      abortListenersField.setAccessible(true);
+      Object listeners = abortListenersField.get(transaction);
+      //abortListenersField.get(transaction).add(listener);
+
+      // 2020-07-30 10:30:58 WARN  (OOAnalyzerGhidraPlugin$ImportCommand) Exception java.lang.NoSuchMethodException: ghidra.util.datastruct.CopyOnWriteWeakSet.add(ghidra.framework
+      Method add = listeners.getClass().getMethod("add", AbortedTransactionListener.class);
+      add.invoke (listeners, listener);
+
+      // ABORT!
+      transaction.getClass().getMethod("abort").invoke(transaction);
+
+    }
+
+
     /**
      * Run the script
      */
     private void cmdConfigureAndExecute(TaskMonitor monitor) {
+
+      MyListener listener = new MyListener ();
+      try {
+        addAbortListener (OOAnalyzerGhidraPlugin.this.currentProgram, listener);
+      } catch (Exception e) {
+        Msg.warn (this, "Exception " + e.toString ());
+      }
 
       // Refuse to continue unless program has been analyzed
       if (!currentProgram.getOptions(Program.PROGRAM_INFO).getBoolean(Program.ANALYZED, false)) {
@@ -181,6 +223,7 @@ public class OOAnalyzerGhidraPlugin extends ProgramPlugin {
       } finally {
         Msg.debug (null, "hasTransactionTerminated: " + OOAnalyzerGhidraPlugin.this.currentProgram.hasTerminatedTransaction ());
         Transaction transaction = OOAnalyzerGhidraPlugin.this.currentProgram.getCurrentTransaction ();
+
         if (transaction != null) {
           Msg.debug (this, "Transaction description: " + transaction.getDescription ());
           Msg.debug (this, "ID: " + transaction.getID ());
