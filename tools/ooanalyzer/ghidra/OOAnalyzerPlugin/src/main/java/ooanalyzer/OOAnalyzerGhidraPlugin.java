@@ -126,7 +126,7 @@ public class OOAnalyzerGhidraPlugin extends ProgramPlugin {
       Object listeners = abortListenersField.get(transaction);
       //abortListenersField.get(transaction).add(listener);
 
-      // 2020-07-30 10:30:58 WARN  (OOAnalyzerGhidraPlugin$ImportCommand) Exception java.lang.NoSuchMethodException: ghidra.util.datastruct.CopyOnWriteWeakSet.add(ghidra.framework
+      // 2020-07-30 10:30:58 WARN  (OOAnalyzerGhidraPlugin$ImportCommand) Exception java.lang.NoSuchMethodException: ghidra.util.datastruct.CopyOnWriteWeakSet.add(ghidra.framework.model.AbortedTransactionListener)
       Method add = listeners.getClass().getMethod("add", AbortedTransactionListener.class);
       add.invoke (listeners, listener);
 
