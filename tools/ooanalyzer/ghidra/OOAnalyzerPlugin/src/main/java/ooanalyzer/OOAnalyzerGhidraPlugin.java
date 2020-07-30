@@ -10,6 +10,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -47,9 +50,10 @@ import ghidra.util.task.TaskMonitor;
 public class OOAnalyzerGhidraPlugin extends ProgramPlugin {
 
   private class MyListener implements AbortedTransactionListener {
+
     @Override
     public void transactionAborted(long tid) {
-      Msg.warn (this, "Transaction was just aborted!");
+      Msg.warn (this, "MyListener transaction was just aborted!");
     }
 
     public void finalize() {
@@ -117,7 +121,7 @@ public class OOAnalyzerGhidraPlugin extends ProgramPlugin {
     }
 
 
-    private void addAbortListener(Program program, AbortedTransactionListener listener) throws Exception {
+    private synchronized void addAbortListener(Program program, AbortedTransactionListener listener) throws Exception {
       //ProgramDB db = (ProgramDB) program;
       Object transaction = program.getCurrentTransaction();
       Field abortListenersField = Class.forName("ghidra.framework.data.DomainObjectDBTransaction").getDeclaredField("abortedTransactionListeners");
@@ -127,11 +131,21 @@ public class OOAnalyzerGhidraPlugin extends ProgramPlugin {
       //abortListenersField.get(transaction).add(listener);
 
       // 2020-07-30 10:30:58 WARN  (OOAnalyzerGhidraPlugin$ImportCommand) Exception java.lang.NoSuchMethodException: ghidra.util.datastruct.CopyOnWriteWeakSet.add(ghidra.framework.model.AbortedTransactionListener)
-      Method add = listeners.getClass().getMethod("add", AbortedTransactionListener.class);
+      Method add = listeners.getClass().getMethod("add", Object.class);
+      add.setAccessible(true);
       add.invoke (listeners, listener);
 
       // ABORT!
-      transaction.getClass().getMethod("abort").invoke(transaction);
+      //Msg.debug (this, "Transaction: " + transaction.getClass ());
+      // for (Method m : transaction.getClass ().getMethods ()) {
+      //   Msg.debug (this, "Method: " + m.toString());
+      // }
+
+      if (false) {
+        Method abort = transaction.getClass().getDeclaredMethod("abort");
+        abort.setAccessible(true);
+        abort.invoke(transaction);
+      }
 
     }
 
@@ -145,7 +159,11 @@ public class OOAnalyzerGhidraPlugin extends ProgramPlugin {
       try {
         addAbortListener (OOAnalyzerGhidraPlugin.this.currentProgram, listener);
       } catch (Exception e) {
-        Msg.warn (this, "Exception " + e.toString ());
+        StringWriter sw = new StringWriter ();
+        PrintWriter pw = new PrintWriter (sw);
+        e.printStackTrace (pw);
+        Msg.warn (this, "Exception: " + sw.toString ());
+
       }
 
       // Refuse to continue unless program has been analyzed
