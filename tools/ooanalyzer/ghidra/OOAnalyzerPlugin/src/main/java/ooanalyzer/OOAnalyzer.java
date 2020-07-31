@@ -1385,7 +1385,7 @@ public class OOAnalyzer {
   }
 
   /**
-   * Transactionally add a data type.
+   * Add a data type.
    *
    * @param dt                the data type to commit.
    * @param useOOAnalyzerPath Flag for where to add the type
@@ -1401,40 +1401,31 @@ public class OOAnalyzer {
         }
       }
 
-      int tid = dataTypeMgr.startTransaction("Update type manager: add one type");
-
-      Boolean commit = false;
       try {
         dataTypeMgr.addDataType(dt, DataTypeConflictHandler.REPLACE_HANDLER);
         dataTypeMgr.flushEvents();
-        commit = true;
-      } catch (IllegalArgumentException iex) {
-        Msg.warn(this, "Unable to add data type " + dt.toString() + ": " + iex.toString ());
-      } finally {
-        dataTypeMgr.endTransaction(tid, commit);
+      } catch (Exception e) {
+        Msg.warn(this, "Unable to add data type " + dt.toString() + ": " + e.toString ());
       }
     }
   }
 
   /**
-   * /** Transactionally add an array of data types.
+   * /** Add an array of data types.
    *
    * @param dTypes            The list of data types to commit.
    * @param useOOAnalyzerPath Flag for where to add the type
    */
   private void updateTypeManager(final DataType[] dTypes, boolean useOOAnalyzerPath) {
 
-    int tid = dataTypeMgr.startTransaction("Update type manager: add multiple types");
     for (var dt : dTypes) {
       allowSwingToProcessEvents ();
       if (monitor.isCancelled ()) {
-        dataTypeMgr.endTransaction(tid, false);
         return;
       }
       updateTypeManager(dt, useOOAnalyzerPath);
     }
     dataTypeMgr.flushEvents();
-    dataTypeMgr.endTransaction(tid, true);
   }
 
   /**
