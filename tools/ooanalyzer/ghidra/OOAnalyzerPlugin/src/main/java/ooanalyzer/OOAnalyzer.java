@@ -928,15 +928,50 @@ public class OOAnalyzer {
       .filter (sym -> sym.getName (true).equalsIgnoreCase (ooaType.getBestName ()))
       .findAny ();
 
-    // If that doesn't work, we'll try matching on just the symbol name without the namespace.
-    // It's unclear if this is actually a good idea, but this is what the original code
-    // effectively did.
+    // If that doesn't work, we'll try to find the class in either the OOAnalyzer namespace or
+    // in an imported DLL.
 
     if (!symbol.isPresent ()) {
-      Msg.debug (this, "Couldn't find exact match for " + ooaType.getBestName () + ", so trying inexact match.");
+      Msg.debug (this, "Couldn't find exact match for " + ooaType.getBestName () + ", so looking in OOAnalyzer and imported DLL namespaces.");
       symbol = getSymbolStream.get ()
         .filter (sym -> sym.getSymbolType () == SymbolType.CLASS)
+        // Check the class name without the namespace as a precondition
         .filter (sym -> sym.toString ().equalsIgnoreCase (ghidraClassType.getName ()))
+        // Now check the namespace
+        .filter (sym -> {
+
+            var path = sym.getPath ();
+
+            var name_without_first_ns = Arrays.stream (path)
+            .skip (1) // Skip the initial namespace
+            .collect (Collectors.joining ("::"));
+
+            if (!name_without_first_ns.equals(ooaType.getBestName ()))
+              return false;
+
+            var first_ns_opt = Stream.iterate (sym.getParentNamespace (),
+                                           ns -> ns != null && ns.getParentNamespace () != null,
+                                           ns -> ns.getParentNamespace ())
+            .findAny ();
+
+            // If there is no parent namespace, we should have matched exactly
+            if (!first_ns_opt.isPresent ())
+              return false;
+
+            var first_ns = first_ns_opt.get ();
+            if (first_ns == null)
+              return false;
+
+            if (first_ns.equals(ooanalyzerNamespace))
+              return true;
+
+            if (first_ns.isExternal ())
+              return true;
+
+            // Default: fail
+            return false;
+
+          })
         .findAny ();
     }
 
@@ -976,6 +1011,8 @@ public class OOAnalyzer {
             } else {
               ns = NamespaceUtils.createNamespaceHierarchy (parentNs.getName (true), this.ooanalyzerNamespace, program, SourceType.ANALYSIS);
             }
+
+            // XXX: If ns is an imported namespace, don't attempt to move it
             Msg.debug (this, "Moving " + sym.getName (true) + " to the OOAnalyzer namespace " + ns.getName (true));
             sym.setNamespace(ns);
           }
@@ -990,6 +1027,8 @@ public class OOAnalyzer {
 
       try {
         Msg.debug(this, "Symbol for class " + ghidraClassType.getName () + " not found.  Creating new one.");
+
+        // XXX: Recreate namespace hierarchy
 
         String className = SymbolUtilities.replaceInvalidChars (ghidraClassType.getDisplayName (), true);
 
@@ -1556,12 +1595,16 @@ public class OOAnalyzer {
         Msg.debug (OOAnalyzer.class, "Ghidra demangled " + mangledName + " to " + demangledName);
 
         // Now get the namespace
-        String namespaceType;
+        String namespaceType = null;
         if (isMethodName) {
           // method -> class -> namespace
-          namespaceType = demangledObj.getNamespace ().getNamespace ().toString ();
+          var tmpNamespace = demangledObj.getNamespace ().getNamespace ();
+          if (tmpNamespace != null)
+            namespaceType = demangledObj.getNamespace ().getNamespace ().toString ();
         } else {
-          namespaceType = demangledObj.getNamespace ().toString ();
+          var tmpNamespace = demangledObj.getNamespace ();
+          if (tmpNamespace != null)
+            namespaceType = demangledObj.getNamespace ().toString ();
         }
         if (namespaceType != null) {
           namespace = namespaceType;
