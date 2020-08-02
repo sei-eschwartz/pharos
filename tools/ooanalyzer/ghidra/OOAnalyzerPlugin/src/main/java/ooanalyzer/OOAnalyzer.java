@@ -1003,18 +1003,31 @@ public class OOAnalyzer {
           if (inOOAnalyzerNamespace) {
             Msg.debug (this, "Not moving " + sym.getName (true) + " since it is already in the OOAnalyzer namespace");
           } else {
-            Namespace ns;
+            Namespace ns = null;
+
+            // If ns is an imported namespace, don't attempt to move it
+            boolean isExternal =
+              Stream.iterate (parentNs,
+                              nst -> nst != null,
+                              nst -> nst.getParentNamespace ())
+              .filter (nst -> nst.isExternal ())
+              .findAny ()
+              .isPresent ();
+
             if (parentNs.isGlobal ()) {
               // If there is no parent namespace, ns becomes Global instead of
               // ooanalyzerNamespace.  Seems like a bug to me.
               ns = this.ooanalyzerNamespace;
-            } else {
+            } else if (!isExternal) {
               ns = NamespaceUtils.createNamespaceHierarchy (parentNs.getName (true), this.ooanalyzerNamespace, program, SourceType.ANALYSIS);
             }
 
-            // XXX: If ns is an imported namespace, don't attempt to move it
-            Msg.debug (this, "Moving " + sym.getName (true) + " to the OOAnalyzer namespace " + ns.getName (true));
-            sym.setNamespace(ns);
+            if (ns == null) {
+              Msg.debug (this, "Not moving " + sym.getName (true) + " to the OOAnalyzer namespace because it is imported and Ghidra will not allow it to be moved.");
+            } else {
+              Msg.debug (this, "Moving " + sym.getName (true) + " to the OOAnalyzer namespace " + ns.getName (true));
+              sym.setNamespace(ns);
+            }
           }
         } catch (NullPointerException | DuplicateNameException | InvalidInputException
                  | CircularDependencyException e) {
@@ -1028,12 +1041,20 @@ public class OOAnalyzer {
       try {
         Msg.debug(this, "Symbol for class " + ghidraClassType.getName () + " not found.  Creating new one.");
 
-        // XXX: Recreate namespace hierarchy
+        // Recreate namespace hierarchy
+        Optional<String> optNamespace = ooaType.getNamespace ();
 
-        String className = SymbolUtilities.replaceInvalidChars (ghidraClassType.getDisplayName (), true);
+        String className = SymbolUtilities.replaceInvalidChars (ooaType.getNameWithoutNamespace (), true);
 
-        GhidraClass newSymCls = symbolTable.createClass(this.ooanalyzerNamespace,
-                                                        className, SourceType.USER_DEFINED);
+        // Msg.debug (this, "D1 " + optNamespace + " " + className + " " + ooaType.getNamespace () + " " + ooaType.getDemangledName ());
+
+        Namespace ns = NamespaceUtils.createNamespaceHierarchy (optNamespace.orElse (null), this.ooanalyzerNamespace, program, SourceType.ANALYSIS);
+
+        // Msg.debug (this, "D2 Namespace " + ns + " Class name " + className);
+
+        GhidraClass newSymCls = symbolTable.createClass(ns,
+                                                        className,
+                                                        SourceType.USER_DEFINED);
 
         classSymbolMap.put(ghidraClassType, newSymCls.getSymbol());
         Msg.debug(this, "Symbol for class " + ghidraClassType.getName () + ": " + newSymCls);
