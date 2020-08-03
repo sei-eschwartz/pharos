@@ -1420,6 +1420,7 @@ public class OOAnalyzer {
     // everything correctly
 
     Parameter thisPtr = null;
+    // XXX: Set category path of the pointer type
     DataType thisPtrType = PointerDataType.getPointer(ooClass, dataTypeMgr);
     updateTypeManager(thisPtrType, true);
 
@@ -1454,8 +1455,9 @@ public class OOAnalyzer {
     if (!dataTypeMgr.contains(dt)) {
       if (useOOAnalyzerPath) {
         try {
-          if (dt.getCategoryPath().compareTo(ooanalyzerCategory) != 0) {
-            dt.setCategoryPath(ooanalyzerCategory);
+          if (!dt.getCategoryPath().isAncestorOrSelf(ooanalyzerCategory)) {
+            CategoryPath cp = new CategoryPath(ooanalyzerCategory, dt.getCategoryPath().asArray ());
+            dt.setCategoryPath(cp);
           }
         } catch (DuplicateNameException e) {
         }
