@@ -1457,7 +1457,7 @@ public class OOAnalyzer {
       if (useOOAnalyzerPath) {
         try {
           if (!dt.getCategoryPath().isAncestorOrSelf(ooanalyzerCategory)) {
-            CategoryPath cp = new CategoryPath(ooanalyzerCategory, dt.getCategoryPath().asArray ());
+            CategoryPath cp = new CategoryPath(ooanalyzerCategory, dt.getCategoryPath().getPath ());
             dt.setCategoryPath(cp);
           }
         } catch (DuplicateNameException e) {
