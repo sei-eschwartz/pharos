@@ -1422,6 +1422,7 @@ public class OOAnalyzer {
     Parameter thisPtr = null;
     // XXX: Set category path of the pointer type
     DataType thisPtrType = PointerDataType.getPointer(ooClass, dataTypeMgr);
+    thisPtrType.setCategoryPath (ooClass.getCategoryPath ());
     updateTypeManager(thisPtrType, true);
 
     // if a this pointer already exists in the form of a 0th param, then update it
