@@ -1194,7 +1194,7 @@ public class OOAnalyzer {
 
     var ea = flatApi.toAddr (vftable.getEa ());
     if (!vftableMap.containsKey (ea)) {
-      Structure vftableStruct = new StructureDataType(ooanalyzerCategory,
+      Structure vftableStruct = new StructureDataType(ghidraClassType.getCategoryPath (),
                                                       ghidraClassType.getName() + "::vftable_" + Long.toHexString(vftable.getEa()).toLowerCase(), 0);
 
       vftableMap.put(ea, vftableStruct);
