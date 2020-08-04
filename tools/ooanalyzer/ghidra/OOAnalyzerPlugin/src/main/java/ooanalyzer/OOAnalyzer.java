@@ -432,7 +432,7 @@ public class OOAnalyzer {
       .toArray(DataType[]::new);
     if (monitor.isCancelled ()) return 0;
     allowSwingToProcessEvents();
-    updateTypeManager(ghidraTypeArray, true);
+    updateTypeManager(ghidraTypeArray, useOOAnalyzerNamespace);
     if (monitor.isCancelled ()) return 0;
     Msg.info(this, "Type manager updated.");
     monitor.initialize(classTypeMap.size ());
@@ -879,7 +879,7 @@ public class OOAnalyzer {
 
             Structure vftableStruct = vftableMap.get(vtableAddr);
             populateVftable(vftableStruct, vfuncList);
-            updateTypeManager(vftableStruct, true);
+            updateTypeManager(vftableStruct, useOOAnalyzerNamespace);
 
             try {
               // Try to remove any data inside the vtable
