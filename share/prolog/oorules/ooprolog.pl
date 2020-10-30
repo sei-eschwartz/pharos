@@ -20,8 +20,7 @@
 :- initialization(main, main).
 
 nohalt :-
-    (exists_source(library(readline)) -> use_module(library(readline)) ; true),
-    break.
+    set_prolog_flag(toplevel_goal, prolog).
 
 %% Same as option/2, but fails if the value hasn't been set
 check_option(X, O) :-
