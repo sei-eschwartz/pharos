@@ -175,7 +175,7 @@ parse_options(OptsSpec, Args, Opts, Positional) :-
 run_with_backtrace(X) :-
     catch_with_backtrace(
         X, Exception,
-        (print_message(error, Exception), (globalHalt, ! ; nohalt), halt(1))).
+        (print_message(error, Exception), (globalHalt -> halt(1) ; true))).
 
 main :-
     set_prolog_flag(color_term, true),
@@ -231,11 +231,9 @@ run :-
     run(Opts).
 
 run(Opts) :-
-    option(halt(Halt), Opts),
     generate_results(Opts),
     generate_json(Opts),
-    validate_results(Opts),
-    (Halt, ! ; nohalt).
+    validate_results(Opts).
 
 %% Generate results when there is a facts file
 generate_results(Opts) :-
