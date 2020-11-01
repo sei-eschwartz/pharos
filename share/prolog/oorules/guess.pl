@@ -105,16 +105,17 @@ tryBinarySearch(PP, NP, L) :-
     trySetGroup(NGp).
 
 % Do not guess if either fact is already true, or if doNotGuess(Fact) exists.
-doNotGuessHelper(Fact, _) :-
-    Fact, !, fail.
-doNotGuessHelper(Fact, _) :-
-    doNotGuess(Fact), !, fail.
-doNotGuessHelper(_, Fact) :-
-    Fact, !, fail.
-doNotGuessHelper(_, Fact) :-
-    doNotGuess(Fact), !, fail.
-% Otherwise we're good!
-doNotGuessHelper(_, _).
+doNotGuessHelper(Fact, Fact2) :-
+    (   Fact
+    ->  fail
+    ;   doNotGuess(Fact)
+    ->  fail
+    ;   Fact2
+    ->  fail
+    ;   doNotGuess(Fact2)
+    ->  fail
+    ;   true
+    ).
 
 % --------------------------------------------------------------------------------------------
 % Try guessing that a virtual function call is correctly interpreted.
