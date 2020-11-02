@@ -105,6 +105,8 @@ tryBinarySearch(PP, NP, L) :-
     trySetGroup(NGp).
 
 % Do not guess if either fact is already true, or if doNotGuess(Fact) exists.
+:- meta_predicate
+    doNotGuessHelper(0,0).
 doNotGuessHelper(Fact, Fact2) :-
     (   Fact
     ->  fail

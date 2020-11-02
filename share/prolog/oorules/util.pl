@@ -8,6 +8,10 @@
 sort_tuple((A,B), (C,D)) :-
     (A < B -> (C=A, D=B); (C=B, D=A)).
 
+:- meta_predicate
+    osetof(?, ^, -),
+    minof(?, ^).
+
 osetof(A, B, C) :-
     bagof(A, B, Cp),
     list_to_set(Cp, Cp2),
