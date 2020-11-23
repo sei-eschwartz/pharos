@@ -425,15 +425,17 @@ public class OOAnalyzer {
     // The types are now complete (including members). Update the datatype
     // manager.
 
-    var ghidraTypeArray = classTypeMap
+    classTypeMap
       .values ()
       .stream ()
       .takeWhile (entry -> !monitor.isCancelled ())
-      .toArray(DataType[]::new);
+      .forEach(entry -> {
+          monitor.incrementProgress(1);
+          allowSwingToProcessEvents();
+          updateTypeManager(entry, useOOAnalyzerNamespace);
+        });
     if (monitor.isCancelled ()) return 0;
-    allowSwingToProcessEvents();
-    updateTypeManager(ghidraTypeArray, useOOAnalyzerNamespace);
-    if (monitor.isCancelled ()) return 0;
+    dataTypeMgr.flushEvents ();
     Msg.info(this, "Type manager updated.");
     monitor.initialize(classTypeMap.size ());
     monitor.setMessage("Updating methods and vftables");
@@ -1488,24 +1490,6 @@ public class OOAnalyzer {
         Msg.warn(this, "Unable to add data type " + dt.toString() + ": " + e.toString ());
       }
     }
-  }
-
-  /**
-   * /** Add an array of data types.
-   *
-   * @param dTypes            The list of data types to commit.
-   * @param useOOAnalyzerPath Flag for where to add the type
-   */
-  private void updateTypeManager(final DataType[] dTypes, boolean useOOAnalyzerPath) {
-
-    for (var dt : dTypes) {
-      allowSwingToProcessEvents ();
-      if (monitor.isCancelled ()) {
-        return;
-      }
-      updateTypeManager(dt, useOOAnalyzerPath);
-    }
-    dataTypeMgr.flushEvents();
   }
 
   /**
