@@ -135,7 +135,7 @@ true_(_) :- true.
 loadPredicates(File) :-
     loadPredicates(File, true_).
 
-loadPredicates(stream(Stream), Verifier) :-
+loadPredicates(stream(Stream), Verifier) :- !,
     readPredicates(Stream, Verifier).
 
 loadPredicates(File, Verifier) :-
