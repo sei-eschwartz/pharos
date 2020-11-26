@@ -1518,17 +1518,17 @@ reasonDerivedClass_B(DerivedClass, BaseClass, ObjectOffset) :-
 %not(factDerivedClass(DerivedClass, BaseClass, _OtherObjectOffset)),
 
 % Short format debugging.
-%%     logtraceln('~Q.', reasonDerivedClass2(DerivedClass, BaseClass, ObjectOffset)),
+%     logtraceln('~Q.', reasonDerivedClass2(DerivedClass, BaseClass, ObjectOffset)),
 
-%%     % Long format debugging.
-%%     logtraceln('reasonDerivedClass2()...'),
-%%     logtraceln('  Method: ~Q', Method),
-%%     logtraceln('  Base VFTable: ~Q', BaseVFTable),
-%%     logtraceln('    Constructor: ~Q', BaseConstructor),
-%%     logtraceln('    Class: ~Q', BaseClass),
-%%     logtraceln('  Derived VFTable: ~Q', DerivedVFTable),
-%%     logtraceln('    Constructor: ~Q', DerivedConstructor),
-%%     logtraceln('    Class: ~Q', DerivedClass).
+% Long format debugging.
+%     logtraceln('reasonDerivedClass2()...'),
+%     logtraceln('  Method: ~Q', Method),
+%     logtraceln('  Base VFTable: ~Q', BaseVFTable),
+%     logtraceln('    Constructor: ~Q', BaseConstructor),
+%     logtraceln('    Class: ~Q', BaseClass),
+%     logtraceln('  Derived VFTable: ~Q', DerivedVFTable),
+%     logtraceln('    Constructor: ~Q', DerivedConstructor),
+%     logtraceln('    Class: ~Q', DerivedClass).
 
 
 % This rule might be slightly off, because another possibility is that there's a nearly
@@ -2362,7 +2362,7 @@ reasonMergeClasses_J(VFTable1Class, VFTable2Class) :-
 %% I think this may only be true for constructors.
 %% The method is 0x40228c in ooex_vs2010/Lite/oo.exe.  According to ground truth it is on std::basic_ios:
 
-%% groundTruth(0x40228c, 'std::basic_ios<char, struct std::char_traits<char> >', '~basic_ios', method, realDestructor, linked, public, virtual, '__thiscall').
+% groundTruth(0x40228c, 'std::basic_ios<char, struct std::char_traits<char> >', '~basic_ios', method, realDestructor, linked, public, virtual, '__thiscall').
 
 %% But look at the implementation of the function:
 
@@ -2378,7 +2378,7 @@ reasonMergeClasses_J(VFTable1Class, VFTable2Class) :-
 
 %% ejs 10/18/20: I don't think this rule is correct at all.
 
-%% Looking back at my vftable installation table for inheritance 
+%% Looking back at my vftable installation table for inheritance
 %% https://docs.google.com/spreadsheets/d/1Sglpf0HT363kH09jmpx0tYHvuTvJgRTEsu7x0sj-QAA/edit#gid=1459733299
 %%  and looking at which cases there can be a single vftable installed by
 %% a constructor...
@@ -2409,8 +2409,8 @@ reasonMergeClasses_J(VFTable1Class, VFTable2Class) :-
 
 %%     iso_dif(MethodClass, VFTClass),
 
-%%     logtraceln('~@~Q.', [not(find(MethodClass, VFTClass)),
-%%                          reasonMergeClasses_K(MethodClass, VFTClass)]).
+%     logtraceln('~@~Q.', [not(find(MethodClass, VFTClass)),
+%                          reasonMergeClasses_K(MethodClass, VFTClass)]).
 
 % Implement: Because they share a method and neither of them have base classes.  This may be
 % needed to ensure that we actually merge the classes.
