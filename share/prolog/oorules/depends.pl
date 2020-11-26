@@ -3,12 +3,31 @@
 /** <module> Analysis dependencies
 
 The predicate guess/0 implements guesses. It calls guess*(-Out), where
-Out is a goal realizing the guess.
+Out is a goal realizing the guess.  The guesses
 
 
 */
 
 % :- debug(depends).
+
+%!  conclude(-Concluder, -Goal) is nondet.
+%
+%   True when Goal is produced by Concluder.
+
+conclude(Concluder, Goal) :-
+    clause(reasonForward, Body),
+    body_term_calls(Body, once(Concluders)),
+    !,
+    semicolon_list(Concluders, List),
+    member(Concluder, List),
+    (   arg(1, Concluder, Out),
+        clause(Concluder, GuessBody),
+        body_term_calls(GuessBody, Out2 = Goal0),
+        Out == Out2
+    ->  Goal = Goal0
+    ;   Goal = ?
+    ).
+
 
 %!  guess(-Guess, -Goal) is nondet.
 %
@@ -72,7 +91,8 @@ hit(user:Callee, user:Caller, Location) :-
 
 %!  input(?Term)
 %
-%   True if Term is external input to the program
+%   True if Term is external input data to the program. Extracted from a
+%   single data file, might be incomplete.
 
 input(callingConvention(_Ptr, _Convention)).
 input(callParameter(_Ptr1, _Ptr2, _How, _SV)).
