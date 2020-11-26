@@ -25,23 +25,23 @@
 
 reasonMethod(Method) :-
     %logwarnln('Recomputing reasonMethod...'),
-    or([reasonMethod_A(Method),
-        reasonMethod_B(Method),
-        reasonMethod_C(Method),
-        reasonMethod_D(Method),
-        reasonMethod_E(Method),
-        reasonMethod_F(Method),
-        reasonMethod_G(Method),
-        reasonMethod_H(Method),
-        reasonMethod_I(Method),
-        reasonMethod_J(Method),
-        reasonMethod_K(Method),
-        reasonMethod_L(Method),
-        reasonMethod_M(Method),
-        reasonMethod_N(Method)
-      %        reasonMethod_O(Method),
-      %        reasonMethod_P(Method)
-      ]).
+    (   reasonMethod_A(Method)
+    ;   reasonMethod_B(Method)
+    ;   reasonMethod_C(Method)
+    ;   reasonMethod_D(Method)
+    ;   reasonMethod_E(Method)
+    ;   reasonMethod_F(Method)
+    ;   reasonMethod_G(Method)
+    ;   reasonMethod_H(Method)
+    ;   reasonMethod_I(Method)
+    ;   reasonMethod_J(Method)
+    ;   reasonMethod_K(Method)
+    ;   reasonMethod_L(Method)
+    ;   reasonMethod_M(Method)
+    ;   reasonMethod_N(Method)
+%   ;   reasonMethod_O(Method)
+%   ;   reasonMethod_P(Method)
+    ).
 
 % Because we already know.
 % PAPER: ??? This entire rule is new and still pretty experimental.
@@ -2455,28 +2455,28 @@ reasonNOTMergeClasses(M1,M2) :-
 
 reasonNOTMergeClasses_new(M1,M2) :-
     %logwarnln('Recomputing reasonNOTMergeClasses...'),
-    or([reasonNOTMergeClasses_J(M1,M2),
-        %reasonNOTMergeClasses_B(M1,M2),
-        reasonNOTMergeClasses_C(M1,M2),
-        %reasonNOTMergeClasses_D(M1,M2),
-        % _E is now handled in trigger.pl
-        %reasonNOTMergeClasses_E(M1,M2),
-        reasonNOTMergeClasses_F(M1,M2),
-        reasonNOTMergeClasses_G(M1,M2),
-        %reasonNOTMergeClasses_H(M1,M2),
-        reasonNOTMergeClasses_I(M1,M2),
-        reasonNOTMergeClasses_K(M1,M2),
-        reasonNOTMergeClasses_L(M1,M2),
-        % _M is now handled in trigger.pl
-        %reasonNOTMergeClasses_M(M1,M2),
-        % _N is now handled in trigger.pl
-        %reasonNOTMergeClasses_N(M1,M2),
-        reasonNOTMergeClasses_O(M1,M2),
-        reasonNOTMergeClasses_P(M1,M2),
-        % _Q is now handled in trigger.pl
-        %reasonNOTMergeClasses_Q(M1,M2)
-        reasonNOTMergeClasses_R(M1,M2)
-      ]).
+    (   reasonNOTMergeClasses_J(M1,M2)
+%   ;   reasonNOTMergeClasses_B(M1,M2)
+    ;   reasonNOTMergeClasses_C(M1,M2)
+%   ;   reasonNOTMergeClasses_D(M1,M2)
+%       _E is now handled in trigger.pl
+%   ;   reasonNOTMergeClasses_E(M1,M2)
+    ;   reasonNOTMergeClasses_F(M1,M2)
+    ;   reasonNOTMergeClasses_G(M1,M2)
+%   ;   reasonNOTMergeClasses_H(M1,M2)
+    ;   reasonNOTMergeClasses_I(M1,M2)
+    ;   reasonNOTMergeClasses_K(M1,M2)
+    ;   reasonNOTMergeClasses_L(M1,M2)
+%       _M is now handled in trigger.pl
+%   ;   reasonNOTMergeClasses_M(M1,M2)
+%       _N is now handled in trigger.pl
+%   ;   reasonNOTMergeClasses_N(M1,M2)
+    ;   reasonNOTMergeClasses_O(M1,M2)
+    ;   reasonNOTMergeClasses_P(M1,M2)
+%       _Q is now handled in trigger.pl
+%   ;   reasonNOTMergeClasses_Q(M1,M2)
+    ;   reasonNOTMergeClasses_R(M1,M2)
+    ).
 
 % Because it's already true.
 reasonNOTMergeClasses_A(Class1, Class2) :-
@@ -2889,14 +2889,14 @@ certainMemberOnExactClassSet(Class, Set) :-
 
 reasonClassSizeGTE(Class, Size) :-
     %logwarnln('Recomputing reasonClassSizeGTE...'),
-    or([reasonClassSizeGTE_A(Class, Size),
-        reasonClassSizeGTE_B(Class, Size),
-        reasonClassSizeGTE_C(Class, Size),
-        reasonClassSizeGTE_D(Class, Size),
-        reasonClassSizeGTE_E(Class, Size),
-        reasonClassSizeGTE_F(Class, Size),
-        reasonClassSizeGTE_G(Class, Size)
-      ]).
+    (   reasonClassSizeGTE_A(Class, Size)
+    ;   reasonClassSizeGTE_B(Class, Size)
+    ;   reasonClassSizeGTE_C(Class, Size)
+    ;   reasonClassSizeGTE_D(Class, Size)
+    ;   reasonClassSizeGTE_E(Class, Size)
+    ;   reasonClassSizeGTE_F(Class, Size)
+    ;   reasonClassSizeGTE_G(Class, Size)
+    ).
 
 % Because it is already known to be true.
 % PAPER: NA
