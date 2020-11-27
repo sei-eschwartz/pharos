@@ -6,21 +6,11 @@
 % backtracking is performed inside of I, T, and E.
 
 :- meta_predicate
-   if_(0,0,0),
-   or(:).
+   if_(0,0,0).
 
 if_(If, Then, Else) :-
    (   '*->'(If, Then)                  % XSB compatible syntax
    ;   Else
-   ).
-
-or(M:List) :-
-   or(M, List).
-
-or(M, [H|T]) :-
-    %(debug('Or: '), debugln(H), H);
-   (   M:H
-   ;   or(M:T)
    ).
 
 user:goal_expansion(if_(If,Then,Else),

@@ -243,15 +243,15 @@ reasonConstructorSet(Set) :-
 
 reasonNOTConstructor(Method) :-
     %logwarnln('Recomputing reasonNOTConstructor...'),
-    or([reasonNOTConstructor_A(Method),
-        reasonNOTConstructor_B(Method),
-        reasonNOTConstructor_C(Method),
-        reasonNOTConstructor_D(Method),
-        reasonNOTConstructor_E(Method),
-        reasonNOTConstructor_F(Method),
-        reasonNOTConstructor_G(Method),
-        reasonNOTConstructor_H(Method)
-      ]).
+    (   reasonNOTConstructor_A(Method)
+    ;   reasonNOTConstructor_B(Method)
+    ;   reasonNOTConstructor_C(Method)
+    ;   reasonNOTConstructor_D(Method)
+    ;   reasonNOTConstructor_E(Method)
+    ;   reasonNOTConstructor_F(Method)
+    ;   reasonNOTConstructor_G(Method)
+    ;   reasonNOTConstructor_H(Method)
+    ).
 
 % Because it is already known to NOT be a constructor.
 % PAPER: NA
@@ -381,15 +381,15 @@ reasonRealDestructorSet(Set) :-
 
 reasonNOTRealDestructor(Method) :-
     %logwarnln('Recomputing reasonNOTRealDestructor...'),
-    or([reasonNOTRealDestructor_A(Method),
-        reasonNOTRealDestructor_B(Method),
-        reasonNOTRealDestructor_C(Method),
-        reasonNOTRealDestructor_D(Method),
-        reasonNOTRealDestructor_E(Method),
-        reasonNOTRealDestructor_F(Method),
-        reasonNOTRealDestructor_G(Method),
-        reasonNOTRealDestructor_H(Method)
-      ]).
+    (   reasonNOTRealDestructor_A(Method)
+    ;   reasonNOTRealDestructor_B(Method)
+    ;   reasonNOTRealDestructor_C(Method)
+    ;   reasonNOTRealDestructor_D(Method)
+    ;   reasonNOTRealDestructor_E(Method)
+    ;   reasonNOTRealDestructor_F(Method)
+    ;   reasonNOTRealDestructor_G(Method)
+    ;   reasonNOTRealDestructor_H(Method)
+    ).
 
 % Because it is already known to NOT be a real destructor.
 % PAPER: NA
@@ -516,14 +516,14 @@ reasonDeletingDestructor(Method) :-
 
 reasonNOTDeletingDestructor(Method) :-
     %logwarnln('Recomputing reasonNOTDeletingDestructor...'),
-    or([reasonNOTDeletingDestructor_A(Method),
-        reasonNOTDeletingDestructor_B(Method),
-        reasonNOTDeletingDestructor_C(Method),
-        reasonNOTDeletingDestructor_D(Method),
-        reasonNOTDeletingDestructor_E(Method),
-        reasonNOTDeletingDestructor_F(Method),
-        reasonNOTDeletingDestructor_G(Method)
-      ]).
+    (   reasonNOTDeletingDestructor_A(Method)
+    ;   reasonNOTDeletingDestructor_B(Method)
+    ;   reasonNOTDeletingDestructor_C(Method)
+    ;   reasonNOTDeletingDestructor_D(Method)
+    ;   reasonNOTDeletingDestructor_E(Method)
+    ;   reasonNOTDeletingDestructor_F(Method)
+    ;   reasonNOTDeletingDestructor_G(Method)
+    ).
 
 % Because it is already known to NOT be a deleting destructor.
 % PAPER: NA
@@ -919,12 +919,12 @@ reasonVFTableEntry(VFTable, Offset, Entry) :-
 
 reasonNOTVFTableEntry(VFTable, Offset, Entry) :-
     %logwarnln('Recomputing reasonNOTVFTableEntry...'),
-    or([reasonNOTVFTableEntry_A(VFTable, Offset, Entry),
-        reasonNOTVFTableEntry_B(VFTable, Offset, Entry),
-        reasonNOTVFTableEntry_C(VFTable, Offset, Entry),
-        reasonNOTVFTableEntry_D(VFTable, Offset, Entry),
-        reasonNOTVFTableEntry_E(VFTable, Offset, Entry)
-      ]).
+    (   reasonNOTVFTableEntry_A(VFTable, Offset, Entry)
+    ;   reasonNOTVFTableEntry_B(VFTable, Offset, Entry)
+    ;   reasonNOTVFTableEntry_C(VFTable, Offset, Entry)
+    ;   reasonNOTVFTableEntry_D(VFTable, Offset, Entry)
+    ;   reasonNOTVFTableEntry_E(VFTable, Offset, Entry)
+    ).
 
 % Because it has already been proved not to be.
 % PAPER: NA
@@ -1184,12 +1184,12 @@ reasonVBTableEntry(VBTable, Offset, Value) :-
 
 reasonObjectInObject(OuterClass, InnerClass, Offset) :-
     %logwarnln('Recomputing reasonObjectInObject...'),
-    or([reasonObjectInObject_A(OuterClass, InnerClass, Offset),
-        reasonObjectInObject_B(OuterClass, InnerClass, Offset),
-        reasonObjectInObject_C(OuterClass, InnerClass, Offset),
-        reasonObjectInObject_D(OuterClass, InnerClass, Offset),
-        reasonObjectInObject_E(OuterClass, InnerClass, Offset)
-      ]).
+    (   reasonObjectInObject_A(OuterClass, InnerClass, Offset)
+    ;   reasonObjectInObject_B(OuterClass, InnerClass, Offset)
+    ;   reasonObjectInObject_C(OuterClass, InnerClass, Offset)
+    ;   reasonObjectInObject_D(OuterClass, InnerClass, Offset)
+    ;   reasonObjectInObject_E(OuterClass, InnerClass, Offset)
+    ).
 
 % Because it is already known to be true.
 % PAPER: NA
@@ -1311,11 +1311,11 @@ reasonObjectInObject_E(OuterClass, InnerClass, Offset) :-
 
 reasonEmbeddedObject(Class, EmbeddedClass, Offset) :-
     %logwarnln('Recomputing reasonEmbeddedObject...'),
-    or([reasonEmbeddedObject_A(Class, EmbeddedClass, Offset),
-        reasonEmbeddedObject_B(Class, EmbeddedClass, Offset),
-        reasonEmbeddedObject_C(Class, EmbeddedClass, Offset),
-        reasonEmbeddedObject_D(Class, EmbeddedClass, Offset)
-      ]).
+    (   reasonEmbeddedObject_A(Class, EmbeddedClass, Offset)
+    ;   reasonEmbeddedObject_B(Class, EmbeddedClass, Offset)
+    ;   reasonEmbeddedObject_C(Class, EmbeddedClass, Offset)
+    ;   reasonEmbeddedObject_D(Class, EmbeddedClass, Offset)
+    ).
 
 % Because it is already known to be true.
 % PAPER: NA
@@ -1398,13 +1398,13 @@ reasonNOTEmbeddedObject(Class, EmbeddedClass, Offset) :-
 
 reasonDerivedClass(DerivedClass, BaseClass, ObjectOffset) :-
     %logwarnln('Recomputing reasonDerivedClass...'),
-    or([reasonDerivedClass_A(DerivedClass, BaseClass, ObjectOffset),
-        reasonDerivedClass_B(DerivedClass, BaseClass, ObjectOffset),
-        reasonDerivedClass_C(DerivedClass, BaseClass, ObjectOffset),
-        reasonDerivedClass_D(DerivedClass, BaseClass, ObjectOffset),
-        reasonDerivedClass_E(DerivedClass, BaseClass, ObjectOffset),
-        reasonDerivedClass_F(DerivedClass, BaseClass, ObjectOffset)
-      ]).
+    (   reasonDerivedClass_A(DerivedClass, BaseClass, ObjectOffset)
+    ;   reasonDerivedClass_B(DerivedClass, BaseClass, ObjectOffset)
+    ;   reasonDerivedClass_C(DerivedClass, BaseClass, ObjectOffset)
+    ;   reasonDerivedClass_D(DerivedClass, BaseClass, ObjectOffset)
+    ;   reasonDerivedClass_E(DerivedClass, BaseClass, ObjectOffset)
+    ;   reasonDerivedClass_F(DerivedClass, BaseClass, ObjectOffset)
+    ).
 
 % Because it is already known to be true.
 % PAPER: NA
@@ -1708,14 +1708,14 @@ reasonClassHasNoBaseSet(Set) :-
 
 reasonClassHasUnknownBase(Class) :-
     %logwarnln('Recomputing reasonClassHasUnknownBase...'),
-    or([reasonClassHasUnknownBase_A(Class),
-        reasonClassHasUnknownBase_B(Class),
-        % in trigger.pl
-        %reasonClassHasUnknownBase_C(Class),
-        reasonClassHasUnknownBase_D(Class)
-      % in trigger.pl
-      %reasonClassHasUnknownBase_E(Class)
-      ]).
+    (   reasonClassHasUnknownBase_A(Class)
+    ;   reasonClassHasUnknownBase_B(Class)
+%       in trigger.pl
+%   ;   reasonClassHasUnknownBase_C(Class)
+    ;   reasonClassHasUnknownBase_D(Class)
+%       in trigger.pl
+%   ;   reasonClassHasUnknownBase_E(Class)
+    ).
 
 % Because it is already known to be true.
 % PAPER: NA
@@ -1887,13 +1887,13 @@ reasonClassHasUnknownBaseSet(Set) :-
 
 reasonClassCallsMethod(Class, Method) :-
     %logwarnln('Recomputing reasonClassCallsMethod...'),
-    or([reasonClassCallsMethod_A(Class, Method),
-        reasonClassCallsMethod_B(Class, Method),
-        reasonClassCallsMethod_C(Class, Method),
-        reasonClassCallsMethod_D(Class, Method)
-      %        reasonClassCallsMethod_E(Class, Method),
-      %        reasonClassCallsMethod_F(Class, Method)
-      ]).
+    (   reasonClassCallsMethod_A(Class, Method)
+    ;   reasonClassCallsMethod_B(Class, Method)
+    ;   reasonClassCallsMethod_C(Class, Method)
+    ;   reasonClassCallsMethod_D(Class, Method)
+%   ;   reasonClassCallsMethod_E(Class, Method)
+%   ;   reasonClassCallsMethod_F(Class, Method)
+    ).
 
 % Because two methods are called on the same this-pointer in the same function.
 % This rule is NOT direction safe, because it simply observes two methods being called on the
@@ -2096,16 +2096,16 @@ reasonMergeVFTables(VFTableClass, Class) :-
 %:- table reasonMergeClasses_K/2 as incremental.
 
 reasonMergeClasses(C,M) :-
-    or([reasonMergeClasses_B(C,M),
-        reasonMergeClasses_C(C,M),
-        reasonMergeClasses_D(C,M),
-        reasonMergeClasses_E(C,M),
-        %reasonMergeClasses_F(C,M),
-        reasonMergeClasses_G(C,M),
-        reasonMergeClasses_H(C,M),
-        reasonMergeClasses_J(C,M)
-        %reasonMergeClasses_K(C,M)
-      ]).
+    (   reasonMergeClasses_B(C,M)
+    ;   reasonMergeClasses_C(C,M)
+    ;   reasonMergeClasses_D(C,M)
+    ;   reasonMergeClasses_E(C,M)
+%   ;   reasonMergeClasses_F(C,M)
+    ;   reasonMergeClasses_G(C,M)
+    ;   reasonMergeClasses_H(C,M)
+    ;   reasonMergeClasses_J(C,M)
+%   ;	reasonMergeClasses_K(C,M)
+    ).
 
 % Because the classes have already been merged.
 %% reasonMergeClasses_A(Method1, Method2) :-
@@ -3004,11 +3004,11 @@ reasonMinimumPossibleClassSize(Class, Size) :-
 
 reasonClassSizeLTE(Class, Size) :-
     %logwarnln('Recomputing reasonClassSizeLTE...'),
-    or([reasonClassSizeLTE_A(Class, Size),
-        reasonClassSizeLTE_B(Class, Size),
-        reasonClassSizeLTE_C(Class, Size),
-        reasonClassSizeLTE_D(Class, Size)
-      ]).
+    (   reasonClassSizeLTE_A(Class, Size)
+    ;   reasonClassSizeLTE_B(Class, Size)
+    ;   reasonClassSizeLTE_C(Class, Size)
+    ;   reasonClassSizeLTE_D(Class, Size)
+    ).
 
 % Because it is already known to be true.
 % PAPER: NA
