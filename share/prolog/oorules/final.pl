@@ -450,6 +450,12 @@ generateResults :-
     reportStage('Complete'),
     ws_end.
 
+% JW: What is this supposed to do?
+:- if(\+current_predicate(ws_end/0)).
+ws_end.
+:- endif.
+
+
 %% Local Variables:
 %% mode: prolog
 %% End:
