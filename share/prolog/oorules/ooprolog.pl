@@ -1,5 +1,7 @@
 #!/usr/bin/env swipl
 
+:- include(mono).
+
 % Copyright 2020 Carnegie Mellon University.
 % ============================================================================================
 % User-level driver for oorules functionality
