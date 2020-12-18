@@ -225,7 +225,7 @@ concludeTrigger(Out) :-
          % If we didn't take any actions, succeed but return a noop action.  If we don't do this,
          % concludeTrigger will fail and the next conclusion rule will be evaluated even if there
          % are more trigger facts to be considered.  This can lead to upstream problem errors.
-         Out = true).
+         Out = logdebugln('its ok')).
 
 /* Local Variables:   */
 /* mode: prolog       */

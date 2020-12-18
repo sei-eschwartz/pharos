@@ -220,8 +220,10 @@ retract_helper(trigger_fact(X)) :-
     !.
 retract_helper(X) :-
     % In SWI Prolog, retract can have open choice points as a result of index/hash collisions.
+    logerrorln('Actually retracting ~Q', X),
     once(incr_retract(X)).
 
+try_assert(X) :- loginfoln('~Q', try_assert(X)), fail.
 try_assert(X) :- X, !.
 try_assert(X) :- try_assert_real(X).
 try_assert_real(X) :- delta_con(numfacts, 1), trigger_hook(X), assert_helper(X).
@@ -234,6 +236,7 @@ try_assert_real(X) :-
     retract_helper(X),
     fail.
 
+try_retract(X) :- loginfoln('~Q', try_retract(X)), fail.
 try_retract(X) :- not(X), !.
 try_retract(X) :- try_retract_real(X).
 try_retract_real(X) :- delta_con(numfacts, -1), retract_helper(X).
@@ -321,7 +324,9 @@ mergeClasses(M1, M2) :-
     makeIfNecessary(M2),
     find(M1, S1),
     find(M2, S2),
+    logerrorln('mergeClasses ~Q ~Q', [S1, S2]),
     S1 \= S2,
+    logerrorln('B'),
 
     (deterministicEnabled
      % If deterministicEnabled, use lower value as NewRep
@@ -339,7 +344,7 @@ mergeClasses(M1, M2) :-
     % Note: We must be able to backtrack through this to restore classes on failure.
     union(NewRep, OldRep),
 
-    loginfoln('Merging class ~Q into ~Q ...', [OldRep, NewRep]),
+    logerrorln('Merging class ~Q into ~Q ...', [OldRep, NewRep]),
 
     % An empty vftable class can cause fixupClasses to fail
     (setof((OldTerm, NewTerm),
@@ -355,7 +360,7 @@ mergeClasses(M1, M2) :-
 
     all(Actions),
 
-    (logLevelEnabled('TRACE')
+    (logLevelEnabled('INFO')
      ->
          findall(NewRep, AllObjects),
          logtraceln('Objects now on ~Q: ~Q', [NewRep, AllObjects])
@@ -408,9 +413,10 @@ reasonForward :-
     % the reasoning because of once/1.
 
     % Go ahead and try_assert the fact.
+    logdebugln('About to call ~Q', Out),
     if_(call(Out),
         true,
-        (logerrorln('An internal error occurred in OOAnalyzer. Please report this to the developers:~n~Q', Out),
+        (logerrorln('An xxx internal error occurred in OOAnalyzer. Please report this to the developers:~n~Q', Out),
          throw_with_backtrace(error(system_error(reasonForward, Out))))).
 
 % Reason forward as many times as possible.  It's ok if we can't reason forward any more.  But

@@ -9,8 +9,11 @@ make(M) :-
     try_assert(findint(M, M)).
 
 unionhelp(Rold, Rnew, M) :-
+    logerrorln('unionhelp ~Q -> ~Q, ~Q', [Rold, Rnew, M]),
     try_retract(findint(M, Rold)),
-    try_assert(findint(M, Rnew)).
+    logerrorln('after try_retract'),
+    try_assert(findint(M, Rnew)),
+    logerrorln('after try_assert').
 
 union(M1, M2) :-
 

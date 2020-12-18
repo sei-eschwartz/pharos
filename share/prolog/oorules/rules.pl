@@ -2145,6 +2145,7 @@ reasonMergeClasses_B(BaseClass, MethodClass) :-
 
     % The base class has a vftable
     findVFTable(BaseVFTable, BaseClass),
+    loginfoln('1'),
 
     % Which has a Method
     factMethodInVFTable(BaseVFTable, _Offset, Method),
@@ -2155,11 +2156,12 @@ reasonMergeClasses_B(BaseClass, MethodClass) :-
 
     % Finally check that the base class and method class are not already the same.
     find(Method, MethodClass),
+    loginfoln('2'),
     iso_dif(BaseClass, MethodClass),
 
     % Debugging.
-    logtraceln('~@~Q.', [not(find(BaseClass, MethodClass)),
-                         reasonMergeClasses_B(BaseVFTable, BaseClass, MethodClass, Method)]).
+    loginfoln('~Q~Q.', [not(find(BaseClass, MethodClass)),
+                         reasonMergeClasses_B(BaseVFTable, Method, BaseClass, MethodClass)]).
 
 % If an object instance associated with the constructor calls the method, and it has no base
 % class, the method must be on exactly the class associated with the constructor.  Wrong!  What
@@ -2185,7 +2187,7 @@ reasonMergeClasses_C(Class, ExistingClass) :-
     not(factObjectInObject(ExistingClass, _0InnerClass, 0)),
 
     % Debugging
-    logtraceln('~@~Q.', [not(find(Class, ExistingClass)),
+    loginfoln('~Q~Q.', [not(find(Class, ExistingClass)),
                          reasonMergeClasses_C(Class, ExistingClass)]).
 
 % If there are two implementations of the constructor on the same class, they should be merged
@@ -2256,7 +2258,7 @@ reasonMergeClasses_D(Class1, Class2) :-
        )),
 
     % Debugging
-    logtraceln('~@~Q.', [not(find(Class1, Class2)),
+    loginfoln('~Q~Q.', [not(find(Class1, Class2)),
                          reasonMergeClasses_D(Method1, Method2, Class1, Class2)]).
 
 % The constructors are certain to be on the exact same class.  The reasoning is that if there's
@@ -2271,7 +2273,7 @@ reasonMergeClasses_E(Class1, Class2) :-
     iso_dif(Class1, Class2),
 
     % Debugging
-    logtraceln('~@~Q.', [not(find(Class1, Class2)),
+    loginfoln('~Q~Q.', [not(find(Class1, Class2)),
                          reasonMergeClasses_E(DerivedClass, ObjectOffset, Class1, Class2)]).
 
 % ejs 9/22/20 Disabled because it's a redundant version of _B
@@ -2294,7 +2296,7 @@ reasonMergeClasses_E(Class1, Class2) :-
 %%     find(Method2, Class2),
 %%     iso_dif(Class1, Class2),
 %%     % Debugging
-%%     logtraceln('~@~Q.', [not(find(Class1, Class2)),
+%%     loginfoln('~Q~Q.', [not(find(Class1, Class2)),
 %%                          reasonMergeClasses_F(Method2, VFTable, Class1, Class2)]).
 
 % Because the symbols tell us they're the same class.
@@ -2307,7 +2309,7 @@ reasonMergeClasses_G(Class1, Class2) :-
     find(Method2, Class2),
     iso_dif(Class1, Class2),
     % Debugging
-    logtraceln('~@~Q.', [not(find(Class1, Class2)),
+    loginfoln('~Q~Q.', [not(find(Class1, Class2)),
                          reasonMergeClasses_G(Method1, Method2, ClassName, Class1, Class2)]).
 
 % Because additional methods in our VFTable must be ours.
@@ -2336,7 +2338,7 @@ reasonMergeClasses_H(DerivedClass, MethodClass) :-
     find(Method, MethodClass),
     iso_dif(DerivedClass, MethodClass),
     % Debugging
-    logtraceln('~@~Q.', [not(find(DerivedClass, MethodClass)),
+    loginfoln('~Q~Q.', [not(find(DerivedClass, MethodClass)),
                          reasonMergeClasses_H(BaseVFTable, DerivedVFTable, BaseSize, VOffset,
                                               Method, BaseClass, DerivedClass, MethodClass)]).
 
@@ -2346,13 +2348,15 @@ reasonMergeClasses_H(DerivedClass, MethodClass) :-
 reasonMergeClasses_J(VFTable1Class, VFTable2Class) :-
     rTTITDA2VFTable(TDA, VFTable1),
     find(VFTable1, VFTable1Class),
+    loginfoln('J 1 ~Q ~Q', [VFTable1, VFTable1Class]),
 
     rTTITDA2VFTable(TDA, VFTable2),
     find(VFTable2, VFTable2Class),
+    loginfoln('J 2 ~Q ~Q', [VFTable2, VFTable2Class]),
 
     iso_dif(VFTable1Class, VFTable2Class),
 
-    logtraceln('~@~Q.', [not(find(VFTable1Class, VFTable2Class)),
+    loginfoln('J~Q~Q.', [not(find(VFTable1Class, VFTable2Class)),
                          reasonMergeClasses_J(TDA, VFTable1, VFTable2, VFTable1Class, VFTable2Class)]).
 
 % This rule says that if a constructor installs a single VFTable, then any method in that VFTable
@@ -2409,7 +2413,7 @@ reasonMergeClasses_J(VFTable1Class, VFTable2Class) :-
 
 %%     iso_dif(MethodClass, VFTClass),
 
-%     logtraceln('~@~Q.', [not(find(MethodClass, VFTClass)),
+%     loginfoln('~Q~Q.', [not(find(MethodClass, VFTClass)),
 %                          reasonMergeClasses_K(MethodClass, VFTClass)]).
 
 % Implement: Because they share a method and neither of them have base classes.  This may be
