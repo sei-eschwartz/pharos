@@ -3753,7 +3753,6 @@ noCallsBefore(0x402d1c).
 noCallsBefore(0x402d41).
 noCallsBefore(0x402d51).
 noCallsBefore(0x404935).
-noCallsBefore(0x405098).
 noCallsBefore(0x4073fc).
 noCallsBefore(0x407f52).
 % Object fact exporting complete.

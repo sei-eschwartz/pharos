@@ -9673,7 +9673,6 @@ noCallsBefore(0x402766).
 noCallsBefore(0x40278a).
 noCallsBefore(0x40284c).
 noCallsBefore(0x4029b8).
-noCallsBefore(0x402a04).
 noCallsBefore(0x402b54).
 noCallsBefore(0x402b63).
 noCallsBefore(0x402b72).
@@ -9726,7 +9725,6 @@ noCallsBefore(0x4040af).
 noCallsBefore(0x4040bf).
 noCallsBefore(0x4040e0).
 noCallsBefore(0x404324).
-noCallsBefore(0x40453b).
 noCallsBefore(0x40517f).
 noCallsBefore(0x40518a).
 noCallsBefore(0x4054ce).

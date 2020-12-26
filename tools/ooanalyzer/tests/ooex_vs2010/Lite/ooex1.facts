@@ -3399,7 +3399,6 @@ noCallsBefore(0x4010e7).
 noCallsBefore(0x4010f2).
 noCallsBefore(0x401119).
 noCallsBefore(0x4013af).
-noCallsBefore(0x4015c6).
 noCallsBefore(0x401769).
 noCallsBefore(0x401786).
 noCallsBefore(0x4017d3).

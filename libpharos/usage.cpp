@@ -2,7 +2,6 @@
 
 #include <boost/format.hpp>
 #include <boost/range/adaptor/map.hpp>
-#include <boost/range/algorithm/set_algorithm.hpp>
 #include <boost/graph/visitors.hpp>
 #include <boost/graph/breadth_first_search.hpp>
 #include <boost/graph/graph_utility.hpp>
@@ -196,6 +195,7 @@ struct Aborted : public std::runtime_error {
 using InsnVertexMap = std::map<SgAsmInstruction*, CFGVertex>;
 using VertexInsnMap = std::map<CFGVertex, SgAsmInstruction*>;
 
+// XXX: Should just pass a pointer to ThisCallPtr to cov
 class CallOrderVisitor: public boost::default_bfs_visitor {
  public:
   InsnVertexMap call2vertex;
@@ -203,27 +203,43 @@ class CallOrderVisitor: public boost::default_bfs_visitor {
   SymbolicValuePtr this_ptr;
   const MethodEvidenceMap &method_evidence;
   const OOAnalyzer &ooa;
+  const FunctionDescriptor *fd;
   bool constructor = true;
   // The current start vertex (so we don't match ourself).
   CFGVertex current;
   CallOrderVisitor(const MethodEvidenceMap &method_evidence_,
-                   const OOAnalyzer &ooa_) : method_evidence (method_evidence_),
-                                             ooa (ooa_) 
+                   const OOAnalyzer &ooa_,
+                   const FunctionDescriptor *fd_)
+    : method_evidence (method_evidence_),
+      ooa (ooa_),
+      fd (fd_)
   { }
   template < typename Graph >
   void discover_vertex(CFGVertex v, const Graph & g) const {
 
     if (constructor) {
-      // When traversing dataflow backwards, we should stop if we hit one of the definition
-      // sites of thisptr (e.g., a call to new).  This isn't quite correct because we are doing
-      // BFS, and there could be another path.  But that is probably pathological, and not
-      // enough to merit doing a full dataflow analysis here.
+      // When traversing dataflow backwards, we should stop if we hit a call to new.  This
+      // isn't quite correct because we are doing BFS, and there could be another path.  But
+      // that is probably pathological, and not enough to merit doing a full dataflow analysis
+      // here.
       auto bb = get(boost::vertex_name, g, v);
       auto stmts = bb->get_statementList ();
-      auto defs = this_ptr->get_defining_instructions ();
-      std::set<SgAsmStatement*> intersection;
-      boost::range::set_intersection (stmts, defs, std::inserter (intersection, intersection.end ()));
-      if (intersection.size ()) {
+
+      auto calls_new = [&] (const SgAsmStatement* insn) {
+        auto cd = fd->ds.get_call (insn->get_address ());
+        // Is this a call?
+        if (!cd) return false;
+
+        // Is this a call to new?
+        auto call_targets = cd->get_targets ();
+        auto is_new = [&] (const auto &addr) { return ooa.is_new_method (addr); };
+        if (boost::find_if (call_targets, is_new) == call_targets.end ()) return false;
+        // Ok, it's a call to new.  Does it return our this pointer?
+        return cd->get_return_value ()->get_expression()->isEquivalentTo (this_ptr->get_expression());
+      };
+
+      // Does this BB have any calls to new for the current thisptr?
+      if (boost::find_if (stmts, calls_new) != stmts.end ()) {
         throw Aborted ("aborted");
       }
     }
@@ -296,7 +312,7 @@ void ThisPtrUsage::update_ctor_dtor(OOAnalyzer& ooa) const {
   // the calls and add them to the CallOrderVisitor.
 
   NonReturningCFGFilter nrf;
-  CallOrderVisitor cov (method_evidence, ooa);
+  CallOrderVisitor cov (method_evidence, ooa, fd);
 
   // How many more vertices do we need to find?
   size_t remaining = method_evidence.size();
