@@ -223,9 +223,12 @@ class CallOrderVisitor: public boost::default_bfs_visitor {
       // that is probably pathological, and not enough to merit doing a full dataflow analysis
       // here.
       auto bb = get(boost::vertex_name, g, v);
+      assert (bb);
       auto stmts = bb->get_statementList ();
 
       auto calls_new = [&] (const SgAsmStatement* insn) {
+        assert (insn);
+
         auto cd = fd->ds.get_call (insn->get_address ());
         // Is this a call?
         if (!cd) return false;
@@ -235,7 +238,9 @@ class CallOrderVisitor: public boost::default_bfs_visitor {
         auto is_new = [&] (const auto &addr) { return ooa.is_new_method (addr); };
         if (boost::find_if (call_targets, is_new) == call_targets.end ()) return false;
         // Ok, it's a call to new.  Does it return our this pointer?
-        return cd->get_return_value ()->get_expression()->isEquivalentTo (this_ptr->get_expression());
+        auto return_value = cd->get_return_value ();
+        if (!return_value) return false;
+        return return_value->get_expression()->isEquivalentTo (this_ptr->get_expression());
       };
 
       // Does this BB have any calls to new for the current thisptr?
