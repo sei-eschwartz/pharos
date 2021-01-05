@@ -298,7 +298,7 @@ reasonNOTConstructor_F(Method) :-
     factNOTConstructor(OtherMethod),
     validFuncOffset(_Insn, OtherMethod, Method, _Offset),
     % Debugging
-    logtraceln('~@~Q.', [not(factNOTConstructor(Method)), reasonNOTConstructor_F(Method)]).
+    logtraceln('~@~Q.', [not(factNOTConstructor(Method)), reasonNOTConstructor_F(Method, OtherMethod)]).
 
 
 % Because you can't be a constructor on a class that's already known to have a VFTable if you
@@ -2940,6 +2940,9 @@ reasonClassSizeGTE_D(Class, Size) :-
     % the fact exporter, so that we don't have to deal with it here.
     Size \= 0,
     find(Constructor, Class),
+    % ejs 1/5/21: This rule only applies if we know there are no base classes using some of the
+    % allocated object's space.
+    factClassHasNoBase(Class),
     % Debugging
     logtraceln('~@~Q.', [not((factClassSizeGTE(Class, ExistingSize), ExistingSize >= Size)),
                          reasonClassSizeGTE_D(Class, Size)]).
