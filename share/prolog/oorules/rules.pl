@@ -989,10 +989,15 @@ reasonVFTableSizeGTE(VFTable, Size) :-
 
 % PAPER: VSize-1
 reasonVFTableSizeGTE(VFTable, Size) :-
-    % Ed says: By prefixing E^ we tell setof NOT to case on E.
-    % If we leave E as _, it will case on different values of E!
-    setof(S, E^factVFTableEntry(VFTable, S, E), Set),
-    max_list(Set, LastEntry),
+
+    % XXX: This should really just answer subsumption
+    factVFTableEntry(VFTable, LastEntry, _E),
+    not((factVFTableEntry(VFTable, LargerEntry, _E2), LargerEntry > LastEntry)),
+
+    %% % Ed says: By prefixing E^ we tell setof NOT to case on E.
+    %% % If we leave E as _, it will case on different values of E!
+    %% setof(S, E^factVFTableEntry(VFTable, S, E), Set),
+    %% max_list(Set, LastEntry),
     Size is LastEntry + 4,
     % Debugging
     logtraceln('~@~Q.', [not((factVFTableSizeGTE(VFTable, ExistingSize),
