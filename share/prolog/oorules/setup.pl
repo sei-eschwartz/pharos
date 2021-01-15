@@ -221,7 +221,8 @@ retract_helper(trigger_fact(X)) :-
 retract_helper(X) :-
     % In SWI Prolog, retract can have open choice points as a result of index/hash collisions.
     logerrorln('Actually retracting ~Q', X),
-    once(incr_retract(X)).
+    once(incr_retract(X)),
+    (X -> logerrorln('~Q is still true', X); logerrorln('~Q is no longer true', X)).
 
 try_assert(X) :- loginfoln('~Q', try_assert(X)), fail.
 try_assert(X) :- X, !.
@@ -262,17 +263,18 @@ fixupClasses(From, To, OldTerm, NewTerm) :-
      % OR we have a trigger fact that we haven't processed yet
      (trigger_fact(IntermediateOldTerm), Trigger=true)),
 
-    %logtraceln('Considering class fact ~Q/~Q index ~Q from ~Q to ~Q in predicate ~Q',
-    %           [Pred, Arity, Index, From, To, IntermediateOldTerm]),
+    logdebugln('Considering class fact ~Q/~Q index ~Q from ~Q to ~Q in predicate ~Q',
+               [Pred, Arity, Index, From, To, IntermediateOldTerm]),
 
-    %logtraceln('Fixing up ~Q/~Q index ~Q from ~Q to ~Q in predicate ~Q',
-    %           [Pred, Arity, Index, From, To, IntermediateOldTerm]),
+    logdebugln('Fixing up ~Q/~Q index ~Q from ~Q to ~Q in predicate ~Q',
+               [Pred, Arity, Index, From, To, IntermediateOldTerm]),
 
     % fixupClasses is only correct if From appears in one location.  E.g., factDerivedClass(X,
     % X, 0) will cause us to leave facts around that still contain From.
     (   Trigger=false, (classArgs(Pred/Arity, OtherIndex), iso_dif(Index, OtherIndex), arg(OtherIndex, IntermediateOldTerm, To))
     ->
         (logerrorln('An internal error occurred in OOAnalyzer. Please report this to the developers:~n~Q', (IntermediateOldTerm, Trigger)),
+         break,
          throw_with_backtrace(error(system_error(fixupClasses, IntermediateOldTerm, Trigger))))
     ;
         true),
@@ -282,15 +284,15 @@ fixupClasses(From, To, OldTerm, NewTerm) :-
     ListIndex is Index + 1,
 
     % Report what the terms list looks like before replacement
-    %logtraceln('Fixing up position ~Q in old elements: ~Q'),
-    %           [ListIndex, IntermediateOldTermElements]),
+    logdebugln('Fixing up position ~Q in old elements: ~Q',
+               [ListIndex, IntermediateOldTermElements]),
 
     % Replace From in IntermediateOldTermElements at ListIndex offset, with To, and return IntermediateNewTermElements.
     replace_ith(IntermediateOldTermElements, ListIndex, From, To, IntermediateNewTermElements),
 
     % Report what the terms list looks like after replacement
-    %logtraceln('Fixing up position ~Q resulted in new elements: ~Q',
-    %           [ListIndex, IntermediateNewTermElements]),
+    logdebugln('Fixing up position ~Q resulted in new elements: ~Q',
+               [ListIndex, IntermediateNewTermElements]),
 
     % Combine NetTermElements back into a predicate that we can assert.
     IntermediateNewTerm =.. IntermediateNewTermElements,

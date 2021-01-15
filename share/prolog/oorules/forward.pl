@@ -168,6 +168,8 @@ concludeObjectInObject(Out) :-
           (reasonObjectInObject(OuterClass, InnerClass, Offset),
            iso_dif(OuterClass, InnerClass),
            not(factObjectInObject(OuterClass, InnerClass, Offset)),
+           (find(OuterClass, OuterClass) -> true; logerrorln('~Q is not a class!', OuterClass)),
+           (find(InnerClass, InnerClass) -> true; logerrorln('~Q is not a class!', InnerClass)),
            % There's no factNOTObjectInObject, since most things aren't in most other things.
            loginfoln('Concluding ~Q.', factObjectInObject(OuterClass, InnerClass, Offset))),
           TupleSets),

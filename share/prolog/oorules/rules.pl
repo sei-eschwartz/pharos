@@ -1207,7 +1207,7 @@ reasonObjectInObject_B(OuterClass, InnerClass, Offset) :-
     % database consistent in cases where we do (e.g. from RTTI information).
     factDerivedClass(OuterClass, InnerClass, Offset),
     % Debugging
-    logtraceln('~@~Q.', [not(factObjectInObject(OuterClass, InnerClass, Offset)),
+    logdebugln('~@~Q.', [not(factObjectInObject(OuterClass, InnerClass, Offset)),
                          reasonObjectInObject_B(OuterClass, InnerClass, Offset)]).
 
 % Because an existing embedded object relationship exists.
@@ -1215,7 +1215,7 @@ reasonObjectInObject_C(OuterClass, InnerClass, Offset) :-
     % This case probably is used at all yet, but it might be someday.
     factEmbeddedObject(OuterClass, InnerClass, Offset),
     % Debugging
-    logtraceln('~@~Q.', [not(factObjectInObject(OuterClass, InnerClass, Offset)),
+    logdebugln('~@~Q.', [not(factObjectInObject(OuterClass, InnerClass, Offset)),
                          reasonObjectInObject_C(OuterClass, InnerClass, Offset)]).
 
 % This rule is a special case of the reasonObjectInObject_E, that relies on the fact that it
@@ -1241,7 +1241,7 @@ reasonObjectInObject_D(OuterClass, InnerClass, Offset) :-
     not(reasonClassRelationship(OuterClass, InnerClass)),
 
     % Debugging
-    logtraceln('~@~Q.', [not(factObjectInObject(OuterClass, InnerClass, Offset)),
+    logdebugln('~@~Q.', [not(factObjectInObject(OuterClass, InnerClass, Offset)),
                          reasonObjectInObject_D(OuterClass, InnerClass, Offset)]).
 
 % Because the outer constructor explicitly calls the inner constructor on that offset.
@@ -1279,7 +1279,7 @@ reasonObjectInObject_E(OuterClass, InnerClass, Offset) :-
     not(reasonClassRelationship(OuterClass, InnerClass)),
 
     % Debugging
-    logtraceln('~@~Q.', [not(factObjectInObject(OuterClass, InnerClass, Offset)),
+    logdebugln('~@~Q.', [not(factObjectInObject(OuterClass, InnerClass, Offset)),
                          reasonObjectInObject_E(OuterClass, InnerClass, Offset)]).
 
 % The member at Offset in OuterConstructor is certain to be an object instance of class
