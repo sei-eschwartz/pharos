@@ -1,7 +1,6 @@
 user:term_expansion((:- table Pred as incremental),
                     (:- table Pred as (monotonic,lazy))) :-
-%   \+ incremental(Pred).
-    monotonic(Pred).
+    incremental(Pred).
 
 log :-
     protocol('lazy.log'),
