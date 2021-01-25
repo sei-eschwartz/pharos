@@ -1634,8 +1634,11 @@ public class OOAnalyzer {
         // For imports, we used a method name
         if (isMethodName) {
           demangledName = demangledObj.getNamespace ().toString().replace("\n", "\\n").replace(" ", "_");
-          // This will leave a :: at the end that we need to remove
-          demangledName = demangledName.substring (0, demangledName.length () - "::".length ());
+          // Ghidra sometimes leaves :: at the end, though this appears to have been fixed at
+          // some point.
+          if (demangledName.endsWith ("::")) {
+            demangledName = demangledName.substring (0, demangledName.length () - "::".length ());
+          }
         } else {
           Msg.warn(OOAnalyzer.class, "Ghidra suceeded on a non-imported class name.  This is unexpected.");
           demangledName = demangledObj.toString().replace("\n", "\\n").replace(" ", "_");
