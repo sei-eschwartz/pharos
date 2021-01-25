@@ -109,15 +109,15 @@ jobs:
       ghidra904:
         ghidraUrl: "https://ghidra-sre.org/ghidra_9.0.4_PUBLIC_20190516.zip"
         ghidraVersion: "9.0.4"
-      ghidra902:
-        ghidraUrl: "https://ghidra-sre.org/ghidra_9.0.2_PUBLIC_20190403.zip"
-        ghidraVersion: "9.0.2"
-      ghidra901:
-        ghidraUrl: "https://ghidra-sre.org/ghidra_9.0.1_PUBLIC_20190325.zip"
-        ghidraVersion: "9.0.1"
-      ghidra90:
-        ghidraUrl: "https://ghidra-sre.org/ghidra_9.0_PUBLIC_20190228.zip"
-        ghidraVersion: "9.0"
+      # ghidra902:
+      #   ghidraUrl: "https://ghidra-sre.org/ghidra_9.0.2_PUBLIC_20190403.zip"
+      #   ghidraVersion: "9.0.2"
+      # ghidra901:
+      #   ghidraUrl: "https://ghidra-sre.org/ghidra_9.0.1_PUBLIC_20190325.zip"
+      #   ghidraVersion: "9.0.1"
+      # ghidra90:
+      #   ghidraUrl: "https://ghidra-sre.org/ghidra_9.0_PUBLIC_20190228.zip"
+      #   ghidraVersion: "9.0"
   pool:
     vmImage: 'Ubuntu-18.04'
   steps:
