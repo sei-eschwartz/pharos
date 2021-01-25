@@ -1656,13 +1656,15 @@ public class OOAnalyzer {
         }
         if (namespaceType != null) {
           namespace = namespaceType;
-          // This will leave a :: at the end that we need to remove
-          namespace = namespace.substring (0, namespace.length () - "::".length ());
+          // Ghidra sometimes leaves :: at the end, though this appears to have been fixed at
+          // some point.
+          if (namespace.endsWith ("::")) {
+            namespace = namespace.substring (0, namespace.length () - "::".length ());
+          }
 
         } else {
           namespace = "";
         }
-        // Ghidra demangler leaves :: at the end, which we don't want.
         Msg.debug(OOAnalyzer.class, "Got namespace from Ghidra demangler: " + namespace);
         return Optional.of (Map.of("demangledName", demangledName, "namespace", namespace));
       } else {
