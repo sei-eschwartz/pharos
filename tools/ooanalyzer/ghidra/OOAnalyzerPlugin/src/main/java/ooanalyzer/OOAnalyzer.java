@@ -238,7 +238,14 @@ public class OOAnalyzer {
   }
 
   private String normalizeName(String name) {
-    return name.replaceAll("::", "/");
+    String out = name.replaceAll("::", "/");
+    if (out.endsWith("/")) {
+      Msg.warn (this, "Normalize name ending in ::? " + name);
+      // What should we do here?  For now strip it and put __.
+      out = out.substring(0, out.length () - 1) + "__";
+    }
+
+    return out;
   }
 
   /**
