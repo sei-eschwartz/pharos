@@ -322,6 +322,7 @@ reasonNOTConstructor_G(Method) :-
 % If we know which VFTable is associated with this class, and the method does not install it,
 % it's NOT a constructor.
 reasonNOTConstructor_H(Method) :-
+    logwarnln('reasonNOTConstructor_H is being recomputed'),
     % There is a VFTable on a class
     findVFTable(VFTable, Class),
     % There is a method on the class
