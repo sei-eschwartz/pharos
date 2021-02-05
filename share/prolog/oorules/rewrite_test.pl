@@ -19,6 +19,8 @@ translateArgs(Pred/Arity, Index) :-
     classArgs(TryPred/Arity, Index),
     format('Success ~w!~n', TryPred).
 
+% Will this work?
+%translateArgs(find/2, 2).
 
 
 user:term_expansion(Old, Old) :-
