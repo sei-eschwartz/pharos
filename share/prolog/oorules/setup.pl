@@ -22,6 +22,8 @@
 % to backtrack until we fix the upstream problem.
 :- dynamic backtrackForUpstream/0.
 
+:- ensure_loaded(rewrite_test).
+
 % ============================================================================================
 % Inputs facts.
 % ============================================================================================
