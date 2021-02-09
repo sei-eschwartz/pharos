@@ -452,6 +452,8 @@ concludeNOTMergeClasses(Out) :-
 concludeMergeVFTables(Out) :-
     reportFirstSeen('concludeMergeVFTables'),
     reasonMergeVFTables(Class1, Class2),
+    is_current(Class1),
+    is_current(Class2),
     not(dynFactNOTMergeClasses(Class1, Class2)),
     loginfoln('Concluding ~Q.', mergeVFTables(Class1, Class2)),
     Out = mergeClasses(Class1, Class2).
@@ -459,6 +461,8 @@ concludeMergeVFTables(Out) :-
 concludeMergeClasses(Out) :-
     reportFirstSeen('concludeMergeClasses'),
     reasonMergeClasses(Class1, Class2),
+    is_current(Class1),
+    is_current(Class2),
     not(dynFactNOTMergeClasses(Class1, Class2)),
     loginfoln('Concluding ~Q.', mergeClasses(Class1, Class2)),
     Out = mergeClasses(Class1, Class2).

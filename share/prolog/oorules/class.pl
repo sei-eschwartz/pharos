@@ -46,6 +46,9 @@ find(M, R) :-
 find_current(M, R) :-
     findint_current(M, R).
 
+is_current(C) :-
+    findint_current(C, C).
+
 findVFTable(V, R) :-
     findint(V, R),
     factVFTable(V).
