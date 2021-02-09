@@ -76,11 +76,11 @@ logln(Importance, Message) :-
 writePredicate(P) :-
     writeHex(P, [quoted(true), spacing(next_argument), nl(true), fullstop(true)]).
 
-% A strange hybrid case.  We store these as find(C1, C2), but we frequently refer to them in
+% A strange hybrid case.  We store these as find_current(C1, C2), but we frequently refer to them in
 % our code as factMergeClasses/2, which seems to be the more natural way to express them.  This
 % little bit of syntactic sugar should help ease that gap.
 reportPredicate(factMergeClasses/2) :-
-    forall(find(C1, C2), writePredicate(factMergeClasses(C1, C2))), !.
+    forall(find_current(C1, C2), writePredicate(factMergeClasses(C1, C2))), !.
 
 reportPredicate(Name/Arity) :-
     functor(Head, Name, Arity), forall(Head, writePredicate(Head)), !.

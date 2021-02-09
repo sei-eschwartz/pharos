@@ -53,14 +53,29 @@ findVFTable(V, R) :-
     findint(V, R),
     factVFTable(V).
 
+findVFTable_current(V, R) :-
+    find_current(V, R),
+    factVFTable(V).
+
 findVFTable(VFTable, Offset, Class) :-
     findVFTable(VFTable, Class),
     factVFTableWrite(_Insn, Method, Offset, VFTable),
     find(Method, Class).
 
+findVFTable_current(VFTable, Offset, Class) :-
+    findVFTable_current(VFTable, Class),
+    factVFTableWrite(_Insn, Method, Offset, VFTable),
+    find_current(Method, Class).
+
 findMethod(M, R) :-
     findint(M, R),
     factMethod(M).
+
+findMethod_current(M, R) :-
+    find_current(M, R),
+    factMethod(M).
+
+% XXX: I think this is ok for current?
 
 % Find all objects on M's class
 findall(M, S) :-

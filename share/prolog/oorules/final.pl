@@ -42,10 +42,10 @@
 reasonPrimaryVFTableForClassFinal(V, C) :-
     nonvar(C),
     % Hey we found one!
-    findVFTable(V, 0, C),
+    findVFTable_current(V, 0, C),
     !,
     % No one else better also claim it
-    forall(findVFTable(V, 0, OC), C = OC).
+    forall(findVFTable_current(V, 0, OC), C = OC).
 
 % ============================================================================================
 % Class Identification...
@@ -63,7 +63,7 @@ classIdentifier(Method, ID) :-
     throw_with_backtrace(error(instantiation_error, classIdentifier/2)).
 
 classIdentifier(Method, ID) :-
-    find(Method, Class),
+    find_current(Method, Class),
     ((
         % Must be the VFTable at offset zero to be the "master" table for the class.
         reasonPrimaryVFTableForClassFinal(VFTable, Class),
@@ -76,15 +76,15 @@ classIdentifier(Method, ID) :-
     % This will use any VFTable on the class as an identifier but only if there is a single
     % VFTable.
     (
-        once((findVFTable(VFTable, Class),
-              forall(findVFTable(OtherVFTable, Class),
+        once((findVFTable_current(VFTable, Class),
+              forall(findVFTable_current(OtherVFTable, Class),
                      VFTable = OtherVFTable),
               logdebugln('Setting classID of ~Q to only vftable ~Q', [Class, VFTable])))
     ) ->
         ID is VFTable
     ;
     (
-        find(RealDestructor, Class),
+        find_current(RealDestructor, Class),
         factRealDestructor(RealDestructor),
         logdebugln('Setting classID of ~Q to real destructuor ~Q', [Class, RealDestructor]),
         true
@@ -127,7 +127,7 @@ usefulClass(Class) :-
 
 % A class is useful if it has a VFTable.
 usefulClass(Class) :-
-    findVFTable(_VFTable, Class).
+    findVFTable_current(_VFTable, Class).
 
 % A class is useful if it is not size zero.
 usefulClass(Class) :-
@@ -135,12 +135,12 @@ usefulClass(Class) :-
 
 % A class containing a constructor is useful.
 usefulClass(Class) :-
-    findMethod(Method, Class),
+    findMethod_current(Method, Class),
     factConstructor(Method).
 
 % A class containing a real destructor is useful.
 usefulClass(Class) :-
-    findMethod(Method, Class),
+    findMethod_current(Method, Class),
     factRealDestructor(Method).
 
 % A class with more than one method is useful.
@@ -182,9 +182,9 @@ finalClass(ClassID, VFTableOrNull, CSize, LSize, RealDestructorOrNull, MethodLis
     classIdentifier(Class, ClassID),
     % If there's a certain VFTableWrite, use the VFTable value from it.  On the other hand if
     % there is a single VFTable in the class, use that.  Otherwise return zero (null).
-    ((findVFTable(VFTable, 0, Class);
-      (findVFTable(VFTable, Class),
-       forall(findVFTable(OtherVFTable, Class), VFTable = OtherVFTable)))
+    ((findVFTable_current(VFTable, 0, Class);
+      (findVFTable_current(VFTable, Class),
+       forall(findVFTable_current(OtherVFTable, Class), VFTable = OtherVFTable)))
      ->
          VFTableOrNull=VFTable
      ;
@@ -194,7 +194,7 @@ finalClass(ClassID, VFTableOrNull, CSize, LSize, RealDestructorOrNull, MethodLis
     LSize is CSize,
     % Optionally find the the real destructor as well.
     ((factRealDestructor(RealDestructor),
-      find(RealDestructor, Class))
+      find_current(RealDestructor, Class))
      -> RealDestructorOrNull=RealDestructor; RealDestructorOrNull=0),
     findallMethods(Class, UnsortedMethodList),
     sort(UnsortedMethodList, MethodList).
@@ -259,9 +259,9 @@ finalInheritance(DerivedClassID, BaseClassID, ObjectOffset, VFTableOrNull, false
           classIdentifier(BaseClass, BaseClassID),
 
           % Try to identify the relevant VFTable
-          ((find(VFTable, DerivedClass),
+          ((find_current(VFTable, DerivedClass),
             factVFTableWrite(_Insn, DerivedConstructor, ObjectOffset, VFTable),
-            find(DerivedConstructor, DerivedClass))
+            find_current(DerivedConstructor, DerivedClass))
            ->
                VFTableOrNull = VFTable
            ;
@@ -287,7 +287,7 @@ finalInheritance(DerivedClassID, BaseClassID, ObjectOffset, VFTableOrNull, false
 % Find all methods that access offsets in the class.
 certainMemberAccessEvidence(Class, Offset, Size, Insn) :-
     certainMemberOnClass(Class, Offset, Size),
-    find(Method, Class),
+    find_current(Method, Class),
     factMethod(Method),
     validMethodMemberAccess(Insn, Method, Offset, Size).
 
@@ -350,7 +350,7 @@ finalMember(ClassID, Offset, Sizes, certain) :-
 % currently scheduled for elimination.
 finalMethodProperty(Method, constructor, certain) :-
     factConstructor(Method),
-    find(Method, Class),
+    find_current(Method, Class),
     not(worthlessClass(Class)).
 
 % --------------------------------------------------------------------------------------------
@@ -359,7 +359,7 @@ finalMethodProperty(Method, constructor, certain) :-
 % given class is determined from the finalClass result.
 finalMethodProperty(Method, deletingDestructor, certain) :-
     factDeletingDestructor(Method),
-    find(Method, Class),
+    find_current(Method, Class),
     not(worthlessClass(Class)).
 
 % --------------------------------------------------------------------------------------------
@@ -368,7 +368,7 @@ finalMethodProperty(Method, deletingDestructor, certain) :-
 % try it with it on for a while.
 finalMethodProperty(Method, realDestructor, certain) :-
     factRealDestructor(Method),
-    find(Method, Class),
+    find_current(Method, Class),
     not(worthlessClass(Class)).
 
 % --------------------------------------------------------------------------------------------
@@ -385,7 +385,7 @@ finalMethodProperty(Method, virtual, certain) :-
     factMethod(Method),
     once((symbolProperty(Method, virtual);
           (factMethodInVFTable(_VFTable, _Offset, Method), not(symbolProperty(Method, virtual))))),
-    find(Method, Class),
+    find_current(Method, Class),
     not(worthlessClass(Class)),
     not(purecall(Method)).
 
