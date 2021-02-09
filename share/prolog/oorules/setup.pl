@@ -22,7 +22,7 @@
 % to backtrack until we fix the upstream problem.
 :- dynamic backtrackForUpstream/0.
 
-:- ensure_loaded(rewrite_test).
+%:- ensure_loaded(rewrite_test).
 
 % ============================================================================================
 % Inputs facts.
@@ -167,8 +167,6 @@ classArgs(factClassSizeLTE/2, 1).
 % Assorted declarations.
 % ============================================================================================
 
-% Can I put this somewhere else?
-:- dynamic findint/2 as (incremental, monotonic).
 
 % ============================================================================================
 % Other modules.
@@ -313,7 +311,7 @@ logtraceClasses :-
 mergeClassBuilder((OldTerm,NewTerm), Out) :-
     Out =
     (logdebugln('Retracting ~Q and asserting ~Q ...', [OldTerm, NewTerm]),
-     try_retract(OldTerm),
+     %try_retract(OldTerm),
      try_assert(NewTerm)).
 
 % Explicitly merge two methods.  Only called from reasonAMergeClasses and tryAMergeClasses.

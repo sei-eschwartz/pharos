@@ -2,22 +2,32 @@
 % Rules for tracking which methods are assigned to which classes.
 % ============================================================================================
 
+% This predicate always holds the current mapping of objects to class.
+:- dynamic findint_current/2 as (incremental).
+
+% This predicate holds the current and previous mapping of objects to class.
+:- dynamic findint/2 as (incremental, monotonic).
+
 :- use_module(library(apply), [maplist/2, include/3]).
 :- use_module(library(lists), [member/2]).
 
 make(M) :-
-    try_assert(findint(M, M)).
+    try_assert(findint(M, M)),
+    try_assert(findint_current(M, M)).
 
 unionhelp(Rold, Rnew, M) :-
-    try_retract(findint(M, Rold)),
-    try_assert(findint(M, Rnew)).
+    % Remove the current mapping
+    try_retract(findint_current(M, Rold)),
+    % Add the new mappings
+    try_assert(findint(M, Rnew)),
+    try_assert(findint_current(M, Rnew)).
 
 union(M1, M2) :-
 
     % Rnew is the new representative for everybody!
-    find(M1, Rnew),
+    find_current(M1, Rnew),
     % Rold is the old representative
-    find(M2, Rold),
+    find_current(M2, Rold),
 
     % Let's move all the members in S2 to S1.
     findall(M2, S2),
@@ -32,6 +42,9 @@ makeIfNecessary(M) :-
 
 find(M, R) :-
     findint(M, R).
+
+find_current(M, R) :-
+    findint_current(M, R).
 
 findVFTable(V, R) :-
     findint(V, R),

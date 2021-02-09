@@ -1130,8 +1130,8 @@ guessMergeClasses(Out) :-
 
 checkMergeClasses(Method1, Method2) :-
     iso_dif(Method1, Method2),
-    find(Method1, Class1),
-    find(Method2, Class2),
+    find_current(Method1, Class1),
+    find_current(Method2, Class2),
     % They're not already on the same class...
     iso_dif(Class1, Class2),
     % They're not already proven NOT to be on the same class.
@@ -1145,14 +1145,15 @@ checkMergeClasses(Method1, Method2) :-
 tryMergeClasses((Method1, Method2)) :- tryMergeClasses(Method1, Method2).
 % If we are merging classes that have already been merged, just ignore it.
 tryMergeClasses(Method1, Method2) :-
-    find(Method1, Class1),
-    find(Method2, Class2),
-    Class1 = Class2,
+    find_current(Method1, Class),
+    find_current(Method2, Class),
+    logerrorln('tryMergeClasses on same class'),
+    throw_with_backtrace(error(system_error(tryMergeClasses, Method1, Method2, Class))),
     !.
 tryMergeClasses(Method1, Method2) :-
     countGuess,
-    find(Method1, Class1),
-    find(Method2, Class2),
+    find_current(Method1, Class1),
+    find_current(Method2, Class2),
     loginfoln('Guessing ~Q.', mergeClasses(Class1, Class2)),
     mergeClasses(Class1, Class2),
     try_assert(guessedMergeClasses(Class1, Class2)).
@@ -1160,8 +1161,8 @@ tryMergeClasses(Method1, Method2) :-
 tryNOTMergeClasses((Class1, Class2)) :- tryNOTMergeClasses(Class1, Class2).
 tryNOTMergeClasses(Method1, Method2) :-
     countGuess,
-    find(Method1, Class1),
-    find(Method2, Class2),
+    find_current(Method1, Class1),
+    find_current(Method2, Class2),
     loginfoln('Guessing ~Q.', factNOTMergeClasses(Class1, Class2)),
     try_assert(factNOTMergeClasses(Class1, Class2)),
     try_assert(guessedNOTMergeClasses(Class1, Class2)).
