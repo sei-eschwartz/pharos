@@ -309,11 +309,9 @@ logtraceClasses :-
 % logtrace level, because there's quite a lot of them, but this is a fairly important set of
 % messages, and it might really belong at the info level.
 
-:- meta_predicate mergeClassBuilder(?, 0).
-
 mergeClassBuilder((OldTerm,NewTerm), Out) :-
     Out =
-    (logdebugln('Retracting ~Q and asserting ~Q ...', [OldTerm, NewTerm]),
+    (logdebugln(true, 'Retracting ~Q and asserting ~Q ...', [OldTerm, NewTerm]),
      %try_retract(OldTerm),
      try_assert(NewTerm)).
 
@@ -354,7 +352,7 @@ mergeClasses(M1, M2) :-
      Set = []),
 
     maplist(mergeClassBuilder, Set, Actions),
-    %logdebugln(Actions),
+    %logdebugln(Actions)
 
     all(Actions),
 
@@ -414,7 +412,7 @@ reasonForward :-
     if_(call(Out),
         true,
         (logerrorln('An internal error occurred in OOAnalyzer. Please report this to the developers:~n~Q', Out),
-         throw_with_backtrace(error(system_error(reasonForward, Out))))).
+         throw_with_backtrace(error(system_error(reasonForward), Out)))).
 
 % Reason forward as many times as possible.  It's ok if we can't reason forward any more.  But
 % if we _backtrack_ and can't reason forward, it means that we've exhausted this search tree,
