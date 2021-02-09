@@ -308,6 +308,9 @@ logtraceClasses :-
 % This is a helper predicate used by mergeClasses(M1, M2).  The messages are logged at the
 % logtrace level, because there's quite a lot of them, but this is a fairly important set of
 % messages, and it might really belong at the info level.
+
+:- meta_predicate mergeClassBuilder(?, 0).
+
 mergeClassBuilder((OldTerm,NewTerm), Out) :-
     Out =
     (logdebugln('Retracting ~Q and asserting ~Q ...', [OldTerm, NewTerm]),

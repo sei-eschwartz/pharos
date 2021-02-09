@@ -63,6 +63,9 @@ iso_dif(X, Y) :-
 
 % atmost(G, N) allows no more than N backtracks through G.
 
+:- meta_predicate atmost(0, ?),
+                  atmost_internal(0, ?).
+
 atmost(G, N) :-
     set_flag(atmost(G), 0),
     !,

@@ -16,13 +16,13 @@ logdebug(X) :- baselog('DEBUG', X).
 logtrace(X) :- baselog('TRACE', X).
 logcrazy(X) :- baselog('CRAZY', X).
 
-logfatal(Fmt, Args) :- fmtlog('FATAL', Fmt, Args).
-logerror(Fmt, Args) :- fmtlog('ERROR', Fmt, Args).
-logwarn(Fmt, Args)  :- fmtlog('WARN', Fmt, Args).
-loginfo(Fmt, Args)  :- fmtlog('INFO', Fmt, Args).
-logdebug(Fmt, Args) :- fmtlog('DEBUG', Fmt, Args).
-logtrace(Fmt, Args) :- fmtlog('TRACE', Fmt, Args).
-logcrazy(Fmt, Args) :- fmtlog('CRAZY', Fmt, Args).
+logfatal(Cond, Fmt, Args) :- fmtlog(Cond, 'FATAL', Fmt, Args).
+logerror(Cond, Fmt, Args) :- fmtlog(Cond, 'ERROR', Fmt, Args).
+logwarn(Cond, Fmt, Args)  :- fmtlog(Cond, 'WARN', Fmt, Args).
+loginfo(Cond, Fmt, Args)  :- fmtlog(Cond, 'INFO', Fmt, Args).
+logdebug(Cond, Fmt, Args) :- fmtlog(Cond, 'DEBUG', Fmt, Args).
+logtrace(Cond, Fmt, Args) :- fmtlog(Cond, 'TRACE', Fmt, Args).
+logcrazy(Cond, Fmt, Args) :- fmtlog(Cond, 'CRAZY', Fmt, Args).
 
 logfatalln(X) :- baselogln('FATAL', X).
 logerrorln(X) :- baselogln('ERROR', X).
@@ -32,13 +32,13 @@ logdebugln(X) :- baselogln('DEBUG', X).
 logtraceln(X) :- baselogln('TRACE', X).
 logcrazyln(X) :- baselogln('CRAZY', X).
 
-logfatalln(Fmt, Args) :- fmtlogln('FATAL', Fmt, Args).
-logerrorln(Fmt, Args) :- fmtlogln('ERROR', Fmt, Args).
-logwarnln(Fmt, Args)  :- fmtlogln('WARN', Fmt, Args).
-loginfoln(Fmt, Args)  :- fmtlogln('INFO', Fmt, Args).
-logdebugln(Fmt, Args) :- fmtlogln('DEBUG', Fmt, Args).
-logtraceln(Fmt, Args) :- fmtlogln('TRACE', Fmt, Args).
-logcrazyln(Fmt, Args) :- fmtlogln('CRAZY', Fmt, Args).
+logfatalln(Cond, Fmt, Args) :- fmtlogln(Cond, 'FATAL', Fmt, Args).
+logerrorln(Cond, Fmt, Args) :- fmtlogln(Cond, 'ERROR', Fmt, Args).
+logwarnln(Cond, Fmt, Args)  :- fmtlogln(Cond, 'WARN', Fmt, Args).
+loginfoln(Cond, Fmt, Args)  :- fmtlogln(Cond, 'INFO', Fmt, Args).
+logdebugln(Cond, Fmt, Args) :- fmtlogln(Cond, 'DEBUG', Fmt, Args).
+logtraceln(Cond, Fmt, Args) :- fmtlogln(Cond, 'TRACE', Fmt, Args).
+logcrazyln(Cond, Fmt, Args) :- fmtlogln(Cond, 'CRAZY', Fmt, Args).
 
 % Associate log level strings with numbers.  Perhaps we should alter the C++ API?
 numericLogLevel('FATAL', 1).
@@ -50,14 +50,14 @@ numericLogLevel('TRACE', 6).
 numericLogLevel('CRAZY', 7).
 
 baselog(Level, X) :-
-    fmtlog(Level, '~P', [X]).
+    fmtlog(true, Level, '~P', [X]).
 baselogln(Level, X) :-
-    fmtlog(Level, '~P~n', [X]).
+    fmtlog(true, Level, '~P~n', [X]).
 
-fmtlog(Level, Fmt, Args) :-
-    format(atom(Repr), Fmt, Args) -> log(Level, Repr) ; true.
-fmtlogln(Level, Fmt, Args) :-
-    format(atom(Repr), Fmt, Args) -> logln(Level, Repr) ; true.
+fmtlog(Cond, Level, Fmt, Args) :-
+    (call(Cond), format(atom(Repr), Fmt, Args)) -> log(Level, Repr) ; true.
+fmtlogln(Cond, Level, Fmt, Args) :-
+    (call(Cond), format(atom(Repr), Fmt, Args)) -> logln(Level, Repr) ; true.
 
 % This is a default implementation of traceAtLevel which should never be used because the code
 % in goal_expansion/2 below should replace it at load time.
@@ -145,6 +145,30 @@ goal_expansion(Goal, Out) :-
 goal_expansion(Goal, Out) :-
     Goal =.. [traceAtLevel, Level, G],
     (logLevelEnabled(Level) -> Out=G; Out=true).
+
+% We originally wrote debug logs with ~@.  Because of annoying reasons, this doesn't play well
+% with monotonic tabling.  So we look for calls like logdebugln('~@~Q', [Cond, Blah]) and
+% rewrite it to logdebugln(Cond, '~Q', [Blah]) which doesn't have the same issue.
+
+goal_expansion(Goal, Out) :-
+    % Goal is logdebugln('~@~Q', [Cond, Foo])
+    ((Goal =.. [Name, Fmt, [Cond|OtherArgs]], ExistingCond=true);
+     % Goal is logdebugln(ExistingCond, '~@~Q', [NewCond, Foo])
+     (Goal =.. [Name, ExistingCond, Fmt, [Cond|OtherArgs]])),
+
+    logging_atom(Name, _Level),
+    % Does the format start with ~@?
+    sub_string(Fmt, 0, 2, _, '~@'),
+    sub_string(Fmt, 2, _, 0, NewFmt),
+
+    Out =.. [Name, (ExistingCond, Cond), NewFmt, OtherArgs].
+
+
+% Here is a normal rule where we change logdebugln('~P', 42) to logdebugln(true, '~P', 42).
+goal_expansion(Goal, Out) :-
+    Goal =.. [Name, Fmt, Args],
+    logging_atom(Name, _Level),
+    Out =.. [Name, true, Fmt, Args].
 
 %% Local Variables:
 %% mode: prolog
