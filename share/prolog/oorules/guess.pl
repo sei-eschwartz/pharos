@@ -918,9 +918,9 @@ guessNOTMergeClasses(Out) :-
 % XXX: Should this be in rules.pl?
 :- table reasonMethodInVFTable/4 as monotonic.
 reasonMethodInVFTable(VFTable, Offset, Method, Entry) :-
-    not(purecall(Entry)),
     factVFTableEntry(VFTable, Offset, Entry),
     dethunk(Entry, Method),
+    not(purecall(Entry)),
     not(purecall(Method)).
 
 reasonMethodInVFTable(VFTable, Offset, Method) :-
