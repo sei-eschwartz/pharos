@@ -88,6 +88,12 @@ jobs:
     matrix:
       ghidra-git:
         ghidraVersion: "master"
+      ghidra922:
+        ghidraUrl: "https://ghidra-sre.org/ghidra_9.2.2_PUBLIC_20201229.zip"
+        ghidraVersion: "9.2.2"
+      ghidra921:
+        ghidraUrl: "https://ghidra-sre.org/ghidra_9.2.1_PUBLIC_20201215.zip"
+        ghidraVersion: "9.2.1"
       ghidra92:
         ghidraUrl: "https://ghidra-sre.org/ghidra_9.2_PUBLIC_20201113.zip"
         ghidraVersion: "9.2"
@@ -103,15 +109,15 @@ jobs:
       ghidra904:
         ghidraUrl: "https://ghidra-sre.org/ghidra_9.0.4_PUBLIC_20190516.zip"
         ghidraVersion: "9.0.4"
-      ghidra902:
-        ghidraUrl: "https://ghidra-sre.org/ghidra_9.0.2_PUBLIC_20190403.zip"
-        ghidraVersion: "9.0.2"
-      ghidra901:
-        ghidraUrl: "https://ghidra-sre.org/ghidra_9.0.1_PUBLIC_20190325.zip"
-        ghidraVersion: "9.0.1"
-      ghidra90:
-        ghidraUrl: "https://ghidra-sre.org/ghidra_9.0_PUBLIC_20190228.zip"
-        ghidraVersion: "9.0"
+      # ghidra902:
+      #   ghidraUrl: "https://ghidra-sre.org/ghidra_9.0.2_PUBLIC_20190403.zip"
+      #   ghidraVersion: "9.0.2"
+      # ghidra901:
+      #   ghidraUrl: "https://ghidra-sre.org/ghidra_9.0.1_PUBLIC_20190325.zip"
+      #   ghidraVersion: "9.0.1"
+      # ghidra90:
+      #   ghidraUrl: "https://ghidra-sre.org/ghidra_9.0_PUBLIC_20190228.zip"
+      #   ghidraVersion: "9.0"
   pool:
     vmImage: 'Ubuntu-18.04'
   steps:
@@ -163,7 +169,7 @@ jobs:
       set -e
       cd ghidra
       gradle --build-cache --init-script gradle/support/fetchDependencies.gradle init
-      gradle --build-cache buildGhidra
+      gradle --build-cache buildGhidra -x ip
       mkdir -p $WS/zip
       cp build/dist/*.zip $WS/zip/
       cd $WS

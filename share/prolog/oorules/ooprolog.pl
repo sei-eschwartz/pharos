@@ -1,14 +1,16 @@
 #!/usr/bin/env swipl
 
+% Copyright 2020-2021 Carnegie Mellon University.
+
 :- include(mono).
 
-% Copyright 2020 Carnegie Mellon University.
 % ============================================================================================
 % User-level driver for oorules functionality
 % ============================================================================================
 
 :- use_module(library(optparse), [opt_parse/4, opt_help/2]).
 :- use_module(library(option), [dict_options/2, option/2]).
+:- use_module(library(lists), [append/3]).
 :- use_module(library(prolog_stack)).
 
 :- dynamic file_search_path/2.
