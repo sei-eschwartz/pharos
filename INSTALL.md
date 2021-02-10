@@ -48,10 +48,16 @@ $ sudo apt install build-essential wget flex ghostscript bzip2 \
   libyaml-cpp-dev libboost-all-dev libboost-dev libxml2-dev
 ```
 
-Then run the script:
+Then install all dependencies by running:
+```
+./scripts/build_prereqs.bash
+```
+
+And finally run the script:
 ```
 NCPU=4 ./scripts/build.bash
 ```
+
 Set `NCPU` to the number of cores you wish to use for building.  You
 should probably use 1 unless you have a lot of RAM.
 
@@ -281,11 +287,14 @@ If all of the dependencies have been built and properly installed,
 building Pharos should be pretty easy.  We use the standard CMake
 build approach listed below.
 
+Similar to NCPU above, change `make -j4` to `make -j1` unless you
+have a lot of RAM.
+
 ```
 $ cd pharos
 $ mkdir build
 $ cd build
-$ cmake -DCMAKE_INSTALL_PREFIX=/usr/local 
+$ cmake -DCMAKE_INSTALL_PREFIX=/usr/local ..
 $ make -j4
 ```
 
@@ -303,7 +312,7 @@ $ ctest -j4
 Installing should also be easy.  Simply type:
 
 ```
-$ make install
+$ sudo make install
 ```
 
 The software installs into /usr/local by default, but can be
