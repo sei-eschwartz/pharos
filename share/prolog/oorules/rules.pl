@@ -1757,8 +1757,7 @@ reasonClassHasUnknownBase(Class) :-
     %logwarnln('Recomputing reasonClassHasUnknownBase...'),
     (   reasonClassHasUnknownBase_A(Class)
     ;   reasonClassHasUnknownBase_B(Class)
-%       in trigger.pl
-%   ;   reasonClassHasUnknownBase_C(Class)
+    ;   reasonClassHasUnknownBase_C(Class)
     ;   reasonClassHasUnknownBase_D(Class)
 %       in trigger.pl
 %   ;   reasonClassHasUnknownBase_E(Class)
@@ -1785,7 +1784,7 @@ reasonClassHasUnknownBase_B(Class) :-
 % ED_PAPER_INTERESTING
 
 % factVFTableEntry: VFTable could be AncestorVFTable or DerivedVFTable
-reasonClassHasUnknownBase_C1(DerivedClass, AncestorVFTable, DerivedVFTable, Entry) :-
+reasonClassHasUnknownBase_C(DerivedClass) :-
     % And there's a method that appears in two different VFTables...  During the thunk
     % conversion Cory chose to make the VFTable entries match exactly, but it's possible that
     % we really mean any two entries that dethunk to the same actual method.
@@ -1815,83 +1814,6 @@ reasonClassHasUnknownBase_C1(DerivedClass, AncestorVFTable, DerivedVFTable, Entr
 
     % And is on a different class.
     find(DerivedConstructor, DerivedClass),
-    iso_dif(DerivedClass, AncestorClass).
-
-% find: (FindMethod, FindClass) could be (Method, AncestorClass) or (AncestorConstructor, AncestorClass)
-% How do we get to Entry?
-% AncestorClass -> AncestorConstructor -> AncestorVFTable -> Entry
-reasonClassHasUnknownBase_C2(DerivedClass, Method, AncestorConstructor, AncestorClass, AncestorVFTable) :-
-
-    % Ensure the ancestor constructor is in the base class.
-    find(AncestorConstructor, AncestorClass),
-    factConstructor(AncestorConstructor),
-
-    % Both constructors wrote confirmed vtables into offsets in the object.  In the derived
-    % class, the offset is the location of the object, but in the base class it will always be
-    % the table written to offset zero.
-    factVFTableWrite(_Insn2, AncestorConstructor, 0, AncestorVFTable),
-
-    % And there's a method that appears in two different VFTables...  During the thunk
-    % conversion Cory chose to make the VFTable entries match exactly, but it's possible that
-    % we really mean any two entries that dethunk to the same actual method.
-    factVFTableEntry(AncestorVFTable, _AncestorVFTableOffset, Entry),
-
-    % The method must be assigned to the ancestor class because ancestor classes can't call
-    % methods on the derived class.
-    dethunk(Entry, Method),
-
-    find(Method, AncestorClass),
-
-    % And there's a method that appears in two different VFTables...  During the thunk
-    % conversion Cory chose to make the VFTable entries match exactly, but it's possible that
-    % we really mean any two entries that dethunk to the same actual method.
-    factVFTableEntry(DerivedVFTable, _DerivedVFTableOffset, Entry),
-    iso_dif(DerivedVFTable, AncestorVFTable),
-
-    % And the other constructor is different from the base constructor.
-    factVFTableWrite(_Insn1, DerivedConstructor, _ObjectOffset, DerivedVFTable),
-    factConstructor(DerivedConstructor),
-    % We don't need to check this because we check that both are on different classes below.
-    %iso_dif(DerivedConstructor, AncestorConstructor),
-
-    % And is on a different class.
-    find(DerivedConstructor, DerivedClass),
-    iso_dif(DerivedClass, AncestorClass).
-
-% find Method, Class could be DerivedConstructor, DerivedClass
-% DerivedConstructor -> DerivedVFTable -> Entry
-reasonClassHasUnknownBase_C3(DerivedClass, DerivedConstructor, DerivedVFTable) :-
-    find(DerivedConstructor, DerivedClass),
-
-    % And the other constructor is different from the base constructor.
-    factVFTableWrite(_Insn1, DerivedConstructor, _ObjectOffset, DerivedVFTable),
-    factConstructor(DerivedConstructor),
-
-    % And there's a method that appears in two different VFTables...  During the thunk
-    % conversion Cory chose to make the VFTable entries match exactly, but it's possible that
-    % we really mean any two entries that dethunk to the same actual method.
-    factVFTableEntry(DerivedVFTable, _DerivedVFTableOffset, Entry),
-    factVFTableEntry(AncestorVFTable, _AncestorVFTableOffset, Entry),
-    iso_dif(DerivedVFTable, AncestorVFTable),
-
-    % The method must be assigned to the ancestor class because ancestor classes can't call
-    % methods on the derived class.
-    dethunk(Entry, Method),
-    find(Method, AncestorClass),
-
-    % Both constructors wrote confirmed vtables into offsets in the object.  In the derived
-    % class, the offset is the location of the object, but in the base class it will always be
-    % the table written to offset zero.
-    factVFTableWrite(_Insn2, AncestorConstructor, 0, AncestorVFTable),
-
-    % Ensure the ancestor constructor is in the base class.
-    find(AncestorConstructor, AncestorClass),
-    factConstructor(AncestorConstructor),
-
-    % We don't need to check this because we check that both are on different classes below.
-    %iso_dif(DerivedConstructor, AncestorConstructor),
-
-    % And is on a different class.
     iso_dif(DerivedClass, AncestorClass).
 
 
