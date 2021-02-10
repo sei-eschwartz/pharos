@@ -112,6 +112,8 @@ incremental(reasonClassHasUnknownBase_D/1).
 incremental(reasonMethod_M/1).
 incremental(insanityConstructorAndNotConstructor/0).
 incremental(reasonSharedImplementation/2).
+incremental(reasonClassHasUnknownBase_E/1).
+incremental(reasonClassHasUnknownBase_C/1).
 incremental(reasonClassHasUnknownBase_B/1).
 incremental(certainMemberOnClass/3).
 incremental(insanityBaseVFTableLarger/0).

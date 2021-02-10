@@ -1747,11 +1747,9 @@ reasonClassHasNoBaseSet(Set) :-
 :- table reasonClassHasUnknownBase_A/1 as incremental.
 :- table reasonClassHasUnknownBase_B/1 as incremental.
 % This was broken up into several triggered rules
-%:- table reasonClassHasUnknownBase_C/8 as incremental.
+:- table reasonClassHasUnknownBase_C/1 as incremental.
 :- table reasonClassHasUnknownBase_D/1 as incremental.
-
-% trigger
-%:- table reasonClassHasUnknownBase_E/3 as incremental.
+:- table reasonClassHasUnknownBase_E/1 as incremental.
 
 reasonClassHasUnknownBase(Class) :-
     %logwarnln('Recomputing reasonClassHasUnknownBase...'),
@@ -1759,8 +1757,7 @@ reasonClassHasUnknownBase(Class) :-
     ;   reasonClassHasUnknownBase_B(Class)
     ;   reasonClassHasUnknownBase_C(Class)
     ;   reasonClassHasUnknownBase_D(Class)
-%       in trigger.pl
-%   ;   reasonClassHasUnknownBase_E(Class)
+    ;   reasonClassHasUnknownBase_E(Class)
     ).
 
 % Because it is already known to be true.
@@ -1831,7 +1828,7 @@ reasonClassHasUnknownBase_D(Class) :-
                          reasonClassHasUnknownBase_D(Class)]).
 
 % Because the class shares a method that we know is not assigned to the class.
-reasonClassHasUnknownBase_E(Class, Method, MethodClass) :-
+reasonClassHasUnknownBase_E(Class) :-
     factClassCallsMethod(Class, Method),
     find(Method, MethodClass),
     dynFactNOTMergeClasses(Class, MethodClass),

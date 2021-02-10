@@ -44,27 +44,6 @@ trigger_hook(findint(A,B)) :-
 
 trigger_hook(_X).
 
-% HasUnknownBase_E
-dispatchTrigger(factClassCallsMethod(Class, Method), Out) :-
-    setof(Class,
-          MethodClass^(reasonClassHasUnknownBase_E(Class, Method, MethodClass),
-           not(factClassHasUnknownBase(Class)),
-           not(factClassHasNoBase(Class)),
-           loginfoln('Concluding ~Q.', factClassHasUnknownBase(Class))),
-          ClassSets),
-    maplist(try_assert_builder(factClassHasUnknownBase), ClassSets, ActionSets),
-    Out = all(ActionSets).
-dispatchTrigger(factNOTMergeClasses(Class, MethodClass), Out) :-
-    setof(Class,
-          Method^(reasonClassHasUnknownBase_E(Class, Method, MethodClass),
-           not(factClassHasUnknownBase(Class)),
-           not(factClassHasNoBase(Class)),
-           loginfoln('Concluding ~Q.', factClassHasUnknownBase(Class))),
-          ClassSets),
-    maplist(try_assert_builder(factClassHasUnknownBase), ClassSets, ActionSets),
-    Out = all(ActionSets).
-% End
-
 dispatchTrigger(factVFTableWrite(A,Method1,C,D), Out) :-
     find(Method1, Class1),
     setof((Class1, Class2),
