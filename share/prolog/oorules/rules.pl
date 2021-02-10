@@ -2081,8 +2081,8 @@ reasonClassCallsMethod_F(Class, Method) :-
 % are not associated by an inheritance relationship.
 reasonReusedImplementation(Method) :-
     %possiblyReused(Method),
-    factMethodInVFTable(VFTable1, _Offset1, Method),
-    factMethodInVFTable(VFTable2, _Offset2, Method),
+    reasonMethodInVFTable(VFTable1, _Offset1, Method),
+    reasonMethodInVFTable(VFTable2, _Offset2, Method),
     iso_dif(VFTable1, VFTable2),
     find(VFTable1, Class1),
     find(VFTable2, Class2),
@@ -2194,11 +2194,11 @@ reasonMergeClasses_B(BaseClass, MethodClass) :-
     findVFTable(BaseVFTable, BaseClass),
 
     % Which has a Method
-    factMethodInVFTable(BaseVFTable, _Offset, Method),
+    reasonMethodInVFTable(BaseVFTable, _Offset, Method),
     not(purecall(Method)),
     not(factReusedImplementation(Method)),
 
-    % We don't have to check purecall because factMethodInVFTable does already
+    % We don't have to check purecall because reasonMethodInVFTable does already
 
     % Finally check that the base class and method class are not already the same.
     find(Method, MethodClass),

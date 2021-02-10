@@ -755,7 +755,7 @@ guessCommitClassHasNoBase(Out) :-
 % edit distance perspective) grouped with the otehr methods.
 guessLateMergeClassesF2(Class, Method) :-
     % There are two different entries in the same VFTable...
-    factMethodInVFTable(VFTable, _Offset1, Method),
+    reasonMethodInVFTable(VFTable, _Offset1, Method),
 
     % One of the methods is in a class all by itself right now.
     findall(Method, [Method]),
@@ -914,16 +914,17 @@ guessNOTMergeClasses(Out) :-
 % This fact was a sub-computation of guessMergeClassesB that added a lot of overhead.  By
 % putting it in a separate fact, we can make it a trigger-based fact that is maintained with
 % low overhead.
-% factMethodInVFTable/3
 
-% trigger
 % XXX: Should this be in rules.pl?
-%:- table reasonMethodInVFTable/4 as incremental.
+:- table reasonMethodInVFTable/4 as monotonic.
 reasonMethodInVFTable(VFTable, Offset, Method, Entry) :-
     not(purecall(Entry)),
     factVFTableEntry(VFTable, Offset, Entry),
     dethunk(Entry, Method),
     not(purecall(Method)).
+
+reasonMethodInVFTable(VFTable, Offset, Method) :-
+    reasonMethodInVFTable(VFTable, Offset, Method, _Entry).
 
 guessMergeClassesB(Class1, Class2) :-
     factVFTableEntry(VFTable, _VFTableOffset, Entry1),
@@ -953,7 +954,7 @@ guessMergeClassesB(Class1, Class2) :-
     % support, Cory decided to allow the second entry to differ so long as it resolved to the
     % same place.  It's unclear if this is really correct.
 
-    forall(factMethodInVFTable(OtherVFTable, _Offset, Method1),
+    forall(reasonMethodInVFTable(OtherVFTable, _Offset, Method1),
            findVFTable(OtherVFTable, Class2)),
 
     checkMergeClasses(Class1, Class2),
@@ -1359,10 +1360,10 @@ guessFinalDeletingDestructor(Out) :-
     % destructor based entirely on a common phenomenon in the Visual Studio compiler.
 
     % There are two thunks to Method in VFTable
-    factMethodInVFTable(VFTable, Offset1, Method),
+    reasonMethodInVFTable(VFTable, Offset1, Method),
     % XXX: By binding to _Other_Method instead of Method on the next line, we are preserving a
     % known bug because it seems to produce better results for destructors.
-    factMethodInVFTable(VFTable, Offset2, _Other_Method),
+    reasonMethodInVFTable(VFTable, Offset2, _Other_Method),
     iso_dif(Offset1, Offset2),
 
     % For this rule to apply, there has to be two different entries that thunk to Method

@@ -44,16 +44,6 @@ trigger_hook(findint(A,B)) :-
 
 trigger_hook(_X).
 
-% MethodInVFTable, which is a helper for guessMergeClassesB
-dispatchTrigger(factVFTableEntry(VFTable, Offset, Entry), Out) :-
-    setof((VFTable, Offset, Method),
-          (reasonMethodInVFTable(VFTable, Offset, Method, Entry),
-           not(factMethodInVFTable(VFTable, Offset, Method)),
-           loginfoln('Concluding ~Q.', factMethodInVFTable(VFTable, Offset, Method))),
-          TupleSets),
-    maplist(try_assert_builder(factMethodInVFTable), TupleSets, ActionSets),
-    Out = all(ActionSets).
-
 % HasUnknownBase_C
 % factVFTableEntry: VFTable could be AncestorVFTable or DerivedVFTable
 dispatchTrigger(factVFTableEntry(VFTable, _Offset, Entry), Out) :-

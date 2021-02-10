@@ -82,11 +82,6 @@
 :- dynamic factNOTMergeClasses/2 as incremental.
 :- dynamic factClassCallsMethod/2 as incremental.
 
-% This fact was a sub-computation of guessMergeClassesB that added a lot of overhead.  By
-% putting it in a separate fact, we can make it a trigger-based fact that is maintained with
-% low overhead.
-:- dynamic factMethodInVFTable/3 as incremental.
-
 % ============================================================================================
 % Dynamically rewritten facts involving classes.
 % ============================================================================================

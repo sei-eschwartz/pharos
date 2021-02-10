@@ -384,7 +384,7 @@ finalMethodProperty(Method, virtual, certain) :-
     % not be the most efficient thing to do here.
     factMethod(Method),
     once((symbolProperty(Method, virtual);
-          (factMethodInVFTable(_VFTable, _Offset, Method), not(symbolProperty(Method, virtual))))),
+          (reasonMethodInVFTable(_VFTable, _Offset, Method), not(symbolProperty(Method, virtual))))),
     find_current(Method, Class),
     not(worthlessClass(Class)),
     not(purecall(Method)).
