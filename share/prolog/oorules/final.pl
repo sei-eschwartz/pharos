@@ -324,6 +324,7 @@ finalMemberAccess(ClassID, Offset, Size, EvidenceList) :-
 % finalInheritance results.
 finalMember(ClassID, Offset, Sizes, certain) :-
     certainMemberOnExactClass(Class, Offset, EarlySize),
+    is_current(Class),
     not(worthlessClass(Class)),
     classIdentifier(Class, ClassID),
     setof(Size, certainMemberOnExactClass(Class, Offset, Size), UnsortedSizes),
