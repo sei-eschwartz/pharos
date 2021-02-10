@@ -258,3 +258,7 @@ monotonic(reasonVFTableBelongsToClass/5).
 monotonic(reasonVFTableSizeGTE/2).
 monotonic(reasonNOTVFTableEntry/3).
 monotonic(reasonClassHasNoBase/1).
+
+%% Local Variables:
+%% mode: prolog
+%% End:
