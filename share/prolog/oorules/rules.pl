@@ -2393,8 +2393,7 @@ reasonMergeClasses_J(VFTable1Class, VFTable2Class) :-
 :- table reasonNOTMergeClasses_C/2 as incremental.
 %:- table reasonNOTMergeClasses_D/2 as incremental.
 
-% trigger
-%:- table reasonNOTMergeClasses_E/6 as incremental.
+%:- table reasonNOTMergeClasses_E/2 as incremental.
 :- table reasonNOTMergeClasses_F/2 as incremental.
 :- table reasonNOTMergeClasses_G/2 as incremental.
 %:- table reasonNOTMergeClasses_H/2 as incremental.
@@ -2425,8 +2424,7 @@ reasonNOTMergeClasses_new(M1,M2) :-
 %   ;   reasonNOTMergeClasses_B(M1,M2)
     ;   reasonNOTMergeClasses_C(M1,M2)
 %   ;   reasonNOTMergeClasses_D(M1,M2)
-%       _E is now handled in trigger.pl
-%   ;   reasonNOTMergeClasses_E(M1,M2)
+%    ;   reasonNOTMergeClasses_E(M1,M2)
     ;   reasonNOTMergeClasses_F(M1,M2)
     ;   reasonNOTMergeClasses_G(M1,M2)
 %   ;   reasonNOTMergeClasses_H(M1,M2)
@@ -2495,36 +2493,35 @@ reasonNOTMergeClasses_C(Class1, Class2) :-
 % cannot be the same class.
 % PAPER: Merging-7
 % ED_PAPER_INTERESTING
-reasonNOTMergeClasses_E(Class1, Class2, Insn1, Method1, 0, VFTable1) :-
-    false,
-    % Two VFTables are written into the zero object offset in two different methods.  The
-    % sterotypical case is of course two compeltely unrelated classes.  This rule applies
-    % equally to constructors and destructors.  There were problems in Lite/oo with 0x402766 (a
-    % deleting destructor) and 0x40247e (a vbase destructor) when this rule was applied to
-    % arbitrary offsets.  It's a little unclear whether the better fix would be to permit
-    % arbitrary offsets and then filter the destructor specific case as an exception.  The case
-    % is related to the counter example blocked by checking for the opposite VFTableWrites.
-    factVFTableWrite(Insn1, Method1, 0, VFTable1),
-    factVFTableWrite(_Insn2, Method2, 0, VFTable2),
-    iso_dif(VFTable1, VFTable2),
-    find(Method1, Class1),
-    find(Method2, Class2),
-    % Those methods cannot be on the same class.
-    iso_dif(Class1, Class2),
-    % <Outdated>This rule handles symmetry correctly, so adding this constraint causes the rule
-    % to fire twice, but reduces the number of NOTMergeClass facts created by this
-    % rule.</Outdated>
-    % Because this is called from a trigger rule, the above comment is no longer true.
-    % <Outdated>Class1 < Class2,</Outdated>
-    % iso_dif(Method1, Method2),
-    % But one counter example that we need to protect against is the inlining of base class
-    % VFTable writes.  The intention here is very similar to factVFTableOverwrite, but without
-    % the complications of caring which value overwrote which other value.
-    not((factVFTableWrite(_Insn3, Method1, 0, VFTable2))),
-    not((factVFTableWrite(_Insn4, Method2, 0, VFTable1))),
-    % Debugging
-    logtraceln('~@~Q.', [not(dynFactNOTMergeClasses(Class1, Class2)),
-                         reasonNOTMergeClasses_E(Class1, Class2)]).
+%% reasonNOTMergeClasses_E(Class1, Class2) :-
+%%     % Two VFTables are written into the zero object offset in two different methods.  The
+%%     % sterotypical case is of course two compeltely unrelated classes.  This rule applies
+%%     % equally to constructors and destructors.  There were problems in Lite/oo with 0x402766 (a
+%%     % deleting destructor) and 0x40247e (a vbase destructor) when this rule was applied to
+%%     % arbitrary offsets.  It's a little unclear whether the better fix would be to permit
+%%     % arbitrary offsets and then filter the destructor specific case as an exception.  The case
+%%     % is related to the counter example blocked by checking for the opposite VFTableWrites.
+%%     factVFTableWrite(Insn1, Method1, 0, VFTable1),
+%%     factVFTableWrite(_Insn2, Method2, 0, VFTable2),
+%%     iso_dif(VFTable1, VFTable2),
+%%     find(Method1, Class1),
+%%     find(Method2, Class2),
+%%     % Those methods cannot be on the same class.
+%%     iso_dif(Class1, Class2),
+%%     % <Outdated>This rule handles symmetry correctly, so adding this constraint causes the rule
+%%     % to fire twice, but reduces the number of NOTMergeClass facts created by this
+%%     % rule.</Outdated>
+%%     % Because this is called from a trigger rule, the above comment is no longer true.
+%%     % <Outdated>Class1 < Class2,</Outdated>
+%%     % iso_dif(Method1, Method2),
+%%     % But one counter example that we need to protect against is the inlining of base class
+%%     % VFTable writes.  The intention here is very similar to factVFTableOverwrite, but without
+%%     % the complications of caring which value overwrote which other value.
+%%     not((factVFTableWrite(_Insn3, Method1, 0, VFTable2))),
+%%     not((factVFTableWrite(_Insn4, Method2, 0, VFTable1))),
+%%     % Debugging
+%%     logtraceln('~@~Q.', [not(dynFactNOTMergeClasses(Class1, Class2)),
+%%                          reasonNOTMergeClasses_E(Class1, Class2)]).
 
 % The constructors are certain to not be on the exact same class.  The reasoning is the inverse
 % of the "classes can't inherit from the same class twice" rules above.  If that rule is

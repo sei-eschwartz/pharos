@@ -177,6 +177,7 @@ incremental(reasonDerivedClass_C/3).
 incremental(reasonNOTConstructor/1).
 incremental(reasonVFTableSizeGTE/2).
 incremental(reasonNOTMergeClasses_I/2).
+incremental(reasonNOTMergeClasses_E/2).
 incremental(insanityClassSizeInvalid/0).
 incremental(rTTITDA2Class/2).
 incremental(insanityInheritanceLoop/0).
@@ -218,6 +219,7 @@ monotonic(reasonNOTConstructor_H/1).
 monotonic(reasonNOTMergeClasses_G/2).
 monotonic(reasonDerivedClass/3).
 monotonic(reasonNOTMergeClasses_F/2).
+monotonic(reasonNOTMergeClasses_E/2).
 monotonic(reasonNOTMergeClasses/2).
 monotonic(reasonMethod_B/1).
 monotonic(reasonClassSizeGTE_C/2).
