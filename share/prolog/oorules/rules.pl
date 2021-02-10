@@ -2401,11 +2401,8 @@ reasonMergeClasses_J(VFTable1Class, VFTable2Class) :-
 :- table reasonNOTMergeClasses_J/2 as incremental.
 :- table reasonNOTMergeClasses_K/2 as incremental.
 :- table reasonNOTMergeClasses_L/2 as incremental.
-
-% trigger
-%:- table reasonNOTMergeClasses_M/4 as incremental.
-% trigger
-%:- table reasonNOTMergeClasses_N/4 as incremental.
+:- table reasonNOTMergeClasses_M/2 as incremental.
+:- table reasonNOTMergeClasses_N/2 as incremental.
 
 :- table reasonNOTMergeClasses_O/2 as incremental.
 :- table reasonNOTMergeClasses_P/2 as incremental.
@@ -2431,10 +2428,8 @@ reasonNOTMergeClasses_new(M1,M2) :-
     ;   reasonNOTMergeClasses_I(M1,M2)
     ;   reasonNOTMergeClasses_K(M1,M2)
     ;   reasonNOTMergeClasses_L(M1,M2)
-%       _M is now handled in trigger.pl
-%   ;   reasonNOTMergeClasses_M(M1,M2)
-%       _N is now handled in trigger.pl
-%   ;   reasonNOTMergeClasses_N(M1,M2)
+    ;   reasonNOTMergeClasses_M(M1,M2)
+    ;   reasonNOTMergeClasses_N(M1,M2)
     ;   reasonNOTMergeClasses_O(M1,M2)
     ;   reasonNOTMergeClasses_P(M1,M2)
 %       _Q is now handled in trigger.pl
@@ -2625,32 +2620,30 @@ reasonNOTMergeClasses_L(Class1, Class2) :-
 
 % Because the sizes are incomaptible.
 % PAPER: Class size constraints
-% Called by trigger.pl
-reasonNOTMergeClasses_M(Class1, Class2, GTESize, LTESize) :-
-    factClassSizeGTE(Class1, GTESize),
-    factClassSizeLTE(Class2, LTESize),
+reasonNOTMergeClasses_M(Class1, Class2) :-
+    factClassSizeGTE(BigClass, GTESize),
+    factClassSizeLTE(SmallClass, LTESize),
     % This rule handles symmetry correctly, so adding this constraint causes the rule to fire
     % twice, but reduces the number of NOTMergeClass facts created by this rule.
-    Class1 < Class2,
     LTESize < GTESize,
+    sort_tuple((BigClass, SmallClass), (Class1, Class2)),
     % Debugging
     logtraceln('~@~Q.', [not(dynFactNOTMergeClasses(Class1, Class2)),
                          reasonNOTMergeClasses_M(Class1, Class2, GTESize, LTESize)]).
 
 % Because the sizes are incompatible.
 % PAPER: Class size constraints
-% Called by trigger.pl
 % Cory notes: To reduce the number of number of these that are generated needlessly, we might
 % want to add a contraint requiring that there be a reason to think that the classes were
 % candidates for a merge in the first place.  The current rule simply looks at sizes and
 % nothing else.  As a result this is the largest source of factNOTMergeClass facts.
-reasonNOTMergeClasses_N(Class1, Class2, GTESize, LTESize) :-
-    factClassSizeLTE(Class1, LTESize),
-    factClassSizeGTE(Class2, GTESize),
+reasonNOTMergeClasses_N(Class1, Class2) :-
+    factClassSizeLTE(SmallClass, LTESize),
+    factClassSizeGTE(BigClass, GTESize),
     % This rule handles symmetry correctly, so adding this constraint causes the rule to fire
     % twice, but reduces the number of NOTMergeClass facts created by this rule.
-    Class1 < Class2,
     GTESize > LTESize,
+    sort_tuple((SmallClass, BigClass), (Class1, Class2)),
     % Debugging
     logtraceln('~@~Q.', [not(dynFactNOTMergeClasses(Class1, Class2)),
                          reasonNOTMergeClasses_N(Class1, Class2, GTESize, LTESize)]).

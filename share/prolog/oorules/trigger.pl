@@ -44,28 +44,6 @@ trigger_hook(findint(A,B)) :-
 
 trigger_hook(_X).
 
-dispatchTrigger(factClassSizeLTE(Class1,LTESize), Out) :-
-    setof((Class1, Class2),
-          GTESize1^GTESize2^((reasonNOTMergeClasses_M(Class1, Class2, GTESize1, LTESize);
-                              reasonNOTMergeClasses_N(Class1, Class2, GTESize2, LTESize)),
-                             iso_dif(Class1, Class2),
-                             not(dynFactNOTMergeClasses(Class1, Class2)),
-                             loginfoln('Concluding ~Q.', factNOTMergeClasses(Class1, Class2))),
-          ClassSets),
-    maplist(try_assert_builder(factNOTMergeClasses), ClassSets, ActionSets),
-    Out = all(ActionSets).
-
-dispatchTrigger(factClassSizeGTE(Class1,GTESize), Out) :-
-    setof((Class1, Class2),
-          LTESize1^LTESize2^((reasonNOTMergeClasses_M(Class1, Class2, GTESize, LTESize1);
-                              reasonNOTMergeClasses_N(Class1, Class2, GTESize, LTESize2)),
-                             iso_dif(Class1, Class2),
-                             not(dynFactNOTMergeClasses(Class1, Class2)),
-                             loginfoln('Concluding ~Q.', factNOTMergeClasses(Class1, Class2))),
-          ClassSets),
-    maplist(try_assert_builder(factNOTMergeClasses), ClassSets, ActionSets),
-    Out = all(ActionSets).
-
 % reasonNOTMergeClasses_Q
 dispatchTrigger(findint(Method, _Class), Out) :-
     setof((Class1, Class2),

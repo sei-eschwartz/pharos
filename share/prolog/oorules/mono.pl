@@ -197,6 +197,8 @@ incremental(reasonNOTVFTableEntry_B/3).
 incremental(reasonMethod_N/1).
 incremental(reasonDerivedClassRelationship/2).
 incremental(reasonNOTMergeClasses_P/2).
+incremental(reasonNOTMergeClasses_M/2).
+incremental(reasonNOTMergeClasses_N/2).
 incremental(reasonClassHasNoBase/1).
 incremental(reasonNOTDerivedClass/3).
 
