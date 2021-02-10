@@ -56,6 +56,8 @@ incremental(reasonDerivedClass_B/3).
 incremental(reasonNOTConstructor_H/1).
 incremental(reasonNOTMergeClasses_G/2).
 incremental(reasonDerivedClass/3).
+incremental(reasonNOTMergeClasses_Q/2).
+incremental(reasonNOTMergeClasses_Qhelper/2).
 incremental(reasonNOTMergeClasses_C/2).
 incremental(reasonNOTMergeClasses_F/2).
 incremental(reasonNOTMergeClasses_A/2).

@@ -2432,8 +2432,7 @@ reasonNOTMergeClasses_new(M1,M2) :-
     ;   reasonNOTMergeClasses_N(M1,M2)
     ;   reasonNOTMergeClasses_O(M1,M2)
     ;   reasonNOTMergeClasses_P(M1,M2)
-%       _Q is now handled in trigger.pl
-%   ;   reasonNOTMergeClasses_Q(M1,M2)
+    ;   reasonNOTMergeClasses_Q(M1,M2)
     ;   reasonNOTMergeClasses_R(M1,M2)
     ).
 
@@ -2708,7 +2707,7 @@ reasonNOTMergeClasses_Qhelper(MethodWithSymbol, OtherMethod, ClassName) :-
 % If one method in a class has a symbol, all other methods in the class must also have a symbol
 % for the same class.  This is tabled separately so that it can call find/2 and be recomputed
 % when that changes.
-reasonNOTMergeClasses_Q(Class1Sorted, Class2Sorted, Method1, Method2) :-
+reasonNOTMergeClasses_Q(Class1Sorted, Class2Sorted) :-
     reasonNOTMergeClasses_Qhelper(Method1, Method2, ClassName),
 
     find(Method1, Class1),

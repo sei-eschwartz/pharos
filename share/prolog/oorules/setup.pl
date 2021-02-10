@@ -180,7 +180,6 @@ classArgs(factClassSizeLTE/2, 1).
 :- ensure_loaded(final).
 :- ensure_loaded(softcut).
 :- ensure_loaded(class).
-:- ensure_loaded(trigger).
 :- ensure_loaded(swihelp).
 
 % These predicates are just named differently in SWI Prolog.
@@ -200,29 +199,15 @@ incr_retract(T) :- retract(T).
 % progress.  Super fancy.
 delta_con(Con, Delta):- get_flag(Con, Y), Z is Y + Delta, set_flag(Con, Z).
 
-% trigger facts are not incremental, but regular facts are
-assert_helper(trigger_fact(X)) :-
-    !,
-    assertz(trigger_fact(X)).
 assert_helper(X) :-
     incr_asserta(X).
-retract_helper(trigger_fact(X)) :-
-    !,
-    retract(trigger_fact(X)),
-    % I believe that it is possible for class merging to re-introduce a trigger fact in between
-    % when it is retracted and when we backtrack.  If this happens, it introduces a choice
-    % point which messes up backtracking.  Thus we need another cut here.
-    !.
 retract_helper(X) :-
     % In SWI Prolog, retract can have open choice points as a result of index/hash collisions.
     once(incr_retract(X)).
 
 try_assert(X) :- X, !.
 try_assert(X) :- try_assert_real(X).
-try_assert_real(X) :- delta_con(numfacts, 1), trigger_hook(X), assert_helper(X).
-% If we try to assert a trigger_fact and it fails, ignore it.  The worst that happens is we
-% reason about the errant trigger which is no longer true.  We do need to fail to avoid creating a choice point when backtracking.
-try_assert_real(X) :- X = trigger_fact(_), !, fail.
+try_assert_real(X) :- delta_con(numfacts, 1), assert_helper(X).
 try_assert_real(X) :-
     logtraceln('Fail-Retracting ~Q...', [X]),
     delta_con(numfacts, -1),
@@ -250,9 +235,7 @@ fixupClasses(From, To, OldTerm, NewTerm) :-
     arg(Index, IntermediateOldTerm, From),
 
     % The IntermediateOldTerm must already be asserted, since we're going to end up retracting it.
-    ((IntermediateOldTerm, Trigger=false);
-     % OR we have a trigger fact that we haven't processed yet
-     (trigger_fact(IntermediateOldTerm), Trigger=true)),
+    IntermediateOldTerm,
 
     %logtraceln('Considering class fact ~Q/~Q index ~Q from ~Q to ~Q in predicate ~Q',
     %           [Pred, Arity, Index, From, To, IntermediateOldTerm]),
@@ -262,12 +245,12 @@ fixupClasses(From, To, OldTerm, NewTerm) :-
 
     % fixupClasses is only correct if From appears in one location.  E.g., factDerivedClass(X,
     % X, 0) will cause us to leave facts around that still contain From.
-    (   Trigger=false, (classArgs(Pred/Arity, OtherIndex), iso_dif(Index, OtherIndex), arg(OtherIndex, IntermediateOldTerm, To))
+    ((classArgs(Pred/Arity, OtherIndex), iso_dif(Index, OtherIndex), arg(OtherIndex, IntermediateOldTerm, To))
     ->
-        (logerrorln('An internal error occurred in OOAnalyzer. Please report this to the developers:~n~Q', (IntermediateOldTerm, Trigger)),
-         throw_with_backtrace(error(system_error(fixupClasses, IntermediateOldTerm, Trigger))))
+        (logerrorln('An internal error occurred in OOAnalyzer. Please report this to the developers:~n~Q', IntermediateOldTerm),
+         throw_with_backtrace(error(system_error(fixupClasses, IntermediateOldTerm))))
     ;
-        true),
+    true),
 
     % Now we'll break it apart.
     IntermediateOldTerm =.. IntermediateOldTermElements,
@@ -287,8 +270,7 @@ fixupClasses(From, To, OldTerm, NewTerm) :-
     % Combine NetTermElements back into a predicate that we can assert.
     IntermediateNewTerm =.. IntermediateNewTermElements,
 
-    ((Trigger=false, OldTerm=IntermediateOldTerm, NewTerm=IntermediateNewTerm);
-     (Trigger=true, OldTerm=trigger_fact(IntermediateOldTerm), NewTerm=trigger_fact(IntermediateNewTerm))).
+    OldTerm=IntermediateOldTerm, NewTerm=IntermediateNewTerm.
 
 logtraceClasses :-
     classArgs(Pred/Arity, Index),
@@ -393,8 +375,6 @@ reasonForward :-
           concludeClassHasUnknownBase(Out);
           concludeReusedImplementation(Out);
           concludeNOTMergeClasses(Out);
-          % We should probably be more intelligent about how we order here for trigger
-          concludeTrigger(Out);
           concludeMergeVFTables(Out);
           concludeMergeClasses(Out);
           concludeClassCallsMethod(Out)
