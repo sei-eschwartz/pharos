@@ -26,11 +26,7 @@ insanityVFTableOnTwoClasses(Out) :-
     iso_dif(Class1, Class2),
 
     Out = (
-        logwarnln('Consistency checks failed.'),
-        logwarn('insanityVFTableOnTwoClasses failed:'),
-        logwarn(' VFTable=~Q', [VFTable]),
-        logwarn(' Method1=~Q', [Method1]),
-        logwarnln(' Method2=~Q', [Method2])
+        logwarnln(true, 'insanityVFTableOnTwoClasses failed: VFTable=~Q Method1=~Q Method2=~Q', [VFTable, Method1, Method2])
     ).
 
 % A constructor may not be virtual.
@@ -42,11 +38,7 @@ insanityConstructorInVFTable(Out) :-
     factConstructor(Constructor),
 
     Out = (
-        logwarnln('Consistency checks failed.'),
-        logwarn('A constructor may not be virtual:'),
-        logwarn(' VFTable=~Q', [VFTable]),
-        logwarn(' Offset=~Q', [Offset]),
-        logwarnln(' Ctor=~Q', [Constructor])
+        logwarnln(true, 'A constructor may not be virtual: VFTable=~Q Offset=~Q Ctor=~Q', [VFTable, Offset, Constructor])
     ).
 
 % A class may not be derived from itself (even with intermediate classes).
@@ -57,10 +49,7 @@ insanityInheritanceLoop(Out) :-
     reasonDerivedClassRelationship(BaseClass, DerivedClass),
 
     Out = (
-        logwarnln('Consistency checks failed.'),
-        logwarn('A class may not be derived from itself:'),
-        logwarn(' Class1=~Q', [BaseClass]),
-        logwarnln(' Class2=~Q', [DerivedClass])
+        logwarnln(true, 'A class may not be derived from itself: Class1=~Q Class2=~Q', [BaseClass, DerivedClass])
     ).
 
 % Classes may not have an invalid size.
@@ -73,11 +62,7 @@ insanityClassSizeInvalid(Out) :-
     LTESize < GTESize,
 
     Out = (
-        logwarnln('Consistency checks failed.'),
-        logwarn('insanityClassSizeInvalid failed:'),
-        logwarn(' Class=~Q', [Class]),
-        logwarn(' LTESize=~Q', [LTESize]),
-        logwarnln(' GTESize=~Q', [GTESize])
+        logwarnln(true, 'insanityClassSizeInvalid failed: Class=~Q LTESize=~Q GTESize=~Q', [Class, LTESize, GTESize])
     ).
 
 % Roughly speaking, inheritance can only occur in an object when it is at offset zero, or there
@@ -98,11 +83,7 @@ insanityInheritanceAfterNonInheritance(Out) :-
     ),
 
     Out = (
-        logwarnln('Consistency checks failed.'),
-        logwarn('insanityInheritanceAfterInheritance failed:'),
-        logwarn(' DerivedClass=~Q', [DerivedClass]),
-        logwarn(' BaseClass=~Q', [BaseClass]),
-        logwarnln(' Offset=~Q', [Offset])
+        logwarnln(true, 'insanityInheritanceAfterInheritance failed: DerivedClass=~Q BaseClass=~Q Offset=~Q', [DerivedClass, BaseClass, Offset])
     ).
 
 % VFTables may not have an invalid size.
@@ -116,11 +97,7 @@ insanityVFTableSizeInvalid(Out) :-
     LTESize < GTESize,
 
     Out = (
-        logwarnln('Consistency checks failed.'),
-        logwarn('insanityVFTableSizeInvalid failed:'),
-        logwarn(' VFTable=~Q', [VFTable]),
-        logwarn(' LTESize=~Q', [LTESize]),
-        logwarnln(' GTESize=~Q', [GTESize])
+        logwarnln(true, 'insanityVFTableSizeInvalid failed: VFTable=~Q LTESize=~Q GTESize=~Q', [VFTable, LTESize, GTESize])
     ).
 
 % The size of an embdded class may not exceed the size of the class it's in.
@@ -136,13 +113,7 @@ insanityEmbeddedObjectLarger(Out) :-
     OuterSize < ComputedSize,
 
     Out = (
-        logwarnln('Consistency checks failed.'),
-        logwarn('insanityEmbeddedObjectLarger failed:'),
-        logwarn(' O_Class=~Q', [OuterClass]),
-        logwarn(' O_Offset=~Q', [Offset]),
-        logwarn(' O_Size=~Q', [OuterSize]),
-        logwarn(' I_Class=~Q', [InnerClass]),
-        logwarnln(' I_Size=~Q', [InnerSize])
+        logwarnln(true, 'insanityEmbeddedObjectLarger failed: O_Class=~Q O_Offset=~Q O_Size=~Q I_Class=~Q I_Size=~Q', [OuterClass, Offset, OuterSize, InnerClass, InnerSize])
     ).
 
 :- table insanityObjectCycle/1 as incremental.
@@ -151,10 +122,7 @@ insanityObjectCycle(Out) :-
     reasonClassRelationship(Class2, Class1),
 
     Out = (
-        logwarnln('Consistency checks failed.'),
-        logwarn('insanityObjectCycle failed:'),
-        logwarn(' Class1=~Q', [Class1]),
-        logwarnln(' Class2=~Q', [Class2])
+        logwarnln(true, 'insanityObjectCycle failed: Class1=~Q Class2=~Q', [Class1, Class2])
     ).
 
 % A member may not extend past the end of the object.
@@ -167,12 +135,7 @@ insanityMemberPastEndOfObject(Out) :-
     ComputedSize > ObjectSize,
 
     Out = (
-        logwarnln('Consistency checks failed.'),
-        logwarn('insanityMemberPastEndObject failed:'),
-        logwarn(' Class=~Q', [Class]),
-        logwarn(' Offset=~Q', [Offset]),
-        logwarn(' Size=~Q', [Size]),
-        logwarnln(' ObjectSize=~Q', [ObjectSize])
+        logwarnln(true, 'insanityMemberPastEndObject failed: Class=~Q Offset=~Q Size=~Q ObjectSize=~Q', [Class, Offset, Size, ObjectSize])
     ).
 
 % The size of the virtual function table on a derived class may not be less than the size of
@@ -191,8 +154,8 @@ insanityBaseVFTableLarger(Out) :-
     DerivedSize < BaseSize,
 
     Out = (
-        logwarnln('Consistency checks failed.'),
-        logwarnln('insanityBaseVFTableLarger failed:')
+        logwarnln(true, 'insanityBaseVFTableLarger failed: Derived{Class,VFTable,Size}=~Q,~Q,~Q Base{Class,VFTable,Size}=~Q,~Q,~Q',
+                  [DerivedClass, DerivedVFTable, DerivedSize, BaseClass, BaseVFTable, BaseSize])
     ).
 
 % A method may not be both a constructor and not a constructor.
@@ -202,9 +165,7 @@ insanityConstructorAndNotConstructor(Out) :-
     factNOTConstructor(Method),
 
     Out = (
-        logwarnln('Consistency checks failed.'),
-        logwarnln('A method may not be a constructor and not a constructor:'),
-        logwarnln(' Method=~Q', [Method])
+        logwarnln(true, 'A method may not be a constructor and not a constructor: Method=~Q', [Method])
     ).
 
 % A method may not be both a constructor and a real destructor.
@@ -215,9 +176,7 @@ insanityConstructorAndRealDestructor(Out) :-
     factRealDestructor(Method),
 
     Out = (
-        logwarnln('Consistency checks failed.'),
-        logwarnln('A method may not be a constructor and real destructor:'),
-        logwarnln(' Method=~Q', [Method])
+        logwarnln(true, 'A method may not be a constructor and real destructor: Method=~Q', [Method])
     ).
 
 
@@ -229,9 +188,7 @@ insanityConstructorAndDeletingDestructor(Out) :-
     factDeletingDestructor(Method),
 
     Out = (
-        logwarnln('Consistency checks failed.'),
-        logwarnln('A method may not be a constructor and deleting destructor:'),
-        logwarnln(' Method=~Q', [Method])
+        logwarnln(true, 'A method may not be a constructor and deleting destructor: Method=~Q', [Method])
     ).
 
 % A class may not have two real destructors.
@@ -245,11 +202,7 @@ insanityTwoRealDestructorsOnClass(Out) :-
     find(Destructor2, Class),
 
     Out = (
-        logwarnln('Consistency checks failed.'),
-        logwarnln('A class may not have more than one real destructor:'),
-        logwarn(' Class=~Q', [Class]),
-        logwarn(' Dtor1=~Q', [Destructor1]),
-        logwarnln(' Dtor2=~Q', [Destructor2])
+        logwarnln(true, 'A class may not have more than one real destructor: Class=~Q Dtor1=~Q Dtor2=~Q', [Class, Destructor1, Destructor2])
     ).
 
 % A method cannot be both merged and not merged into a class.
@@ -259,11 +212,7 @@ insanityContradictoryMerges(Out) :-
     dynFactNOTMergeClasses(Method1, Method2),
 
     Out = (
-        logwarnln('failed.'),
-        logwarnln('Consistency checks failed.'),
-        logwarn('Contradictory information about merging classes:'),
-        logwarn(' Method1=~Q', [Method1]),
-        logwarnln(' Method2=~Q', [Method2])
+        logwarnln(true, 'Contradictory information about merging classes: Method1=~Q Method2=~Q', [Method1, Method2])
     ).
 
 :- table insanityContradictoryNOTConstructor/1 as incremental.
@@ -272,9 +221,7 @@ insanityContradictoryNOTConstructor(Out) :-
     factConstructor(M),
 
     Out = (
-        logwarnln('failed.'),
-        logwarnln('Consistency checks failed.'),
-        logwarnln('Contradictory information about constructor: factConstructor(~Q) but reasonNOTConstructor(~Q)', [M, M])
+        logwarnln(true, 'Contradictory information about constructor: factConstructor(~Q) but reasonNOTConstructor(~Q)', [M, M])
     ).
 
 
@@ -283,9 +230,7 @@ insanityContradictoryNOTConstructor(Out) :-
     factNOTConstructor(M),
 
     Out = (
-        logwarnln('failed.'),
-        logwarnln('Consistency checks failed.'),
-        logwarnln('Contradictory information about constructor: factNOTConstructor(~Q) but reasonConstructor(~Q)', [M, M])
+        logwarnln(true, 'Contradictory information about constructor: factNOTConstructor(~Q) but reasonConstructor(~Q)', [M, M])
     ).
 
 
@@ -295,8 +240,7 @@ insanityEmbeddedAndNot(Out) :-
     factNOTEmbeddedObject(A, B, C),
 
     Out = (
-        logwarnln('Consistency checks failed.'),
-        logwarnln('Contradictory information about embedded objects: ~Q',
+        logwarnln(true, 'Contradictory information about embedded object: ~Q',
                   factEmbeddedObject(A, B, C))
     ).
 
@@ -321,6 +265,7 @@ sanityChecks(Out) :-
 sanityChecks :-
     sanityChecks(Out)
     ->
+        logwarnln('Consistency checks failed.'),
         call(Out),
         fail
     ;
