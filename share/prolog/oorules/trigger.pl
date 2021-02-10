@@ -44,17 +44,6 @@ trigger_hook(findint(A,B)) :-
 
 trigger_hook(_X).
 
-dispatchTrigger(factVFTableWrite(A,Method1,C,D), Out) :-
-    find(Method1, Class1),
-    setof((Class1, Class2),
-          (reasonNOTMergeClasses_E(Class1, Class2, A, Method1, C, D),
-           iso_dif(Class1, Class2),
-           not(dynFactNOTMergeClasses(Class1, Class2)),
-           loginfoln('Concluding ~Q.', factNOTMergeClasses(Class1, Class2))),
-          ClassSets),
-    maplist(try_assert_builder(factNOTMergeClasses), ClassSets, ActionSets),
-    Out = all(ActionSets).
-
 dispatchTrigger(factClassSizeLTE(Class1,LTESize), Out) :-
     setof((Class1, Class2),
           GTESize1^GTESize2^((reasonNOTMergeClasses_M(Class1, Class2, GTESize1, LTESize);
