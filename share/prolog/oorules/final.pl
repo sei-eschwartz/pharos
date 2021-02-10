@@ -236,6 +236,8 @@ finalVBTableEntry(VBTable, Offset, Value) :-
 % class (via an inheritance relationship), for that relationship see finalInheritance().
 finalEmbeddedObject(OuterClass, Offset, EmbeddedClass, likely) :-
     factEmbeddedObject(OuterClass1, EmbeddedClass1, Offset),
+    is_current(OuterClass1),
+    is_current(EmbeddedClass1),
     classIdentifier(OuterClass1, OuterClass),
     classIdentifier(EmbeddedClass1, EmbeddedClass),
     iso_dif(OuterClass, EmbeddedClass).
@@ -249,6 +251,8 @@ finalEmbeddedObject(OuterClass, Offset, EmbeddedClass, likely) :-
 % virtual function table.
 finalInheritance(DerivedClassID, BaseClassID, ObjectOffset, VFTableOrNull, false) :-
     factDerivedClass(DerivedClass, BaseClass, ObjectOffset),
+    is_current(DerivedClass),
+    is_current(BaseClass),
 
     % The following line stops us from reporting inheritances from A to C if there is also a
     % relation from A to B and B to C.  We have this because virtual inheritance is known to
