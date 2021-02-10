@@ -93,7 +93,7 @@ classIdentifier(Method, ID) :-
         ID is RealDestructor
     ;
     (
-        findallMethods(Class, MethodSet),
+        findallMethods_current(Class, MethodSet),
         %logwarnln('trying to pick class ID from method set1 ...'),
         %logwarnln('picking class ID from method set: ~Q', MethodSet),
         setof(C, (member(C, MethodSet), factConstructor(C)), ConstructorSet),
@@ -105,7 +105,7 @@ classIdentifier(Method, ID) :-
     -> ID is MinimumConstructor
     ;
     (
-        findallMethods(Method, MethodSet),
+        findallMethods_current(Method, MethodSet),
         %logwarnln('trying to pick class ID from method set2 ...'),
         %logwarnln('picking class ID from method set: ~Q', MethodSet),
         min_list(MethodSet, MinimumMethod),
@@ -164,7 +164,7 @@ worthlessClass(Class) :-
     logdebugln('Rejecting worthless finalClass ~Q', [Class]).
 
 worthlessClass(Class) :-
-    findall(Class, [Method]),
+    findall_current(Class, [Method]),
     purecall(Method),
     !,
 
@@ -177,7 +177,7 @@ finalFileInfo(FileMD5, Filename) :-
 % This final result defines the existance of a class.   More details in results.txt.
 %:- finalClass/6 as incremental.
 finalClass(ClassID, VFTableOrNull, CSize, LSize, RealDestructorOrNull, MethodList) :-
-    class(Class),
+    class_current(Class),
     not(worthlessClass(Class)),
     classIdentifier(Class, ClassID),
     % If there's a certain VFTableWrite, use the VFTable value from it.  On the other hand if
@@ -193,10 +193,10 @@ finalClass(ClassID, VFTableOrNull, CSize, LSize, RealDestructorOrNull, MethodLis
     reasonMinimumPossibleClassSize(Class, CSize),
     LSize is CSize,
     % Optionally find the the real destructor as well.
-    ((factRealDestructor(RealDestructor),
-      find_current(RealDestructor, Class))
+    ((find_current(RealDestructor, Class),
+      factRealDestructor(RealDestructor))
      -> RealDestructorOrNull=RealDestructor; RealDestructorOrNull=0),
-    findallMethods(Class, UnsortedMethodList),
+    findallMethods_current(Class, UnsortedMethodList),
     sort(UnsortedMethodList, MethodList).
 
 % --------------------------------------------------------------------------------------------

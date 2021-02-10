@@ -75,15 +75,19 @@ findMethod_current(M, R) :-
     find_current(M, R),
     factMethod(M).
 
-% XXX: I think this is ok for current?
-
 % Find all objects on M's class
 findall(M, S) :-
     find(M, R),
     setof(X, find(X, R), S).
 
+findall_current(M, S) :-
+    find_current(M, R),
+    setof(X, find(X, R), S).
+
 % Filter out non-methods...
 findallMethods(C, O) :- findall(C, L), include(factMethod, L, O).
+
+findallMethods_current(C, O) :- findall_current(C, L), include(factMethod, L, O).
 
 numberOfMethods(C, O) :- findallMethods(C, L),
                          length(L, O).
@@ -91,8 +95,15 @@ numberOfMethods(C, O) :- findallMethods(C, L),
 findAllClasses(S) :-
     setof(C, M^find(M, C), S).
 
+findAllClasses_current(S) :-
+    setof(C, M^find_current(M, C), S).
+
 class(C) :-
     findAllClasses(S),
+    member(C, S).
+
+class_current(C) :-
+    findAllClasses_current(S),
     member(C, S).
 
 /* Local Variables:   */
