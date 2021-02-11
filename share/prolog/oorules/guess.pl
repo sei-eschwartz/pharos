@@ -1109,7 +1109,7 @@ guessMergeClasses(Out) :-
 guessMergeClassesG(Class1, Class2) :-
     % A constructor/destructor installs a VFTable
     factVFTableWrite(_Insn, Method, Offset, VFTable),
-    find(Method, Class1),
+    find_current(Method, Class1),
 
     % This guessing rule is only for destructors, because VFTableOverwrite logic works for
     % constructors (see reasonVFTableBelongsToClass).
@@ -1120,7 +1120,7 @@ guessMergeClassesG(Class1, Class2) :-
           Insn2^Offset2^Method2^(
               factVFTableWrite(Insn2, Method2, Offset2, VFTable),
               not(factVFTableOverwrite(Method2, _OtherVFTable, VFTable, Offset2)),
-              find(Method2, Class),
+              find_current(Method2, Class),
               iso_dif(Class1, Class)),
           ClassSet),
 
