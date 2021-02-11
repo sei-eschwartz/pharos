@@ -3,6 +3,10 @@
 % Guessing rules.
 % ============================================================================================
 
+% TODO
+% Should we use minof everywhere?
+% Many cuts in this file are useless.
+
 :- use_module(library(apply), [maplist/2]).
 :- use_module(library(lists), [member/2, append/3]).
 
@@ -954,8 +958,10 @@ guessMergeClasses(Out) :-
     minof((Class, Method),
           guessMergeClassesB(Class, Method)),
     !,
-    OneTuple=[(Class, Method)],
-    Out = tryBinarySearch(tryMergeClasses, tryNOTMergeClasses, OneTuple, 1).
+
+    tryOrNot(tryMergeClasses(Class, Method),
+             tryNOTMergeClasses(Class, Method),
+             Out).
 
 % A Derived class calls a method.  Does that method belong to the base or derived class?
 
@@ -1007,8 +1013,10 @@ guessMergeClasses(Out) :-
     minof((Class, Method),
           guessMergeClassesC1(Class, Method)),
     !,
-    OneTuple=[(Class, Method)],
-    Out = tryBinarySearch(tryMergeClasses, tryNOTMergeClasses, OneTuple, 1).
+
+    tryOrNot(tryMergeClasses(Class, Method),
+             tryNOTMergeClasses(Class, Method),
+             Out).
 
 % If the called method installs a base VFTable, guess that the method belongs on the base class.
 guessMergeClassesC2(BaseClass, CalledClass) :-
@@ -1032,8 +1040,10 @@ guessMergeClasses(Out) :-
     minof((Class, Method),
           guessMergeClassesC2(Class, Method)),
     !,
-    OneTuple=[(Class, Method)],
-    Out = tryBinarySearch(tryMergeClasses, tryNOTMergeClasses, OneTuple, 1).
+
+    tryOrNot(tryMergeClasses(Class, Method),
+             tryNOTMergeClasses(Class, Method),
+             Out).
 
 % If we haven't made a guess about the called method, guess that it is on the derived class.
 guessMergeClassesC3(DerivedClass, CalledClass) :-
@@ -1052,8 +1062,10 @@ guessMergeClasses(Out) :-
     minof((Class, Method),
           guessMergeClassesC3(Class, Method)),
     !,
-    OneTuple=[(Class, Method)],
-    Out = tryBinarySearch(tryMergeClasses, tryNOTMergeClasses, OneTuple, 1).
+
+    tryOrNot(tryMergeClasses(Class, Method),
+             tryNOTMergeClasses(Class, Method),
+             Out).
 
 % If we still haven't made a guess about the called method, guess that it is on the base class.
 guessMergeClassesC4(BaseClass, CalledClass) :-
@@ -1072,8 +1084,10 @@ guessMergeClasses(Out) :-
     minof((Class, Method),
           guessMergeClassesC4(Class, Method)),
     !,
-    OneTuple=[(Class, Method)],
-    Out = tryBinarySearch(tryMergeClasses, tryNOTMergeClasses, OneTuple, 1).
+
+    tryOrNot(tryMergeClasses(Class, Method),
+             tryNOTMergeClasses(Class, Method),
+             Out).
 
 
 % Try guessing that a VFTable belongs to a method.
@@ -1138,11 +1152,13 @@ guessMergeClassesG(Class1, Class2) :-
 
 guessMergeClasses(Out) :-
     reportFirstSeen('guessMergeClassesG'),
-    minof((Class1, Class2),
-          guessMergeClassesG(Class1, Class2)),
+    minof((Class, Method),
+          guessMergeClassesG(Class, Method)),
     !,
-    OneTuple=[(Class1, Class2)],
-    Out = tryBinarySearch(tryMergeClasses, tryNOTMergeClasses, OneTuple, 1).
+
+    tryOrNot(tryMergeClasses(Class, Method),
+             tryNOTMergeClasses(Class, Method),
+             Out).
 
 
 checkMergeClasses(Method1, Method2) :-
@@ -1159,7 +1175,6 @@ checkMergeClasses(Method1, Method2) :-
     not(reasonClassRelationship(Class1, Class2)),
     not(reasonClassRelationship(Class2, Class1)).
 
-tryMergeClasses((Method1, Method2)) :- tryMergeClasses(Method1, Method2).
 % If we are merging classes that have already been merged, just ignore it.
 tryMergeClasses(Method1, Method2) :-
     find_current(Method1, Class),
@@ -1167,6 +1182,7 @@ tryMergeClasses(Method1, Method2) :-
     logerrorln('tryMergeClasses on same class'),
     throw_with_backtrace(error(system_error(tryMergeClasses, Method1, Method2, Class))),
     !.
+
 tryMergeClasses(Method1, Method2) :-
     countGuess,
     find_current(Method1, Class1),
@@ -1175,7 +1191,6 @@ tryMergeClasses(Method1, Method2) :-
     mergeClasses(Class1, Class2),
     try_assert(guessedMergeClasses(Class1, Class2)).
 
-tryNOTMergeClasses((Class1, Class2)) :- tryNOTMergeClasses(Class1, Class2).
 tryNOTMergeClasses(Method1, Method2) :-
     countGuess,
     find_current(Method1, Class1),
@@ -1196,17 +1211,9 @@ guessRealDestructor(Out) :-
            doNotGuessHelper(factRealDestructor(Method),
                             factNOTRealDestructor(Method)))),
 
-    Out = tryOrNOTRealDestructor(Method).
-
-%% tryOrNOTRealDestructor(Method) :-
-%%     likelyDeletingDestructor(DeletingDestructor, Method),
-%%     % Require that we've already confirmed the deleting destructor.
-%%     factDeletingDestructor(DeletingDestructor),
-%%     doNotGuessHelper(factRealDestructor(Method),
-%%                      factNOTRealDestructor(Method)),
-%%     countGuess,
-%%     (tryRealDestructor(Method);
-%%      tryNOTRealDestructor(Method)).
+    tryOrNot(tryRealDestructor(Method),
+             tryNOTRealDestructor(Method),
+             Out).
 
 % Establish that the candidate meets minimal requirements.
 minimalRealDestructor(Method) :-
@@ -1239,33 +1246,38 @@ guessFinalRealDestructor(Out) :-
     minimalRealDestructor(Method),
     callTarget(_Insn, OtherDestructor, Method),
     factDeletingDestructor(OtherDestructor),
-    Out = tryOrNOTRealDestructor(Method).
+
+    tryOrNot(tryRealDestructor(Method),
+             tryNOTRealDestructor(Method),
+             Out).
 
 % Prioritize methods that call other real destructors.
 guessFinalRealDestructor(Out) :-
     minimalRealDestructor(Method),
     callTarget(_Insn, Method, OtherDestructor),
     factRealDestructor(OtherDestructor),
-    Out = tryOrNOTRealDestructor(Method).
+
+    tryOrNot(tryRealDestructor(Method),
+             tryNOTRealDestructor(Method),
+             Out).
 
 % Prioritize methods that do not call delete to avoid confusion with deleting destructors.
 % This eliminates a couple of false positives in the fast test suite.
 guessFinalRealDestructor(Out) :-
     minimalRealDestructor(Method),
     not(insnCallsDelete(_Insn, Method, _SV)),
-    Out = tryOrNOTRealDestructor(Method).
+
+    tryOrNot(tryRealDestructor(Method),
+             tryNOTRealDestructor(Method),
+             Out).
 
 % Guess if it meets the minimal criteria.
 guessFinalRealDestructor(Out) :-
     minimalRealDestructor(Method),
-    Out = tryOrNOTRealDestructor(Method).
 
-tryOrNOTRealDestructor(Method) :-
-    countGuess,
-    tryRealDestructor(Method);
-    tryNOTRealDestructor(Method);
-    logwarnln('Something is wrong upstream: ~Q.', invalidRealDestructor(Method)),
-    fail.
+    tryOrNot(tryRealDestructor(Method),
+             tryNOTRealDestructor(Method),
+             Out).
 
 tryRealDestructor(Method) :-
     loginfoln('Guessing ~Q.', factRealDestructor(Method)),
@@ -1297,13 +1309,14 @@ likelyAVirtualDestructor(Method) :-
 
 guessDeletingDestructor(Out) :-
     reportFirstSeen('guessDeletingDestructor'),
-    setof(Method,
-          (likelyAVirtualDestructor(Method),
-           doNotGuessHelper(factDeletingDestructor(Method),
-                            factNOTDeletingDestructor(Method))),
-          MethodSet),
+    likelyAVirtualDestructor(Method),
+     doNotGuessHelper(factDeletingDestructor(Method),
+                      factNOTDeletingDestructor(Method)),
     !,
-    Out = tryBinarySearch(tryDeletingDestructor, tryNOTDeletingDestructor, MethodSet).
+
+    tryOrNot(tryDeletingDestructor(Method),
+             tryNOTDeletingDestructor(Method),
+             Out).
 
 guessDeletingDestructor(Out) :-
     minof(Method,
@@ -1311,18 +1324,10 @@ guessDeletingDestructor(Out) :-
            doNotGuessHelper(factDeletingDestructor(Method),
                             factNOTDeletingDestructor(Method)))),
     !,
-    Out = tryOrNOTDeletingDestructor(Method).
 
-tryOrNOTDeletingDestructor(Method) :-
-    %likelyDeletingDestructor(Method, _RealDestructor),
-    doNotGuessHelper(factDeletingDestructor(Method),
-                     factNOTDeletingDestructor(Method)),
-    (
-        tryDeletingDestructor(Method);
-        tryNOTDeletingDestructor(Method);
-        logwarnln('Something is wrong upstream: ~Q.', invalidDeletingDestructor(Method)),
-        fail
-    ).
+    tryOrNot(tryDeletingDestructor(Method),
+             tryNOTDeletingDestructor(Method),
+             Out).
 
 guessFinalDeletingDestructor(Out) :-
     reportFirstSeen('guessFinalDeletingDestructor'),
@@ -1341,7 +1346,9 @@ guessFinalDeletingDestructor(Out) :-
        )),
 
     !,
-    Out = tryOrNOTDeletingDestructor(Method).
+    tryOrNot(tryDeletingDestructor(Method),
+             tryNOTDeletingDestructor(Method),
+             Out).
 
 %
 guessFinalDeletingDestructor(Out) :-
@@ -1372,7 +1379,9 @@ guessFinalDeletingDestructor(Out) :-
     iso_dif(Entry1, Entry2),
 
     !,
-    Out = tryOrNOTDeletingDestructor(Method).
+    tryOrNot(tryDeletingDestructor(Method),
+             tryNOTDeletingDestructor(Method),
+             Out).
 
 tryDeletingDestructor(Method) :-
     loginfoln('Guessing ~Q.', factDeletingDestructor(Method)),
