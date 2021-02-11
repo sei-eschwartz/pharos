@@ -449,13 +449,14 @@ reasoningLoop :-
     if_(tryAGuess(Out),
         (is_list(Out)
         ->
-            % If Out is a list of goals (eventually it should always be), then we try them in
+            % If Out is a list of goals (it should always be), then we try them in
             % order until we find one that works.
             member(Guess, Out),
             guessReasonAndCheck(Guess)
         ;
         % If Out is a legacy goal, just call it.
-        guessReasonAndCheck(Out)),
+        throw_with_backtrace(error(system_error(badGuess, Out)))),
+        %guessReasonAndCheck(Out)),
         % If we can't guess, exit with true.  Cut so we don't trigger the second rule.
         (!, loginfoln('reasoningLoop: There are no possible guesses remaining'))).
 
