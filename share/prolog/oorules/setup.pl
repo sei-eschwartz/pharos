@@ -208,20 +208,10 @@ retract_helper(X) :-
 try_assert(X) :- X, !.
 try_assert(X) :- try_assert_real(X).
 try_assert_real(X) :- delta_con(numfacts, 1), assert_helper(X).
-try_assert_real(X) :-
-    logtraceln('Fail-Retracting ~Q...', [X]),
-    delta_con(numfacts, -1),
-    retract_helper(X),
-    fail.
 
 try_retract(X) :- not(X), !.
 try_retract(X) :- try_retract_real(X).
 try_retract_real(X) :- delta_con(numfacts, -1), retract_helper(X).
-try_retract_real(X) :-
-    logtraceln('Fail-Asserting ~Q...', [X]),
-    delta_con(numfacts, 1),
-    assert_helper(X),
-    fail.
 
 % This predicate looks for arguments that are defined in classArgs as representing classes.  It
 % then looks for any argument that is equal to 'From', and modifies it to 'To' instead.  The
