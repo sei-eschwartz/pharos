@@ -165,18 +165,11 @@ guessVFTable(Out) :-
     reportFirstSeen('guessVFTable'),
     % See the commentary at possibleVFTable for how this goal constrains our guesses (and
     % ordering).
-    osetof(VFTable,
-           (possibleVFTable(VFTable),
-            doNotGuessHelper(factVFTable(VFTable),
-                             factNOTVFTable(VFTable))),
-           VFTableSet),
-    Out = tryBinarySearch(tryVFTable, tryNOTVFTable, VFTableSet).
+    possibleVFTable(VFTable),
+    doNotGuessHelper(factVFTable(VFTable),
+                     factNOTVFTable(VFTable)),
 
-tryOrNOTVFTable(VFTable) :-
-    tryVFTable(VFTable);
-    tryNOTVFTable(VFTable);
-    logwarnln('Something is wrong upstream: ~Q.', invalidVFTable(VFTable)),
-    fail.
+    tryOrNot(tryVFTable(VFTable), tryNOTVFTable(VFTable), Out).
 
 tryVFTable(VFTable) :-
     countGuess,
@@ -201,13 +194,10 @@ guessVBTable(Out) :-
     factMethod(Method),
     doNotGuessHelper(factVBTable(VBTable),
                      factNOTVBTable(VBTable)),
-    Out = (
-        countGuess,
-        tryVBTable(VBTable);
-        tryNOTVBTable(VBTable);
-        logwarnln('Something is wrong upstream: ~Q.', invalidVBTable(VBTable)),
-        fail
-    ).
+
+    tryOrNot(tryVBTable(VBTable),
+             tryNOTVBTable(VBTable),
+             Out).
 
 tryVBTable(VBTable) :-
     loginfoln('Guessing ~Q.', factVBTable(VBTable)),
