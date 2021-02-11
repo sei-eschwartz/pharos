@@ -302,6 +302,8 @@ tryNOTVFTableEntry(VFTable, Offset, Entry) :-
 guessDerivedClass(DerivedClass, BaseClass, Offset) :-
     reportFirstSeen('guessDerivedClass'),
     factObjectInObject(DerivedClass, BaseClass, Offset),
+    is_current(DerivedClass),
+    is_current(BaseClass),
     % Over time we've had a lot of different theories about whether we intended to limit this
     % guess to offset zero.  This logic says that the offset must either be zero, or have a
     % proven instance of inheritance at a lower address already.  This isn't strictly correct,
@@ -663,7 +665,7 @@ tryNOTConstructor(Method) :-
 % ED_PAPER_INTERESTING
 guessClassHasNoBaseB(Class) :-
     factConstructor(Constructor),
-    find(Constructor, Class),
+    find_current(Constructor, Class),
 
     factVFTableWrite(_Insn1, Constructor, 0, VFTable),
     not((
@@ -687,7 +689,7 @@ guessClassHasNoBase(Out) :-
 % ED_PAPER_INTERESTING
 guessClassHasNoBaseC(Class) :-
     factConstructor(Constructor),
-    find(Constructor, Class),
+    find_current(Constructor, Class),
     not(factDerivedClass(Class, _BaseClass, _Offset)),
     doNotGuessHelper(factClassHasNoBase(Class),
                      factClassHasUnknownBase(Class)).
@@ -717,7 +719,7 @@ tryClassHasUnknownBase(Class) :-
 % identified base.
 guessClassHasNoBaseSpecial(Class) :-
     % Class is a class
-    find(_, Class),
+    class_current(Class),
 
     % Class does not have any base classes
     not(factDerivedClass(Class, _Base, _Offset)),
@@ -759,7 +761,7 @@ guessLateMergeClassesF2(Class, Method) :-
 
     % One of the methods is in a class all by itself right now.
     findall(Method, [Method]),
-    findVFTable(VFTable, Class),
+    findVFTable_current(VFTable, Class),
 
     checkMergeClasses(Class, Method).
 
@@ -800,10 +802,11 @@ guessLateMergeClasses(Out) :-
 % ED_PAPER_INTERESTING
 guessLateMergeClassesG(Class1, Class2) :-
     factClassCallsMethod(Class1, Method),
+    is_current(Class1),
     not(purecall(Method)), % Never merge purecall methods into classes.
     % Same reasoning as in guessMergeClasses_B...
     not(symbolProperty(Method, virtual)),
-    find(Method, Class2),
+    find_current(Method, Class2),
     checkMergeClasses(Class1, Class2),
     logtraceln('Proposing ~Q.', factLateMergeClasses_G(Class1, Class2)).
 
@@ -836,8 +839,8 @@ guessNOTMergeClasses(OuterClass, InnerClass) :-
     factConstructor(InnerConstructor),
     iso_dif(InnerConstructor, OuterConstructor),
     % They're not currently on the same class...
-    find(InnerConstructor, InnerClass),
-    find(OuterConstructor, OuterClass),
+    find_current(InnerConstructor, InnerClass),
+    find_current(OuterConstructor, OuterClass),
     iso_dif(OuterClass, InnerClass),
 
     not(uninitializedReads(InnerConstructor)),
@@ -942,10 +945,10 @@ guessMergeClassesB(Class1, Class2) :-
     % have the vftable for the method that's imported...
     not(symbolProperty(Method1, virtual)),
 
-    find(Method1, Class1),
+    find_current(Method1, Class1),
 
     % Which class is VFTable associated with?
-    findVFTable(VFTable, Class2),
+    findVFTable_current(VFTable, Class2),
 
     iso_dif(Class1, Class2),
 
@@ -955,7 +958,7 @@ guessMergeClassesB(Class1, Class2) :-
     % same place.  It's unclear if this is really correct.
 
     forall(reasonMethodInVFTable(OtherVFTable, _Offset, Method1),
-           findVFTable(OtherVFTable, Class2)),
+           findVFTable_current(OtherVFTable, Class2)),
 
     checkMergeClasses(Class1, Class2),
     logtraceln('Proposing ~Q.', factMergeClasses_B(Method1, VFTable, Class1, Class2)).
@@ -984,11 +987,13 @@ guessMergeClassesC1(DerivedClass, CalledClass) :-
     factClassCallsMethod(DerivedClass, CalledMethod),
     not(purecall(CalledMethod)), % Never merge purecall methods into classes.
     factDerivedClass(DerivedClass, BaseClass, Offset),
-    find(CalledMethod, CalledClass),
+    is_current(DerivedClass),
+    is_current(BaseClass),
+    find_current(CalledMethod, CalledClass),
 
     % The called method does NOT install any vftables that are on the base class.
     not((
-               find(BaseVFTable, BaseClass),
+               find_current(BaseVFTable, BaseClass),
                factVFTableWrite(_Insn, CalledMethod, Offset, BaseVFTable)
        )),
     % There does NOT exist a distinct class that also calls the called method.  If this
@@ -1024,10 +1029,12 @@ guessMergeClassesC2(BaseClass, CalledClass) :-
     factClassCallsMethod(DerivedClass, CalledMethod),
     not(purecall(CalledMethod)), % Never merge purecall methods into classes.
     factDerivedClass(DerivedClass, BaseClass, Offset),
-    find(CalledMethod, CalledClass),
+    is_current(DerivedClass),
+    is_current(BaseClass),
+    find_current(CalledMethod, CalledClass),
 
     % The CalledMethod installs a VFTable on the base class
-    find(BaseVFTable, BaseClass),
+    find_current(BaseVFTable, BaseClass),
     factVFTableWrite(_Insn, CalledMethod, Offset, BaseVFTable),
 
     checkMergeClasses(BaseClass, CalledClass),
@@ -1047,7 +1054,9 @@ guessMergeClassesC3(DerivedClass, CalledClass) :-
     factClassCallsMethod(DerivedClass, CalledMethod),
     not(purecall(CalledMethod)), % Never merge purecall methods into classes.
     factDerivedClass(DerivedClass, BaseClass, Offset),
-    find(CalledMethod, CalledClass),
+    is_current(DerivedClass),
+    is_current(BaseClass),
+    find_current(CalledMethod, CalledClass),
     checkMergeClasses(DerivedClass, CalledClass),
     logtraceln('Proposing ~Q.', factMergeClasses_C3(DerivedClass, CalledClass, CalledMethod,
                                                     BaseClass, Offset)).
@@ -1065,7 +1074,9 @@ guessMergeClassesC4(BaseClass, CalledClass) :-
     factClassCallsMethod(BaseClass, CalledMethod),
     not(purecall(CalledMethod)), % Never merge purecall methods into classes.
     factDerivedClass(DerivedClass, BaseClass, Offset),
-    find(CalledMethod, CalledClass),
+    is_current(DerivedClass),
+    is_current(BaseClass),
+    find_current(CalledMethod, CalledClass),
     checkMergeClasses(BaseClass, CalledClass),
     logtraceln('Proposing ~Q.', factMergeClasses_C4(BaseClass, CalledClass, CalledMethod,
                                                     DerivedClass, Offset)).
