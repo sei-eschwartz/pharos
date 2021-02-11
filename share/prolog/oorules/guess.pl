@@ -258,25 +258,25 @@ guessVFTableEntry2(VFTable, Offset, Entry) :-
 
 guessVFTableEntry(Out) :-
     reportFirstSeen('guessVFTableEntry'),
-    osetof((VFTable, Offset, Entry),
-           guessVFTableEntry1(VFTable, Offset, Entry),
-           TupleSet),
-    Out = tryBinarySearch(tryVFTableEntry, tryNOTVFTableEntry, TupleSet).
+    guessVFTableEntry1(VFTable, Offset, Entry),
+
+    tryOrNot(tryVFTableEntry(VFTable, Offset, Entry),
+             tryNOTVFTableEntry(VFTable, Offset, Entry),
+             Out).
 
 guessVFTableEntry(Out) :-
-    osetof((VFTable, Offset, Entry),
-           guessVFTableEntry2(VFTable, Offset, Entry),
-           TupleSet),
-    Out = tryBinarySearch(tryVFTableEntry, tryNOTVFTableEntry, TupleSet).
+    guessVFTableEntry2(VFTable, Offset, Entry),
 
-tryVFTableEntry((VFTable, Offset, Entry)) :- tryVFTableEntry(VFTable, Offset, Entry).
+    tryOrNot(tryVFTableEntry(VFTable, Offset, Entry),
+             tryNOTVFTableEntry(VFTable, Offset, Entry),
+             Out).
+
 tryVFTableEntry(VFTable, Offset, Entry) :-
     countGuess,
     loginfoln('Guessing ~Q.', factVFTableEntry(VFTable, Offset, Entry)),
     try_assert(factVFTableEntry(VFTable, Offset, Entry)),
     try_assert(guessedVFTableEntry(VFTable, Offset, Entry)).
 
-tryNOTVFTableEntry((VFTable, Offset, Entry)) :- tryNOTVFTableEntry(VFTable, Offset, Entry).
 tryNOTVFTableEntry(VFTable, Offset, Entry) :-
     countGuess,
     loginfoln('Guessing ~Q.', factNOTVFTableEntry(VFTable, Offset, Entry)),
@@ -302,20 +302,18 @@ guessDerivedClass(DerivedClass, BaseClass, Offset) :-
                      factEmbeddedObject(DerivedClass, BaseClass, Offset)).
 
 guessDerivedClass(Out) :-
-    osetof((DerivedClass, BaseClass, Offset),
-           guessDerivedClass(DerivedClass, BaseClass, Offset),
-           TupleSet),
-    Out = tryBinarySearch(tryDerivedClass, tryEmbeddedObject, TupleSet).
+    guessDerivedClass(DerivedClass, BaseClass, Offset),
 
-tryEmbeddedObject((OuterClass, InnerClass, Offset)) :-
-    tryEmbeddedObject(OuterClass, InnerClass, Offset).
+    tryOrNot(tryDerivedClass(DerivedClass, BaseClass, Offset),
+             tryEmbeddedObject(DerivedClass, BaseClass, Offset),
+             Out).
+
 tryEmbeddedObject(OuterClass, InnerClass, Offset) :-
     countGuess,
     loginfoln('Guessing ~Q.', factEmbeddedObject(OuterClass, InnerClass, Offset)),
     try_assert(factEmbeddedObject(OuterClass, InnerClass, Offset)),
     try_assert(guessedEmbeddedObject(OuterClass, InnerClass, Offset)).
 
-tryDerivedClass((DerivedClass, BaseClass, Offset)) :- tryDerivedClass(DerivedClass, BaseClass, Offset).
 tryDerivedClass(DerivedClass, BaseClass, Offset) :-
     countGuess,
     loginfoln('Guessing ~Q.', factDerivedClass(DerivedClass, BaseClass, Offset)),
@@ -366,11 +364,12 @@ guessMethodA(Method) :-
 
 guessMethod(Out) :-
     reportFirstSeen('guessMethod'),
-    osetof(Method,
-           guessMethodA(Method),
-           MethodSet),
-    logtraceln('Proposing ~Q.', factMethod_A(MethodSet)),
-    Out = tryBinarySearch(tryMethod, tryNOTMethod, MethodSet).
+    guessMethodA(Method),
+    logtraceln('Proposing ~Q.', factMethod_A(Method)),
+
+    tryOrNot(tryMethod(Method),
+             tryNOTMethod(Method),
+             Out).
 
 guessMethodB(Method) :-
     factMethod(Caller),
@@ -387,11 +386,12 @@ guessMethodB(Method) :-
 % Guess that calls passed offsets into existing objects are methods.  This rule is not
 % literally true, but objects are commonly in other objects.
 guessMethod(Out) :-
-    osetof(Method,
-           guessMethodB(Method),
-           MethodSet),
-    logtraceln('Proposing ~Q.', factMethod_B(MethodSet)),
-    Out = tryBinarySearch(tryMethod, tryNOTMethod, MethodSet).
+    guessMethodB(Method),
+    logtraceln('Proposing ~Q.', factMethod_B(Method)),
+
+    tryOrNot(tryMethod(Method),
+             tryNOTMethod(Method),
+             Out).
 
 % This guess is required (at least for our test suite) in cases where there's no certainty in
 % the calling convention, and effectively no facts that would allow us to reach the conclusion
@@ -409,11 +409,12 @@ guessMethodC(Method) :-
     factMethod(Caller).
 
 guessMethod(Out) :-
-    osetof(Method,
-           guessMethodC(Method),
-           MethodSet),
-    logtraceln('Proposing ~Q.', factMethod_C(MethodSet)),
-    Out = tryBinarySearch(tryMethod, tryNOTMethod, MethodSet).
+    guessMethodC(Method),
+    logtraceln('Proposing ~Q.', factMethod_C(Method)),
+
+    tryOrNot(tryMethod(Method),
+             tryNOTMethod(Method),
+             Out).
 
 % More kludgy guessing rules. :-( This one is based on thre premise that a cluster of three or
 % more nearly OO methods is not a conincidence. A better fix would be for at least one of the
@@ -433,11 +434,11 @@ guessMethodD(Method) :-
     iso_dif(Caller1, Caller3).
 
 guessMethod(Out) :-
-    osetof(Method,
-           guessMethodD(Method),
-           MethodSet),
-    logtraceln('Proposing ~Q.', factMethod_D(MethodSet)),
-    Out = tryBinarySearch(tryMethod, tryNOTMethod, MethodSet).
+    guessMethodD(Method),
+    logtraceln('Proposing ~Q.', factMethod_D(Method)),
+    tryOrNot(tryMethod(Method),
+             tryNOTMethod(Method),
+             Out).
 
 % A variation of the previous rule using thisPtrUsage and passing around a this-pointer to
 % multiple methods.  Just guess the first and the rest will follow...
@@ -456,11 +457,12 @@ guessMethodE(Method) :-
 
 
 guessMethod(Out) :-
-    osetof(Method,
-           guessMethodE(Method),
-           MethodSet),
-    logtraceln('Proposing ~Q.', factMethod_E(MethodSet)),
-    Out = tryBinarySearch(tryMethod, tryNOTMethod, MethodSet).
+    guessMethodE(Method),
+    logtraceln('Proposing ~Q.', factMethod_E(Method)),
+
+    tryOrNot(tryMethod(Method),
+             tryNOTMethod(Method),
+             Out).
 
 % Another case where we're trying to implement the reasoning that there's a lot of stuff
 % suggesting that it's a method.  In this case, it's a possible constructor with memory
@@ -474,11 +476,12 @@ guessMethodF(Method) :-
     (possibleConstructor(Method); possibleDestructor(Method)).
 
 guessMethod(Out) :-
-    osetof(Method,
-           guessMethodF(Method),
-           MethodSet),
-    logtraceln('Proposing ~Q.', factMethod_F(MethodSet)),
-    Out = tryBinarySearch(tryMethod, tryNOTMethod, MethodSet).
+    guessMethodF(Method),
+    logtraceln('Proposing ~Q.', factMethod_F(Method)),
+
+    tryOrNot(tryMethod(Method),
+             tryNOTMethod(Method),
+             Out).
 
 % Also guess possible constructors and destructors with calls from known methods.
 guessMethodG(Method) :-
@@ -490,21 +493,12 @@ guessMethodG(Method) :-
     (possibleConstructor(Method); possibleDestructor(Method)).
 
 guessMethod(Out) :-
-    osetof(Method,
-           guessMethodG(Method),
-           MethodSet),
-    logtraceln('Proposing ~Q.', factMethod_G(MethodSet)),
-    Out = tryBinarySearch(tryMethod, tryNOTMethod, MethodSet).
+    guessMethodG(Method),
+    logtraceln('Proposing ~Q.', factMethod_G(Method)),
 
-tryMethodNOTMethod(Method):-
-    doNotGuessHelper(factMethod(Method),
-                     factNOTMethod(Method)),
-    (
-        tryMethod(Method);
-        tryNOTMethod(Method);
-        logwarnln('Something is wrong upstream: ~Q.', invalidMethod(Method)),
-        fail
-    ).
+    tryOrNot(tryMethod(Method),
+             tryNOTMethod(Method),
+             Out).
 
 tryMethod(Method) :-
     countGuess,
@@ -560,11 +554,12 @@ guessConstructor1(Method) :-
 
 guessConstructor(Out) :-
     reportFirstSeen('guessConstructor'),
-    osetof(Method,
-           guessConstructor1(Method),
-           MethodSet),
-    logtraceln('Proposing ~Q.', factConstructor1(MethodSet)),
-    Out = tryBinarySearch(tryConstructor, tryNOTConstructor, MethodSet).
+    guessConstructor1(Method),
+    logtraceln('Proposing ~Q.', factConstructor1(Method)),
+
+    tryOrNot(tryConstructor(Method),
+             tryNOTConstructor(Method),
+             Out).
 
 % Likely virtual case, not in a vftable, writes a vftable, but has unitialized reads.
 guessConstructor2(Method) :-
@@ -578,11 +573,12 @@ guessConstructor2(Method) :-
                      factNOTConstructor(Method)).
 
 guessConstructor(Out) :-
-    osetof(Method,
-           guessConstructor2(Method),
-           MethodSet),
-    logtraceln('Proposing ~Q.', factConstructor2(MethodSet)),
-    Out = tryBinarySearch(tryConstructor, tryNOTConstructor, MethodSet).
+    guessConstructor2(Method),
+    logtraceln('Proposing ~Q.', factConstructor2(Method)),
+
+    tryOrNot(tryConstructor(Method),
+             tryNOTConstructor(Method),
+             Out).
 
 % Normal non-virtual case, not in a vftable, doesn't write a vftable, and has no uninitialized
 % reads.
@@ -597,11 +593,12 @@ guessConstructor3(Method) :-
                      factNOTConstructor(Method)).
 
 guessConstructor(Out) :-
-    osetof(Method,
-           guessConstructor3(Method),
-           MethodSet),
-    logtraceln('Proposing ~Q.', factConstructor3(MethodSet)),
-    Out = tryBinarySearch(tryConstructor, tryNOTConstructor, MethodSet).
+    guessConstructor3(Method),
+    logtraceln('Proposing ~Q.', factConstructor3(Method)),
+
+    tryOrNot(tryConstructor(Method),
+             tryNOTConstructor(Method),
+             Out).
 
 % Unusual non-virtual case presumably with inheritance -- not in a vftable, doesn't write a
 % vftable, but has uninitialized reads.  It's very likely that this class has a base, but we
@@ -616,21 +613,12 @@ guessConstructor4(Method) :-
 
 guessUnlikelyConstructor(Out) :-
     reportFirstSeen('guessUnlikelyConstructor'),
-    osetof(Method,
-           guessConstructor4(Method),
-           MethodSet),
-    logtraceln('Proposing ~Q.', factConstructor4(MethodSet)),
-    Out = tryBinarySearch(tryConstructor, tryNOTConstructor, MethodSet).
+    guessConstructor4(Method),
+    logtraceln('Proposing ~Q.', factConstructor4(Method)),
 
-tryConstructorNOTConstructor(Method) :-
-    doNotGuessHelper(factConstructor(Method),
-                     factNOTConstructor(Method)),
-    (
-        tryConstructor(Method);
-        tryNOTConstructor(Method);
-        logwarnln('Something is wrong upstream: ~Q.', invalidConstructor(Method)),
-        fail
-    ).
+    tryOrNot(tryConstructor(Method),
+             tryNOTConstructor(Method),
+             Out).
 
 tryConstructor(Method) :-
     countGuess,
@@ -667,11 +655,13 @@ guessClassHasNoBaseB(Class) :-
 
 guessClassHasNoBase(Out) :-
     reportFirstSeen('guessClassHasNoBase'),
-    osetof(Class,
-          guessClassHasNoBaseB(Class),
-          ClassSet),
-    logtraceln('Proposing ~P.', 'ClassHasNoBase_B'(ClassSet)),
-    Out = tryBinarySearch(tryClassHasNoBase, tryClassHasUnknownBase, ClassSet).
+    guessClassHasNoBaseB(Class),
+    logtraceln('Proposing ~P.', 'ClassHasNoBase_B'(Class)),
+
+    tryOrNot(tryClassHasNoBase(Class),
+             tryClassHasUnknownBase(Class),
+             Out).
+
 
 % Then guess classes regardless of their VFTable writes.
 % ED_PAPER_INTERESTING
@@ -683,11 +673,12 @@ guessClassHasNoBaseC(Class) :-
                      factClassHasUnknownBase(Class)).
 
 guessClassHasNoBase(Out) :-
-    osetof(Class,
-           guessClassHasNoBaseC(Class),
-           ClassSet),
-    logtraceln('Proposing ~P.', 'ClassHasNoBase_C'(ClassSet)),
-    Out = tryBinarySearch(tryClassHasNoBase, tryClassHasUnknownBase, ClassSet).
+    guessClassHasNoBaseC(Class),
+    logtraceln('Proposing ~P.', 'ClassHasNoBase_C'(Class)),
+
+    tryOrNot(tryClassHasNoBase(Class),
+             tryClassHasUnknownBase(Class),
+             Out).
 
 tryClassHasNoBase(Class) :-
     countGuess,
@@ -719,12 +710,12 @@ guessClassHasNoBaseSpecial(Class) :-
 
 guessCommitClassHasNoBase(Out) :-
     reportFirstSeen('guessCommitClassHasNoBase'),
-    osetof(Class,
-           guessClassHasNoBaseSpecial(Class),
-           ClassSet),
-    logtraceln('Proposing ~P.', 'CommitClassHasNoBase'(ClassSet)),
-    Out = tryBinarySearch(tryClassHasNoBase, tryClassHasUnknownBase, ClassSet).
+    guessClassHasNoBaseSpecial(Class),
+    logtraceln('Proposing ~P.', 'CommitClassHasNoBase'(Class)),
 
+    tryOrNot(tryClassHasNoBase(Class),
+             tryClassHasUnknownBase(Class),
+             Out).
 
 % The following merge guesses should occur late so that we can identify all classes which have
 % base classes.  This will allow the best guesses from guessLateMergeClassesF1 to fire.
@@ -765,18 +756,22 @@ guessLateMergeClasses(Out) :-
     minof((Class, Method),
           guessLateMergeClassesF1(Class, Method)),
     !,
-    OneTuple=[(Class, Method)],
-    logtraceln('Proposing ~Q.', factLateMergeClasses_F1(OneTuple)),
-    Out = tryBinarySearch(tryMergeClasses, tryNOTMergeClasses, OneTuple, 1).
+    logtraceln('Proposing ~Q.', factLateMergeClasses_F1(Class, Method)),
+
+    tryOrNot(tryMergeClasses(Class, Method),
+             tryNOTMergeClasses(Class, Method),
+             Out).
 
 guessLateMergeClasses(Out) :-
     reportFirstSeen('guessLateMergeClassesF2'),
     minof((Class, Method),
           guessLateMergeClassesF2(Class, Method)),
     !,
-    OneTuple=[(Class, Method)],
-    logtraceln('Proposing ~Q.', factLateMergeClasses_F2(OneTuple)),
-    Out = tryBinarySearch(tryMergeClasses, tryNOTMergeClasses, OneTuple, 1).
+    logtraceln('Proposing ~Q.', factLateMergeClasses_F2(Class, Method)),
+
+    tryOrNot(tryMergeClasses(Class, Method),
+             tryNOTMergeClasses(Class, Method),
+             Out).
 
 % ejs 1/27/21 This rule used to be a normal merge guess instead of a late merge guess.  But we
 % ran into a bug in #158 in which we incorrectly merged a base constructor with a derived
@@ -803,8 +798,10 @@ guessLateMergeClasses(Out) :-
     minof((Class, Method),
           guessLateMergeClassesG(Class, Method)),
     !,
-    OneTuple=[(Class, Method)],
-    Out = tryBinarySearch(tryMergeClasses, tryNOTMergeClasses, OneTuple, 1).
+
+    tryOrNot(tryMergeClasses(Class, Method),
+             tryNOTMergeClasses(Class, Method),
+             Out).
 
 
 % --------------------------------------------------------------------------------------------
@@ -848,10 +845,11 @@ guessNOTMergeClassesSymmetric(Class1, Class2) :-
     true.
 
 guessNOTMergeClasses(Out) :-
-    osetof((OuterClass, InnerClass),
-           guessNOTMergeClassesSymmetric(OuterClass, InnerClass),
-           ClassPairSets),
-    Out = tryBinarySearch(tryNOTMergeClasses, tryMergeClasses, ClassPairSets).
+    guessNOTMergeClassesSymmetric(Class1, Class2),
+
+    tryOrNot(tryNOTMergeClasses(Class1, Class2),
+             tryMergeClasses(Class1, Class2),
+             Out).
 
 % This is one of the strongest of several rules for guessing arbitrary method assignments.  We
 % know that the method is very likely to be assigned to one of the two constructors, so we
