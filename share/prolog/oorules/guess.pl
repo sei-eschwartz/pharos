@@ -120,6 +120,15 @@ doNotGuessHelper(Fact, Fact2) :-
     ;   true
     ).
 
+% ejs 2/11/2021
+% Guesses now return a list of guess goals that will be tried in order.
+
+upstreamFail(Pos, _Neg) :-
+    logwarnln('Something is wrong upstream: ~Q', Pos),
+    fail.
+
+tryOrNot(Pos, Neg, [Pos, Neg, upstreamFail(Pos, Neg)]).
+
 % --------------------------------------------------------------------------------------------
 % Try guessing that a virtual function call is correctly interpreted.
 % --------------------------------------------------------------------------------------------
@@ -132,20 +141,9 @@ guessVirtualFunctionCall(Out) :-
                    factVirtualFunctionCall(Insn, Constructor, OOffset, VFTable, VOffset),
                    factNOTVirtualFunctionCall(Insn, Constructor, OOffset, VFTable, VOffset)))),
 
-    Out = tryOrNOTVirtualFunctionCall(Insn, Constructor, OOffset, VFTable, VOffset).
-
-tryOrNOTVirtualFunctionCall(Insn, Constructor, OOffset, VFTable, VOffset) :-
-    likelyVirtualFunctionCall(Insn, Constructor, OOffset, VFTable, VOffset),
-    not(factNOTConstructor(Constructor)),
-    doNotGuessHelper(factVirtualFunctionCall(Insn, Constructor, OOffset, VFTable, VOffset),
-                     factNOTVirtualFunctionCall(Insn, Constructor, OOffset, VFTable, VOffset)),
-    (
-        countGuess,
-        tryVirtualFunctionCall(Insn, Constructor, OOffset, VFTable, VOffset);
-        tryNOTVirtualFunctionCall(Insn, Constructor, OOffset, VFTable, VOffset);
-        logwarnln('Something is wrong upstream: ~Q.', invalidVirtualFunctionCall(Insn)),
-        fail
-    ).
+    tryOrNot(tryVirtualFunctionCall(Insn, Constructor, OOffset, VFTable, VOffset),
+             tryVirtualFunctionCall(Insn, Constructor, OOffset, VFTable, VOffset),
+             Out).
 
 tryVirtualFunctionCall(Insn, Method, OOffset, VFTable, VOffset) :-
     loginfoln('Guessing ~Q.',

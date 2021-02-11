@@ -403,33 +403,59 @@ reasonForwardAsManyTimesAsPossible :-
         logdebugln('reasonForwardAsManyTimesAsPossible complete.')).
 
 % Go forward: Make a guess, reason forward, and then sanity check
-tryAGuess :-
+tryAGuess(Out) :-
     logtraceln('reasoningLoop: guess'),
-    guess,
+    guess(Out),
     get_flag(numfacts, N),
     progress(N).
+
+guessReasonAndCheck(Guess) :-
+    logdebugln('Going to make guess ~Q', Guess),
+    transaction((call(Guess),
+                 (sanityChecks
+                 ->
+                     loginfoln('Constraint checks succeeded, proceeding to reason forward!')
+                 ;
+                 (logwarnln('Constraint checks failed, retracting guess!'), fail)),
+                 logdebugln('reasoningLoop: reasonForardAsManyTimesAsPossible'),
+                 reasonForwardAsManyTimesAsPossible,
+                 logdebugln('reasoningLoop: post-reason sanityChecks'),
+                 (sanityChecks
+                 -> loginfoln('Constraint checks succeeded, guess accepted!')
+                 ; (logwarnln('Constraint checks failed, retracting guess!'), fail)),
+                 % If we want to be able to backtrack upstream, we should resume reasoning
+                 % inside the transaction here.  Right? XXX
+                 (backtrackForUpstream ->
+                      reasoningLoop
+                 ;
+                 % If we don't want to backtrack upstream, we let the transaction close and
+                 % then reason...
+                 true))),
+    (backtrackForUpstream
+    ->
+        % If we reach this point, reasoningLoop has terminated since we called it inside the
+        % transaction
+        true
+    ;
+    % If we are not backtracking, we eagerly cut here to avoid wasting a lot of memory.
+    (!,
+     reasoningLoop)).
+
 
 % When reasoning, if we ever run out of guesses, we are done!  Otherwise, we execute the rest
 % of the loop, but we must preserve choice points so that we can backtrack to the latest guess
 % even if that is in another loop iteration.
 reasoningLoop :-
-    if_(tryAGuess,
-        (logdebugln('reasoningLoop: pre-reason sanityChecks'),
-         (sanityChecks
-         -> loginfoln('Constraint checks succeeded, proceeding to reason forward!')
-         ; (logwarnln('Constraint checks failed, retracting guess!'), fail)),
-         logdebugln('reasoningLoop: reasonForardAsManyTimesAsPossible'),
-         reasonForwardAsManyTimesAsPossible,
-         logdebugln('reasoningLoop: post-reason sanityChecks'),
-         (sanityChecks
-         -> loginfoln('Constraint checks succeeded, guess accepted!')
-         ; (logwarnln('Constraint checks failed, retracting guess!'), fail)),
-         (backtrackForUpstream ->
-              reasoningLoop
-         ;
-          % If we are not backtracking, we eagerly cut here to avoid wasting a lot of memory.
-          (!,
-           reasoningLoop))),
+    if_(tryAGuess(Out),
+        (is_list(Out)
+        ->
+            % If Out is a list of goals (eventually it should always be), then we try them in
+            % order until we find one that works.
+            member(Guess, Out),
+            guessReasonAndCheck(Guess)
+        ;
+        % If Out is a legacy goal, just call it.
+        guessReasonAndCheck(Out)),
         % If we can't guess, exit with true.  Cut so we don't trigger the second rule.
         (!, loginfoln('reasoningLoop: There are no possible guesses remaining'))).
 
@@ -451,7 +477,7 @@ reasoningLoop :-
 % guesses early causes lots of backtracking which preforms poorly.  The current ordering is not
 % well justified, but rather a hodge-podge of experimental results and gut feelings.  Cory has
 % no idea how to reason through this properly, so he's just going to take some notes.
-guess :-
+guess(Out) :-
         logdebugln('~@Starting guess. There are currently ~D guesses.',
                    [get_flag(guesses, Guesses), Guesses]),
         % These three guesses are first on the principle that guesing them has lots of
@@ -523,13 +549,7 @@ guess :-
               guessCommitClassHasNoBase(Out)
 
 
-             )),
-
-        (
-            call(Out);
-            (logdebugln('guess: We have back-tracked to the call of ~Q', [Out]),
-             fail)
-        ).
+             )).
 
 % Actually check to see if the solution is complete.
 checkCompleteness :-
