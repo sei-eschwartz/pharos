@@ -47,6 +47,8 @@ insanityConstructorInVFTable(Out) :-
 insanityInheritanceLoop(Out) :-
     reasonDerivedClassRelationship(DerivedClass, BaseClass),
     reasonDerivedClassRelationship(BaseClass, DerivedClass),
+    is_current(BaseClass),
+    is_current(DerivedClass),
 
     Out = (
         logwarnln(true, 'A class may not be derived from itself: Class1=~Q Class2=~Q', [BaseClass, DerivedClass])
@@ -104,9 +106,7 @@ insanityVFTableSizeInvalid(Out) :-
 % PAPER: NA.  Handled by constraint system.
 :- table insanityEmbeddedObjectLarger/1 as incremental.
 insanityEmbeddedObjectLarger(Out) :-
-    factEmbeddedObject(OuterClass1, InnerClass1, Offset),
-    find(OuterClass1, OuterClass),
-    find(InnerClass1, InnerClass),
+    factEmbeddedObject(OuterClass, InnerClass, Offset),
     factClassSizeLTE(OuterClass, OuterSize),
     factClassSizeGTE(InnerClass, InnerSize),
     ComputedSize is Offset + InnerSize,
