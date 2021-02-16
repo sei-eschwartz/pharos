@@ -1073,7 +1073,7 @@ reasonVFTableSizeGTE(VFTable, Size) :-
                          reasonVFTableSizeGTE_B(DerivedClass, DerivedVFTable, Offset, BaseClass, BaseVFTable, VFTable, Size)]).
 
 % --------------------------------------------------------------------------------------------
-:- table reasonVFTableSizeLTE/2 as incremental.
+:- table reasonVFTableSizeLTE(_, min) as incremental.
 
 % The size includes the length of the last pointer, and pointers are incorrectly assumed to by
 % 4 byte (32-bit) function pointers.  So a table with one entry will have size 4, with two
