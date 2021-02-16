@@ -1086,9 +1086,8 @@ reasonVFTableSizeLTE(VFTable, Size) :-
 reasonVFTableSizeLTE(VFTable, Size) :-
     % Ed says: By prefixing M^ we tell setof NOT to case on M.
     % If we leave M as _, it will case on different values of M!
-    setof(S, M^factNOTVFTableEntry(VFTable, S, M), Set),
-    max_list(Set, LastEntry),
-    Size is LastEntry + 4,
+    factNOTVFTableEntry(VFTable, Offset, _),
+    Size is Offset + 4,
     % Debugging
     logtraceln('~@~Q.', [not((factVFTableSizeLTE(VFTable, ExistingSize),
                               ExistingSize >= Size)),
