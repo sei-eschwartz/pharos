@@ -131,7 +131,7 @@ usefulClass(Class) :-
 
 % A class is useful if it is not size zero.
 usefulClass(Class) :-
-    reasonMinimumPossibleClassSize(Class, Size), Size > 0.
+    reasonClassSizeGTE(Class, Size), Size > 0.
 
 % A class containing a constructor is useful.
 usefulClass(Class) :-
@@ -189,8 +189,8 @@ finalClass(ClassID, VFTableOrNull, CSize, LSize, RealDestructorOrNull, MethodLis
          VFTableOrNull=VFTable
      ;
      VFTableOrNull=0),
-    % Get the certain and likely class sizes.
-    reasonMinimumPossibleClassSize(Class, CSize),
+    % Get the certain and likely class sizes.  BUG! This is sooo old, fix me!
+    reasonClassSizeGTE(Class, CSize),
     LSize is CSize,
     % Optionally find the the real destructor as well.
     ((find_current(RealDestructor, Class),

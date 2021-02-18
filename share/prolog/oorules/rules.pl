@@ -2797,7 +2797,7 @@ certainMemberOnClassSet(Class, Set) :-
 % reasoning is supposed to be that the member is not on the exact class because it is within
 % the memory range allocaed to and embedded object or base class (including multiple
 % inhertiance).  The flaw in the logic is that it does not account for virtual inheritance
-% correctly.  Specfically, the reasonMinimumPossibleClassSize(InnerClass, InnerSize)
+% correctly.  Specfically, the reasonClassSizeGTE(InnerClass, InnerSize)
 % unification fails to reduce InnerSize by the size of the shared virtual grandparent class.
 % Currently this results in a fairly rare bug, but it manifests in OOEX8 as an incorrect
 % assignment of a class member.  It is believed that we will need virtual base pointer table
@@ -2806,7 +2806,7 @@ certainMemberNOTOnExactClass(Class, Offset, Size) :-
     certainMemberOnClass(Class, Offset, Size),
     factObjectInObject(Class, InnerClass, InnerOffset),
     Offset >= InnerOffset,
-    reasonMinimumPossibleClassSize(InnerClass, InnerSize),
+    reasonClassSizeGTE(InnerClass, InnerSize),
     EndOfInnerObject is InnerOffset + InnerSize,
     Offset < EndOfInnerObject.
 
