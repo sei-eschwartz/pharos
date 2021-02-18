@@ -1020,7 +1020,7 @@ reasonNOTVFTableEntrySet(VFTable, Set) :-
     setof(Offset, Entry^reasonNOTVFTableEntry(VFTable, Offset, Entry), Set).
 
 % --------------------------------------------------------------------------------------------
-:- table reasonVFTableSizeGTE/2 as incremental.
+:- table reasonVFTableSizeGTE(_, max) as incremental.
 
 % The size includes the length of the last pointer, and pointers are incorrectly assumed to by
 % 4 byte (32-bit) function pointers.  So a table with one entry will have size 4, with two
@@ -2069,7 +2069,7 @@ reasonMergeClasses(C,M) :-
     ;   reasonMergeClasses_G(C,M)
     ;   reasonMergeClasses_H(C,M)
     ;   reasonMergeClasses_J(C,M)
-%   ;	reasonMergeClasses_K(C,M)
+%   ;   reasonMergeClasses_K(C,M)
     ).
 
 % Because the classes have already been merged.
@@ -2831,15 +2831,15 @@ certainMemberOnExactClassSet(Class, Set) :-
 % The given class is certain to be of this size or greater.  This is the allocation size,
 % including any padding, alignment, etc.  It also includes the size of any base classes (since
 % they're part of the class).
-:- table reasonClassSizeGTE/2 as incremental.
+:- table reasonClassSizeGTE(_, max) as incremental.
 
-:- table reasonClassSizeGTE_A/2 as incremental.
-:- table reasonClassSizeGTE_B/2 as incremental.
-:- table reasonClassSizeGTE_C/2 as incremental.
-:- table reasonClassSizeGTE_D/2 as incremental.
-:- table reasonClassSizeGTE_E/2 as incremental.
-:- table reasonClassSizeGTE_F/2 as incremental.
-:- table reasonClassSizeGTE_G/2 as incremental.
+:- table reasonClassSizeGTE_A(_, max) as incremental.
+:- table reasonClassSizeGTE_B(_, max) as incremental.
+:- table reasonClassSizeGTE_C(_, max) as incremental.
+:- table reasonClassSizeGTE_D(_, max) as incremental.
+:- table reasonClassSizeGTE_E(_, max) as incremental.
+:- table reasonClassSizeGTE_F(_, max) as incremental.
+:- table reasonClassSizeGTE_G(_, max) as incremental.
 
 reasonClassSizeGTE(Class, Size) :-
     %logwarnln('Recomputing reasonClassSizeGTE...'),
@@ -2950,14 +2950,14 @@ reasonMinimumPossibleClassSize(Class, Size) :-
     true.
 
 % --------------------------------------------------------------------------------------------
-:- table reasonClassSizeLTE/2 as incremental.
+:- table reasonClassSizeLTE(_, min) as incremental.
 
 % The given class is certain to be of this size or smaller.
 
-:- table reasonClassSizeLTE_A/2 as incremental.
-:- table reasonClassSizeLTE_B/2 as incremental.
-:- table reasonClassSizeLTE_C/2 as incremental.
-:- table reasonClassSizeLTE_D/2 as incremental.
+:- table reasonClassSizeLTE_A(_, min) as incremental.
+:- table reasonClassSizeLTE_B(_, min) as incremental.
+:- table reasonClassSizeLTE_C(_, min) as incremental.
+:- table reasonClassSizeLTE_D(_, min) as incremental.
 
 reasonClassSizeLTE(Class, Size) :-
     %logwarnln('Recomputing reasonClassSizeLTE...'),
