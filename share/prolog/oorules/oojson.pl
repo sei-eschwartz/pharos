@@ -92,7 +92,7 @@ makeMemberTypeFromSize(_, "") :- !.
 % adding the missing results here as a special rule.  Unfortuntely, this means that the
 % members are not longer coincidentally in the correct order, so we need to do some
 % additional sorting (which perhaps we should be doing anyway).
-:- table expandedFinalMember/2 as incremental.
+:- table expandedFinalMember/2.
 expandedFinalMember(ClassId, Offset):-
     finalInheritance(ClassId, _InnerClassId, Offset, _, _).
 
@@ -308,7 +308,7 @@ virtualMethodsOnClass(ClassId, MethodList):-
     setof(Method, virtualMethodOnClass(ClassId, Method), MethodList) -> true; MethodList=[].
 
 % Return true if there's a VFTable at the given offset in the class.
-:- table vFTableForClass/3 as incremental.
+:- table vFTableForClass/3.
 vFTableForClass(ClassId, VFTable, Offset):-
     (finalClass(ClassId, VFTable, _Size, _OtherSize, _RealDestructor, _Methods), Offset=0);
     finalInheritance(ClassId, _BaseClassId, Offset, VFTable, _).
