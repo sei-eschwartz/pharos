@@ -102,7 +102,7 @@ reasonMethod_K(Method) :-
     factMethod(Method1),
     logdebugln('2 ~Q ~Q ~Q', [Func, ThisPtr, Method1]),
     thisPtrUsage(_Insn2, Func, ThisPtr, Method),
-    logdebugln('3 ~Q ~Q ~Q', [Func, ThisPtr, Method1]).
+    logdebugln('3 ~Q ~Q ~Q', [Func, ThisPtr, Method]).
 
 % Because the thisptr is known to be an object pointer.
 reasonMethod_L(Method) :-
