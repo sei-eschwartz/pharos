@@ -401,35 +401,41 @@ tryAGuess(Out) :-
 
 guessReasonAndCheck(Guess) :-
     logdebugln('Going to make guess ~Q', Guess),
-    transaction((call(Guess),
-                 (sanityChecks
-                 ->
-                     loginfoln('Constraint checks succeeded, proceeding to reason forward!')
-                 ;
-                 (logwarnln('Constraint checks failed, retracting guess!'), fail)),
-                 logdebugln('reasoningLoop: reasonForardAsManyTimesAsPossible'),
-                 reasonForwardAsManyTimesAsPossible,
-                 logdebugln('reasoningLoop: post-reason sanityChecks'),
-                 (sanityChecks
-                 -> loginfoln('Constraint checks succeeded, guess accepted!')
-                 ; (logwarnln('Constraint checks failed, retracting guess!'), fail)),
-                 % If we want to be able to backtrack upstream, we should resume reasoning
-                 % inside the transaction here.  Right? XXX
-                 (backtrackForUpstream ->
-                      reasoningLoop
-                 ;
-                 % If we don't want to backtrack upstream, we let the transaction close and
-                 % then reason...
-                 true))),
-    (backtrackForUpstream
-    ->
-        % If we reach this point, reasoningLoop has terminated since we called it inside the
+    transaction(guessReasonAndCheckGuarded(Guess)),
+    (   backtrackForUpstream
+    ->  % If we reach this point, reasoningLoop has terminated since we called it inside the
         % transaction
         true
-    ;
-    % If we are not backtracking, we eagerly cut here to avoid wasting a lot of memory.
-    (!,
-     reasoningLoop)).
+    ;   % If we are not backtracking, we eagerly cut here to avoid wasting a lot of memory.
+        !,
+        reasoningLoop
+    ).
+
+guessReasonAndCheckGuarded(Guess) :-
+    (   call(Guess),
+        (   sanityChecks
+        ->  loginfoln('Constraint checks succeeded, proceeding to reason forward!')
+        ;   logwarnln('Constraint checks failed, retracting guess!'),
+            fail
+        ),
+        logdebugln('reasoningLoop: reasonForardAsManyTimesAsPossible'),
+        reasonForwardAsManyTimesAsPossible,
+        logdebugln('reasoningLoop: post-reason sanityChecks'),
+        (   sanityChecks
+        ->  loginfoln('Constraint checks succeeded, guess accepted!')
+        ;   logwarnln('Constraint checks failed, retracting guess!'),
+            fail
+        ),
+        % If we want to be able to backtrack upstream, we should resume reasoning
+        % inside the transaction here.  Right? XXX
+        (   backtrackForUpstream
+        ->  reasoningLoop
+        ;   % If we don't want to backtrack upstream, we let the transaction close and
+            % then reason...
+            true
+        )
+    ).
+
 
 
 % When reasoning, if we ever run out of guesses, we are done!  Otherwise, we execute the rest
