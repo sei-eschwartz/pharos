@@ -413,13 +413,10 @@ guessReasonAndCheck(Guess) :-
 
 guessReasonAndCheckGuarded(Guess) :-
     (   call(Guess),
-        (   sanityChecks
-        ->  loginfoln('Constraint checks succeeded, proceeding to reason forward!')
-        ;   logwarnln('Constraint checks failed, retracting guess!'),
-            fail
-        ),
+        sanityChecksOrRevert,
         logdebugln('reasoningLoop: reasonForardAsManyTimesAsPossible'),
         reasonForwardAsManyTimesAsPossible,
+        sanityChecksOrRevert,
         logdebugln('reasoningLoop: post-reason sanityChecks'),
         (   sanityChecks
         ->  loginfoln('Constraint checks succeeded, guess accepted!')
@@ -436,6 +433,56 @@ guessReasonAndCheckGuarded(Guess) :-
         )
     ).
 
+sanityChecksOrRevert :-
+    updated(Variants),
+    loginfoln(true, 'Affected variants: ~p', [Variants]),
+    (   sanityChecks
+    ->  loginfoln('Constraint checks succeeded, proceeding to reason forward!')
+    ;   logwarnln('Constraint checks failed, retracting guess!'),
+        invalidate(Variants),
+        fail
+    ).
+
+updated(Variants) :-
+    transaction_updates(Updates),
+    maplist(clause_head, Updates, AllVariants),
+    variant_set(AllVariants, Variants).
+
+clause_head(asserta(ClauseRef), Head) :-
+    '$tabling':'$clause'(Head, _Body, ClauseRef, _Bindings).
+clause_head(assertz(ClauseRef), Head) :-
+    '$tabling':'$clause'(Head, _Body, ClauseRef, _Bindings).
+clause_head(erased(ClauseRef), Head) :-
+    '$tabling':'$clause'(Head, _Body, ClauseRef, _Bindings).
+
+variant_set(List, Set) :-
+    sort(List, Sorted),
+    variant_set_(Sorted, Set).
+
+variant_set_([], []).
+variant_set_([H|T0], [H|T]) :-
+    skip_same_variant(H, T0, T1),
+    variant_set_(T1, T).
+
+skip_same_variant(V, [H|T0], T) :-
+    V =@= H,
+    !,
+    skip_same_variant(V, T0, T).
+skip_same_variant(_, List, List).
+
+invalidate(Variants) :-
+    debug(invalidate, 'Invalidating ~p', [Variants]),
+    maplist(invalidate_one, Variants).
+
+invalidate_one(Head) :-
+    predicate_property(Head, monotonic),
+    !,
+    '$tabling':mon_invalidate_dependents(Head).
+invalidate_one(Head) :-
+    predicate_property(Head, incremental),
+    !,
+    '$tabling':dyn_changed_pattern(Head).
+invalidate_one(_).
 
 
 % When reasoning, if we ever run out of guesses, we are done!  Otherwise, we execute the rest
