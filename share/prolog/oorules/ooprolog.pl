@@ -176,6 +176,9 @@ parse_options(OptsSpec, Args, Opts, Positional) :-
              format(user_error, 'ERROR: Unknown option ''~a''~n', Flag))),
      exit_failure).
 
+:- meta_predicate
+    run_with_backtrace(0).
+
 run_with_backtrace(X) :-
     catch_with_backtrace(
         X, Exception,
