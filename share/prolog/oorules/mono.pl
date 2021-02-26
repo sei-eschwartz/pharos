@@ -1,14 +1,14 @@
-user:term_expansion((:- table Pred as incremental),
-                    (:- table Pred as (monotonic,lazy))).
+%% user:term_expansion((:- table Pred as incremental),
+%%                     (:- table Pred as (monotonic,lazy))).
 
-user:term_expansion((:- dynamic Pred as incremental),
-                    (:- dynamic Pred as (monotonic))).
+%% user:term_expansion((:- dynamic Pred as incremental),
+%%                     (:- dynamic Pred as (monotonic))).
 
-user:term_expansion((:- dynamic Pred as (incremental,abstract(0))),
-                    (:- dynamic Pred as (monotonic,abstract(0)))).
+%% user:term_expansion((:- dynamic Pred as (incremental,abstract(0))),
+%%                     (:- dynamic Pred as (monotonic,abstract(0)))).
 
-user:term_expansion((:- dynamic Pred as (incremental, monotonic)),
-                    (:- dynamic Pred as (monotonic))).
+%% user:term_expansion((:- dynamic Pred as (incremental, monotonic)),
+%%                     (:- dynamic Pred as (monotonic))).
 
 log :-
     protocol('lazy.log'),
