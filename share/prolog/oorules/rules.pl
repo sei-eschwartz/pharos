@@ -1267,11 +1267,17 @@ reasonObjectInObject_C(OuterClass, InnerClass, Offset) :-
 reasonObjectInObject_D(OuterClass, InnerClass, Offset) :-
     % We are certain that this member offset is passed to InnerConstructor.
     validFuncOffset(_CallInsn, OuterConstructor, InnerConstructor, Offset),
+    logdebugln('boo constructor1a ~Q', OuterConstructor),
     factConstructor(OuterConstructor),
+    logdebugln('boo constructor1b ~Q', OuterConstructor),
+    logdebugln('boo constructor2a ~Q', InnerConstructor),
     factConstructor(InnerConstructor),
+    logdebugln('boo constructor2b ~Q', InnerConstructor),
     iso_dif(InnerConstructor, OuterConstructor),
     find(InnerConstructor, InnerClass),
     find(OuterConstructor, OuterClass),
+
+    logdebugln('boo innerclass ~Q outerclass ~Q', [InnerClass, OuterClass]),
 
     % This constraint is the one that makes this rule different from ObjectInObject_E.
     iso_dif(Offset, 0),
@@ -1279,7 +1285,9 @@ reasonObjectInObject_D(OuterClass, InnerClass, Offset) :-
 
     % Prevent grand ancestors from being decalred object in object.  See commentary below.
     % It's unclear of this constraint is really required in cases where Offset is non-zero.
+    logdebugln('boo 1'),
     not(reasonClassRelationship(OuterClass, InnerClass)),
+    logdebugln('boo 2'),
 
     % Debugging
     logtraceln('~@~Q.', [not(factObjectInObject(OuterClass, InnerClass, Offset)),
