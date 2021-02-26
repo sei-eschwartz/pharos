@@ -2621,8 +2621,6 @@ reasonNOTMergeClasses_L(Class1, Class2) :-
 reasonNOTMergeClasses_M(Class1, Class2) :-
     factClassSizeGTE(BigClass, GTESize),
     factClassSizeLTE(SmallClass, LTESize),
-    % This rule handles symmetry correctly, so adding this constraint causes the rule to fire
-    % twice, but reduces the number of NOTMergeClass facts created by this rule.
     LTESize < GTESize,
     sort_tuple((BigClass, SmallClass), (Class1, Class2)),
     % Debugging
@@ -2638,8 +2636,6 @@ reasonNOTMergeClasses_M(Class1, Class2) :-
 reasonNOTMergeClasses_N(Class1, Class2) :-
     factClassSizeLTE(SmallClass, LTESize),
     factClassSizeGTE(BigClass, GTESize),
-    % This rule handles symmetry correctly, so adding this constraint causes the rule to fire
-    % twice, but reduces the number of NOTMergeClass facts created by this rule.
     GTESize > LTESize,
     sort_tuple((SmallClass, BigClass), (Class1, Class2)),
     % Debugging

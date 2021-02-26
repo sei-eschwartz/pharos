@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Carnegie Mellon University.  See LICENSE file for terms.
+// Copyright 2015-2021 Carnegie Mellon University.  See LICENSE file for terms.
 
 #include <algorithm>
 #include <iterator>
@@ -301,6 +301,8 @@ static ProgOptVarMap parse_cert_options_internal(
   // Register our custom callback for determining if two expressions may be equal.
   set_may_equal_callback();
 
+  get_logging_destination()->prefix()->showElapsedTime(false);
+
   // Get the options logging facility working with the standard options.
   olog.initialize("OPTI");
   olog.initStreams(get_logging_destination());
@@ -420,6 +422,11 @@ static ProgOptVarMap parse_cert_options_internal(
   // apidb
   apidblog[Sawyer::Message::WARN].enable();
 
+  // Prolog logging levels
+  plog[Sawyer::Message::ERROR].enable();
+  plog[Sawyer::Message::FATAL].enable();
+  plog[Sawyer::Message::WARN].enable();
+
   // If the user has modified the verbosity level, let's try to get the logging right before we
   // emit any messages at all.
   auto verbosity_opt = vm.get<int>("verbose", "pharos.verbosity");
@@ -469,9 +476,6 @@ static ProgOptVarMap parse_cert_options_internal(
     slog[Sawyer::Message::DEBUG].enable(verbosity >= 13);
 
     // Prolog logging levels
-    plog[Sawyer::Message::ERROR].enable(true);
-    plog[Sawyer::Message::FATAL].enable(true);
-    plog[Sawyer::Message::WARN].enable(true);
     plog[Sawyer::Message::INFO].enable(verbosity >= 3);
     plog[Sawyer::Message::WHERE].enable(verbosity >= 6);
     plog[Sawyer::Message::TRACE].enable(verbosity >= 9);
