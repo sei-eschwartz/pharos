@@ -135,13 +135,18 @@ check_table(Goal) :-
     current_prolog_flag(break_level, 0), % disable inside a break
     !,
     solutions_from_table(Goal, Answers),
-    thread_create(get_all_solutions(Goal, Me), Id, []),
+    (   transaction_updates(Updates)
+    ->  true
+    ;   Updates = []
+    ),
+    thread_create(get_all_solutions(Goal, Updates, Me), Id, []),
     thread_get_message(answers(OkAnswers)),
     thread_join(Id),
-    count(Goal),
+    count(Goal, NthCall),
     (   OkAnswers == Answers
     ->  true
-    ;   format(user_error, 'Wrong answers for ~p~n', [Goal]),
+    ;   format(user_error, 'Wrong answers for ~p (iteration ~d) ~n',
+               [Goal, NthCall]),
         show_difference(Answers, OkAnswers),
         break,
         abort
@@ -159,21 +164,67 @@ all_solutions(Goal, Answers) :-
     findall(Goal, Goal, Answers0),
     sort(Answers0, Answers).
 
-get_all_solutions(Goal, SendTo) :-
+get_all_solutions(Goal, [], SendTo) :-
+    !,
     all_solutions(Goal, Answers),
     thread_send_message(SendTo, answers(Answers)).
+get_all_solutions(Goal, Updates, SendTo) :-
+    length(Updates, Count),
+    snapshot(( format(user_error,
+                      'Checking ~p; updating snapshot with ~D actions~n',
+                      [Goal, Count]),
+               maplist(copy_from_transaction, Updates),
+               all_solutions(Goal, Answers),
+               format(user_error,
+                      'Snapshot re-evaluation of ~p done~n',
+                      [Goal])
+             )),
+    thread_send_message(SendTo, answers(Answers)).
+
+copy_from_transaction(asserta(ClauseRef)) :-
+    '$tabling':'$clause'(Head, _Body, ClauseRef, _Bindings),
+    asserta(Head).
+copy_from_transaction(assertz(ClauseRef)) :-
+    '$tabling':'$clause'(Head, _Body, ClauseRef, _Bindings),
+    assertz(Head).
+copy_from_transaction(erased(ClauseRef)) :-
+    '$tabling':'$clause'(Head, _Body, ClauseRef, _Bindings),
+    retractall(Head).
 
 :- dynamic
+    count_engine_store/1,
     checked/3,
     break/3.
 
-count(Goal) :-
+%!  count(+Goal, -Count)
+%
+%   Count checks for Goal. This  is  tricky   as  the  evaluation can be
+%   inside a transaction and we want to make the count global.  To do so
+%   we use an engine.
+
+count(Goal, Count) :-
+    count_engine(Engine),
+    engine_post(Engine, Goal, Count).
+
+count_engine(Engine) :-
+    count_engine_store(Engine),
+    !.
+count_engine(Engine) :-
+    engine_create(x, do_count, Engine),
+    asserta(count_engine_store(Engine)).
+
+do_count :-
+    engine_fetch(Goal),
     variant_sha1(Goal, Hash),
     (   retract(checked(Hash, Goal, Count0))
     ->  Count is Count0+1
     ;   Count = 1
     ),
-    asserta(checked(Hash, Goal, Count)).
+    asserta(checked(Hash, Goal, Count)),
+    engine_yield(Count),
+    do_count.
+
+:- initialization count(init, _).
 
 %!  break(:Goal, +Count)
 %
@@ -184,6 +235,7 @@ break(Goal, Count) :-
     asserta(break(Hash, Goal, Count)).
 
 maybe_break(Goal) :-
+    thread_self(main),
     variant_sha1(Goal, Hash),
     break(Hash, Goal, BreatAt),
     (   checked(Hash, Goal, Count0)
