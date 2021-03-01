@@ -132,7 +132,7 @@ check_table(Head, Wrapped) :-
 check_table(Goal) :-
     thread_self(Me),
     Me == main,
-    current_prolog_flag(break_level, 0), % disable inside a break
+    \+ ( current_prolog_flag(break_level, Level), Level > 0 ), % disable inside a break
     !,
     solutions_from_table(Goal, Answers),
     (   transaction_updates(Updates)
@@ -148,7 +148,7 @@ check_table(Goal) :-
     ;   format(user_error, 'Wrong answers for ~p (iteration ~d) ~n',
                [Goal, NthCall]),
         show_difference(Answers, OkAnswers),
-        break,
+        %break,
         abort
     ).
 check_table(_).
