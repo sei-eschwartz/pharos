@@ -427,17 +427,13 @@ guessReasonAndCheck(Guess) :-
     ).
 
 guessReasonAndCheckGuarded(Guess) :-
-    (   call(Guess),
-        sanityChecksOrRevert,
+    (   logdebugln('Entered transaction for ~Q', Guess),
+        call(Guess),
+        sanityChecksOrRevert("after guess"),
         logdebugln('reasoningLoop: reasonForardAsManyTimesAsPossible'),
         reasonForwardAsManyTimesAsPossible,
-        sanityChecksOrRevert,
         logdebugln('reasoningLoop: post-reason sanityChecks'),
-        (   sanityChecks
-        ->  loginfoln('Constraint checks succeeded, guess accepted!')
-        ;   logwarnln('Constraint checks failed, retracting guess!'),
-            fail
-        ),
+        sanityChecksOrRevert("after reasonForwardAsManyTimesAsPossible"),
         % If we want to be able to backtrack upstream, we should resume reasoning
         % inside the transaction here.  Right? XXX
         (   backtrackForUpstream
@@ -445,16 +441,18 @@ guessReasonAndCheckGuarded(Guess) :-
         ;   % If we don't want to backtrack upstream, we let the transaction close and
             % then reason...
             true
-        )
+        ),
+        logdebugln('Commit transaction')
     ).
 
-sanityChecksOrRevert :-
+sanityChecksOrRevert(When) :-
     updated(Variants),
-    loginfoln(true, 'Affected variants: ~p', [Variants]),
     (   sanityChecks
-    ->  loginfoln('Constraint checks succeeded, proceeding to reason forward!')
+    ->  loginfoln('Constraint checks succeeded ~w!', When)
     ;   logwarnln('Constraint checks failed, retracting guess!'),
+        loginfoln(true, 'Invalidating affected variants: ~p', [Variants]),
         invalidate(Variants),
+        logdebugln('Rollback transaction ~w', When),
         fail
     ).
 
