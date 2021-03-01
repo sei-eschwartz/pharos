@@ -135,6 +135,8 @@ ooprolog_opts_spec(
        default(true), help('halt after execution')],
       [opt(load_only), longflags([load_only]), shortflags(['L']), type(boolean),
        default(false), help('only load the code')],
+      [opt(verify), longflags([verify]), type(boolean),
+       default(false), help('automatically verify tables')],
 
       [opt(help), longflags([help]), shortflags(['h']), type(boolean),
        help('output this message')]
@@ -205,10 +207,15 @@ main(_, [H|T]) :-
 main([], []) :-
     usage(user_output, 0).
 
+% How can we do this better?
+:- [v].
+
 main(Opts, []) :-
     load(Opts),
     (   option(load_only(true), Opts)
     ->  asserta(runOptions(Opts))
+    ;   option(verify(true), Opts)
+    ->  d, run(Opts)
     ;   run(Opts)
     ).
 
