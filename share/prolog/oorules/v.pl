@@ -26,7 +26,7 @@ Edit d/0 as needed for current task.
 d :-
     check_tabled_preds,
     debug,
-    clr,
+%   clr,
 %   break(user:reasonObjectInObject(_,_,_), 7),
 %   debug(tabling(reeval)),
 %   trace('$tabling':mon_propagate/3),
