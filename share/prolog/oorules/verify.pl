@@ -14,6 +14,7 @@
 :- use_module(library(tables)).
 :- use_module(library(tdump)).
 :- use_module(library(ordsets)).
+:- use_module(library(apply)).
 
 :- set_prolog_flag(backtrace_goal_depth, 20).
 
@@ -132,7 +133,7 @@ check_table(Head, Wrapped) :-
 check_table(Goal) :-
     thread_self(Me),
     Me == main,
-    current_prolog_flag(break_level, 0), % disable inside a break
+    \+ ( current_prolog_flag(break_level, Level), Level > 0 ), % disable inside a break
     !,
     solutions_from_table(Goal, Answers),
     (   transaction_updates(Updates)
@@ -143,12 +144,12 @@ check_table(Goal) :-
     thread_get_message(answers(OkAnswers)),
     thread_join(Id),
     count(Goal, NthCall),
-    (   OkAnswers == Answers
+    (   maplist(=@=, OkAnswers, Answers)
     ->  true
     ;   format(user_error, 'Wrong answers for ~p (iteration ~d) ~n',
                [Goal, NthCall]),
         show_difference(Answers, OkAnswers),
-        break,
+        %break,
         abort
     ).
 check_table(_).
