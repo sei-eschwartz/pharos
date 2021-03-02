@@ -9,11 +9,9 @@ initialMemory(0x4167bc, 0x4110b9).
 initialMemory(0x4167c4, -0x4).
 initialMemory(0x4167c8, 0x8).
 initialMemory(0x4167d4, 0x4110d7).
-noCallsBefore(0x411203).
 noCallsBefore(0x411610).
 noCallsBefore(0x411780).
 noCallsBefore(0x411860).
-noCallsBefore(0x412d86).
 noCallsBefore(0x413086).
 possibleVBTableWrite(0x411646, 0x411610, 0x10, 0x416764).
 possibleVBTableWrite(0x4117ac, 0x411780, 0x4, 0x4167a0).
@@ -51,7 +49,3 @@ rTTITypeDescriptor(0x419014, 0x4167d4, '.?AVB@@', 'B').
 rTTITypeDescriptor(0x419028, 0x4167d4, '.?AVA@@', 'A').
 rTTITypeDescriptor(0x41903c, 0x4167d4, '.?AVC@@', 'C').
 rTTITypeDescriptor(0x419058, 0x4167d4, '.?AVtype_info@@', type_info).
-thisPtrOffset(sv_9795505214497381384, 0xc, sv_9248995230526262021).
-thunk(0x411163, 0x413c84).
-thunk(0x411181, 0x4130b0).
-thunk(0x4111cc, 0x413ca2).
