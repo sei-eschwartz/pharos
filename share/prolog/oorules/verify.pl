@@ -149,8 +149,10 @@ check_table(Goal) :-
     ;   format(user_error, 'Wrong answers for ~p (iteration ~d) ~n',
                [Goal, NthCall]),
         show_difference(Answers, OkAnswers),
-        %break,
-        abort
+        (   current_prolog_flag(break_level, _) % interactive
+        ->  break
+        ;   abort
+	)
     ).
 check_table(_).
 
