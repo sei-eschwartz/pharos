@@ -379,7 +379,7 @@ reasonRealDestructorSet(Set) :-
 :- table reasonNOTRealDestructor_F/1 as incremental.
 :- table reasonNOTRealDestructor_G/1 as incremental.
 :- table reasonNOTRealDestructor_H/1 as incremental.
-:- table reasonNOTRealDestructor_I/2 as opaque.
+:- table reasonNOTRealDestructor_I/1 as incremental.
 
 reasonNOTRealDestructor(Method) :-
     %logwarnln('Recomputing reasonNOTRealDestructor...'),
@@ -472,7 +472,7 @@ reasonNOTRealDestructor_H(Method) :-
 :- table reasonDestructorParams/2 as opaque.
 reasonDestructorParams(Method, MaxParams) :-
     % There is a method
-    findMethod(Method, _Class),
+    possibleMethod(Method),
     % Get params
     setof(Param, Hash^funcParameter(Method, Param, Hash), Params),
     % ejs: It looks like arguments are not reliable
@@ -487,6 +487,7 @@ reasonDestructorParams(Method, MaxParams) :-
 reasonNOTRealDestructor_I(Method) :-
     Params = 1,
     reasonDestructorParams(Method, Params),
+    factMethod(Method),
 
     logtraceln('~@~Q.', [not(factNOTRealDestructor(Method)),
                          reasonNOTRealDestructor_I(Params, Method)]).
