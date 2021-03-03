@@ -774,93 +774,29 @@ reasonVFTableOverwrite(Method, VFTable2, VFTable1, Offset) :-
 % case of multiple inheritance.  The "Primary" VFTable is simply defined to be the one at
 % offset 0.
 
-:- table reasonVFTableBelongsToClass/5 as incremental.
+:- table reasonVFTableBelongsToClass_internal/6 as incremental.
 
-% Free, _, Bound
-reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
-    var(VFTable),
-    nonvar(Class),
-    !,
-    find(Method, Class),
-    factVFTableWrite(Insn, Method, Offset, VFTable),
-    VFTableWrite=factVFTableWrite(Insn, Method, Offset, VFTable),
+reasonVFTableBelongsToClass(VFTable, Offset, Method, Class, Rule, VFTableWrite) :-
+    reasonVFTableBelongsToClass_internal(VFTable, Offset, Method, Class, Rule, VFTableWrite),
 
     % ejs 10/9/20: We found the destructor rule was applying to a method which we had not
     % decided was a constructor or destructor.  The problem is that factVFTableOverwrite facts
     % are not produced when that happens.  So the following clause forces us to wait for that
     % decision to be made.
-    not(mayHavePendingOverwrites(Method)),
+    not(mayHavePendingOverwrites(Method)).
 
-    % ejs 9/13/20: If a factVFTableOverwrite exists, then the VFTable doesn't belong to this
-    % class.  This is different than the first case below, which says that the absence of
-    % factVFTableOverwrite indicates that the installed vftable belongs to the class (but only
-    % for constructors).  This clause is especially important for base classes that may not be
-    % directly instantiated, because the "no other class trying to install this vftable" will
-    % be trivially true, and without this clause, the vftable will simply belong to an
-    % arbitrary method that installs it.
-    not(factVFTableOverwrite(Method, VFTable, _OverwriteVFTable, Offset)),
-
-    % Constructors may inline embedded constructors.  If non-offset
-    % zero, we must make sure that there is an inherited class at this
-    % offset.
-    (Offset = 0 -> true; factDerivedClass(Class, _BaseClass, Offset)),
-
-    % VFTables from a base class can be reused in a derived class.  If this happens, we know
-    % that the VFTable does not belong to the derived class.
-    (Offset = 0 -> true; forall(factVFTableWrite(_Insn2, _OtherMethod, OtherOffset, VFTable), OtherOffset > 0)),
-
-    % Additional checks.  One of the following must be true...
-    (
-        % If Method is a constructor, we can use factVFTableOverwrite to make sure that we are
-        % actually installing this vftable for this class.  This only applies to constructors
-        % because we have found destructors get optimized more. See the more detailed
-        % commentary in reasonMergeClasses_D regarding the bad_cast case in Lite/oo.
-
-        % ejs 8/27/20: We saw cases where we would falsely use this rule because
-        % factVFTableOverwrite had not yet been proved, which requires factConstructor,
-        % factVFTable, and other rules.  So we use possibleVFTableOverwrite here instead to be
-        % more conservative.
-        % ejs 9/13/20: We now use factConstructor anyway, so perhaps we could relax this.
-        % ejs 10/9/20: Since we call not(mayHavePendingOverwrites(Method)) above, should we change this to factVFTableOverwrite?
-        (not(possibleVFTableOverwrite(_Insn3, _Insn4, Method, Offset, VFTable, _OtherVFTable)),
-         % ejs 9/13/20: In mysqld.exe, we were using this rule to incorrectly associate
-         % vftables with destructors before any determination about constructors or destructors
-         % was made.  So we must actually wait for a definitive constructor conclusion rather
-         % than the absence of contradictory evidence.
-         factConstructor(Method),
-         Rule=constructor);
-
-        % Alternatively, if we are a destructor, make sure there is no other class trying to
-        % install this vftable
-        % XXX: Should Offset = Offset2?
-        (forall(factVFTableWrite(_Insn5, Method2, Offset2, VFTable),
-               % It is ok to ignore overwritten vftables
-               (factVFTableOverwrite(Method2, VFTable, _OtherVFTable, Offset2);
-                % Otherwise it better be the same class
-                find(Method2, Class))),
-         Rule=destructor);
-
-        % If Class has no base, then the VFTable installation we see must be the right one.
-        (factClassHasNoBase(Class),
-         Rule=hasnobase)
-
-    ).
-
-% Bound, _, Bound: OK
-% Bound, _, Free: OK
-% Free, _, Bound: Not OK
-% Free, _, Free: OK
-reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
+reasonVFTableBelongsToClass_internal(VFTable, Offset, Method, Class, Rule, VFTableWrite) :-
     factVFTableWrite(Insn, Method, Offset, VFTable),
     VFTableWrite=factVFTableWrite(Insn, Method, Offset, VFTable),
     find(Method, Class),
-
 
     % ejs 10/9/20: We found the destructor rule was applying to a method which we had not
     % decided was a constructor or destructor.  The problem is that factVFTableOverwrite facts
     % are not produced when that happens.  So the following clause forces us to wait for that
     % decision to be made.
-    not(mayHavePendingOverwrites(Method)),
+    % ejs 3/3/21: This is non-monotonic so we move it into the non-tabled wrapper
+    % reasonVFTableBelongsToClass/6.
+    %not(mayHavePendingOverwrites(Method)),
 
     % ejs 9/13/20: If a factVFTableOverwrite exists, then the VFTable doesn't belong to this
     % class.  This is different than the first case below, which says that the absence of
@@ -2036,14 +1972,14 @@ reasonReusedImplementation(Method) :-
 % Because a vftable is connected by a vftable write.  See reasonVFTableBelongsToClass for more
 % information.
 reasonMergeVFTables(VFTableClass, Class) :-
-    reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite),
+    reasonVFTableBelongsToClass(VFTable, Offset, Method, Class, Rule, VFTableWrite),
     find(VFTable, VFTableClass),
 
     iso_dif(VFTableClass, Class),
 
     logtraceln('~@~Q.', [
                    not(find(VFTableClass, Class)),
-                   reasonMergeVFTables_A(Rule, VFTableClass, Class, VFTable, Offset, VFTableWrite)]).
+                   reasonMergeVFTables_A(Rule, VFTableClass, Method, Class, VFTable, Offset, VFTableWrite)]).
 
 % --------------------------------------------------------------------------------------------
 :- table reasonMergeClasses/2 as incremental.
