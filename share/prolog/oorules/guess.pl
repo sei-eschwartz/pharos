@@ -19,7 +19,7 @@ take(N, List, Prefix) :-
 reportGuess(Fact, Rule) :-
     countGuess,
     loginfoln('Guessing ~Q.', Fact),
-    logdebugln('~Q proposing ~Q.', [Rule, Fact]).
+    logtraceln('~Q proposing ~Q.', [Rule, Fact]).
 
 % Because of the way that we're mixing specific guessing rules with more general guessing
 % rules, SWI Prolog is complaining about non-contiugous rules, like so:
@@ -424,13 +424,13 @@ guessMethod(Out) :-
 tryMethod(Method, Rule) :-
     reportGuess(factMethod(Method), Rule),
     try_assert(factMethod(Method)),
-    try_assert(guessedMethod(Method), Rule),
+    try_assert(guessedMethod(Method)),
     make(Method).
 
-tryNOTMethod(Method) :-
+tryNOTMethod(Method, Rule) :-
     reportGuess(factNOTMethod(Method), Rule),
     try_assert(factNOTMethod(Method)),
-    try_assert(guessedNOTMethod(Method), Rule).
+    try_assert(guessedNOTMethod(Method)).
 
 % --------------------------------------------------------------------------------------------
 % Try guessing that method is a constructor.
@@ -1078,7 +1078,7 @@ checkMergeClasses(Method1, Method2) :-
     not(reasonClassRelationship(Class2, Class1)).
 
 % If we are merging classes that have already been merged, just ignore it.
-tryMergeClasses(Method1, Method2, Rule) :-
+tryMergeClasses(Method1, Method2, _Rule) :-
     find_current(Method1, Class),
     find_current(Method2, Class),
     logerrorln('tryMergeClasses on same class'),
