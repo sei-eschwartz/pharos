@@ -14,6 +14,8 @@ take(N, List, Prefix) :-
     length(Prefix, N),
     append(Prefix, _, List).
 
+reportGuess(Fact, Rule) :- logdebugln('Fact ~Q produced by guessing rule ~Q', [Fact, Rule]).
+
 % Because of the way that we're mixing specific guessing rules with more general guessing
 % rules, SWI Prolog is complaining about non-contiugous rules, like so:
 %   Clauses of Name/Arity are not together in the source-file
@@ -145,19 +147,21 @@ guessVirtualFunctionCall(Out) :-
                    factVirtualFunctionCall(Insn, Constructor, OOffset, VFTable, VOffset),
                    factNOTVirtualFunctionCall(Insn, Constructor, OOffset, VFTable, VOffset)))),
 
-    tryOrNot(tryVirtualFunctionCall(Insn, Constructor, OOffset, VFTable, VOffset),
-             tryVirtualFunctionCall(Insn, Constructor, OOffset, VFTable, VOffset),
+    tryOrNot(tryVirtualFunctionCall(Insn, Constructor, OOffset, VFTable, VOffset, guessVirtualFunctionCall),
+             tryVirtualFunctionCall(Insn, Constructor, OOffset, VFTable, VOffset, guessVirtualFunctionCall),
              Out).
 
-tryVirtualFunctionCall(Insn, Method, OOffset, VFTable, VOffset) :-
+tryVirtualFunctionCall(Insn, Method, OOffset, VFTable, VOffset, Rule) :-
     loginfoln('Guessing ~Q.',
               factVirtualFunctionCall(Insn, Method, OOffset, VFTable, VOffset)),
+    reportGuess(factVirtualFunctionCall(Insn, Method, OOffset, VFTable, VOffset), Rule),
     try_assert(factVirtualFunctionCall(Insn, Method, OOffset, VFTable, VOffset)),
     try_assert(guessedVirtualFunctionCall(Insn, Method, OOffset, VFTable, VOffset)).
 
-tryNOTVirtualFunctionCall(Insn, Method, OOffset, VFTable, VOffset) :-
+tryNOTVirtualFunctionCall(Insn, Method, OOffset, VFTable, VOffset, Rule) :-
     loginfoln('Guessing ~Q.',
               factNOTVirtualFunctionCall(Insn, Method, OOffset, VFTable, VOffset)),
+    reportGuess(factNOTVirtualFunctionCall(Insn, Method, OOffset, VFTable, VOffset), Rule),
     try_assert(factNOTVirtualFunctionCall(Insn, Method, OOffset, VFTable, VOffset)),
     try_assert(guessedNOTVirtualFunctionCall(Insn, Method, OOffset, VFTable, VOffset)).
 
@@ -173,18 +177,22 @@ guessVFTable(Out) :-
     doNotGuessHelper(factVFTable(VFTable),
                      factNOTVFTable(VFTable)),
 
-    tryOrNot(tryVFTable(VFTable), tryNOTVFTable(VFTable), Out).
+    tryOrNot(tryVFTable(VFTable, guessVFTable),
+             tryNOTVFTable(VFTable, guessVFTable),
+             Out).
 
-tryVFTable(VFTable) :-
+tryVFTable(VFTable, Rule) :-
     countGuess,
     loginfoln('Guessing ~Q.', factVFTable(VFTable)),
+    reportGuess(factVFTable(VFTable), Rule),
     try_assert(factVFTable(VFTable)),
     try_assert(guessedVFTable(VFTable)),
     make(VFTable).
 
-tryNOTVFTable(VFTable) :-
+tryNOTVFTable(VFTable, Rule) :-
     countGuess,
     loginfoln('Guessing ~Q.', factNOTVFTable(VFTable)),
+    reportGuess(factNOTVFTable(VFTable), Rule),
     try_assert(factNOTVFTable(VFTable)),
     try_assert(guessedNOTVFTable(VFTable)).
 
@@ -199,17 +207,19 @@ guessVBTable(Out) :-
     doNotGuessHelper(factVBTable(VBTable),
                      factNOTVBTable(VBTable)),
 
-    tryOrNot(tryVBTable(VBTable),
-             tryNOTVBTable(VBTable),
+    tryOrNot(tryVBTable(VBTable, guessVBTable),
+             tryNOTVBTable(VBTable, guessVBTable),
              Out).
 
-tryVBTable(VBTable) :-
+tryVBTable(VBTable, Rule) :-
     loginfoln('Guessing ~Q.', factVBTable(VBTable)),
+    reportGuess(factVBTable(VBTable), Rule),
     try_assert(factVBTable(VBTable)),
     try_assert(guessedVBTable(VBTable)).
 
-tryNOTVBTable(VBTable) :-
+tryNOTVBTable(VBTable, Rule) :-
     loginfoln('Guessing ~Q.', factNOTVBTable(VBTable)),
+    reportGuess(factNOTVBTable(VBTable), Rule),
     try_assert(factNOTVBTable(VBTable)),
     try_assert(guessedNOTVBTable(VBTable)).
 
@@ -264,26 +274,28 @@ guessVFTableEntry(Out) :-
     reportFirstSeen('guessVFTableEntry'),
     guessVFTableEntry1(VFTable, Offset, Entry),
 
-    tryOrNot(tryVFTableEntry(VFTable, Offset, Entry),
-             tryNOTVFTableEntry(VFTable, Offset, Entry),
+    tryOrNot(tryVFTableEntry(VFTable, Offset, Entry, guessVFTableEntry1),
+             tryNOTVFTableEntry(VFTable, Offset, Entry, guessVFTableEntry1),
              Out).
 
 guessVFTableEntry(Out) :-
     guessVFTableEntry2(VFTable, Offset, Entry),
 
-    tryOrNot(tryVFTableEntry(VFTable, Offset, Entry),
-             tryNOTVFTableEntry(VFTable, Offset, Entry),
+    tryOrNot(tryVFTableEntry(VFTable, Offset, Entry, guessVFTableEntry2),
+             tryNOTVFTableEntry(VFTable, Offset, Entry, guessVFTableEntry2),
              Out).
 
-tryVFTableEntry(VFTable, Offset, Entry) :-
+tryVFTableEntry(VFTable, Offset, Entry, Rule) :-
     countGuess,
     loginfoln('Guessing ~Q.', factVFTableEntry(VFTable, Offset, Entry)),
+    reportGuess(factVFTableEntry(VFTable, Offset, Entry), Rule),
     try_assert(factVFTableEntry(VFTable, Offset, Entry)),
     try_assert(guessedVFTableEntry(VFTable, Offset, Entry)).
 
-tryNOTVFTableEntry(VFTable, Offset, Entry) :-
+tryNOTVFTableEntry(VFTable, Offset, Entry, Rule) :-
     countGuess,
     loginfoln('Guessing ~Q.', factNOTVFTableEntry(VFTable, Offset, Entry)),
+    reportGuess(factNOTVFTableEntry(VFTable, Offset, Entry), Rule),
     try_assert(factNOTVFTableEntry(VFTable, Offset, Entry)),
     try_assert(guessedNOTVFTableEntry(VFTable, Offset, Entry)).
 
@@ -308,19 +320,21 @@ guessDerivedClass(DerivedClass, BaseClass, Offset) :-
 guessDerivedClass(Out) :-
     guessDerivedClass(DerivedClass, BaseClass, Offset),
 
-    tryOrNot(tryDerivedClass(DerivedClass, BaseClass, Offset),
-             tryEmbeddedObject(DerivedClass, BaseClass, Offset),
+    tryOrNot(tryDerivedClass(DerivedClass, BaseClass, Offset, guessDerivedClass),
+             tryEmbeddedObject(DerivedClass, BaseClass, Offset, guessDerivedClass),
              Out).
 
-tryEmbeddedObject(OuterClass, InnerClass, Offset) :-
+tryEmbeddedObject(OuterClass, InnerClass, Offset, Rule) :-
     countGuess,
     loginfoln('Guessing ~Q.', factEmbeddedObject(OuterClass, InnerClass, Offset)),
+    reportGuess(factEmbeddedObject(OuterClass, InnerClass, Offset), Rule),
     try_assert(factEmbeddedObject(OuterClass, InnerClass, Offset)),
     try_assert(guessedEmbeddedObject(OuterClass, InnerClass, Offset)).
 
-tryDerivedClass(DerivedClass, BaseClass, Offset) :-
+tryDerivedClass(DerivedClass, BaseClass, Offset, Rule) :-
     countGuess,
     loginfoln('Guessing ~Q.', factDerivedClass(DerivedClass, BaseClass, Offset)),
+    reportGuess(factDerivedClass(DerivedClass, BaseClass, Offset), Rule),
     try_assert(factDerivedClass(DerivedClass, BaseClass, Offset)),
     try_assert(guessedDerivedClass(DerivedClass, BaseClass, Offset)).
 
@@ -371,8 +385,8 @@ guessMethod(Out) :-
     guessMethodA(Method),
     logtraceln('Proposing ~Q.', factMethod_A(Method)),
 
-    tryOrNot(tryMethod(Method),
-             tryNOTMethod(Method),
+    tryOrNot(tryMethod(Method, guessMethodA),
+             tryNOTMethod(Method, guessMethodA),
              Out).
 
 guessMethodB(Method) :-
@@ -393,8 +407,8 @@ guessMethod(Out) :-
     guessMethodB(Method),
     logtraceln('Proposing ~Q.', factMethod_B(Method)),
 
-    tryOrNot(tryMethod(Method),
-             tryNOTMethod(Method),
+    tryOrNot(tryMethod(Method, guessMethodB),
+             tryNOTMethod(Method, guessMethodB),
              Out).
 
 % This guess is required (at least for our test suite) in cases where there's no certainty in
@@ -416,8 +430,8 @@ guessMethod(Out) :-
     guessMethodC(Method),
     logtraceln('Proposing ~Q.', factMethod_C(Method)),
 
-    tryOrNot(tryMethod(Method),
-             tryNOTMethod(Method),
+    tryOrNot(tryMethod(Method, guessMethodC),
+             tryNOTMethod(Method, guessMethodC),
              Out).
 
 % More kludgy guessing rules. :-( This one is based on thre premise that a cluster of three or
@@ -440,8 +454,8 @@ guessMethodD(Method) :-
 guessMethod(Out) :-
     guessMethodD(Method),
     logtraceln('Proposing ~Q.', factMethod_D(Method)),
-    tryOrNot(tryMethod(Method),
-             tryNOTMethod(Method),
+    tryOrNot(tryMethod(Method, guessMethodD),
+             tryNOTMethod(Method, guessMethodD),
              Out).
 
 % A variation of the previous rule using thisPtrUsage and passing around a this-pointer to
@@ -464,8 +478,8 @@ guessMethod(Out) :-
     guessMethodE(Method),
     logtraceln('Proposing ~Q.', factMethod_E(Method)),
 
-    tryOrNot(tryMethod(Method),
-             tryNOTMethod(Method),
+    tryOrNot(tryMethod(Method, guessMethodE),
+             tryNOTMethod(Method, guessMethodE),
              Out).
 
 % Another case where we're trying to implement the reasoning that there's a lot of stuff
@@ -483,8 +497,8 @@ guessMethod(Out) :-
     guessMethodF(Method),
     logtraceln('Proposing ~Q.', factMethod_F(Method)),
 
-    tryOrNot(tryMethod(Method),
-             tryNOTMethod(Method),
+    tryOrNot(tryMethod(Method, guessMethodF),
+             tryNOTMethod(Method, guessMethodF),
              Out).
 
 % Also guess possible constructors and destructors with calls from known methods.
@@ -500,22 +514,24 @@ guessMethod(Out) :-
     guessMethodG(Method),
     logtraceln('Proposing ~Q.', factMethod_G(Method)),
 
-    tryOrNot(tryMethod(Method),
-             tryNOTMethod(Method),
+    tryOrNot(tryMethod(Method, guessMethodG),
+             tryNOTMethod(Method, guessMethodG),
              Out).
 
-tryMethod(Method) :-
+tryMethod(Method, Rule) :-
     countGuess,
     loginfoln('Guessing ~Q.', factMethod(Method)),
+    reportGuess(factMethod(Method), Rule),
     try_assert(factMethod(Method)),
-    try_assert(guessedMethod(Method)),
+    try_assert(guessedMethod(Method), Rule),
     make(Method).
 
 tryNOTMethod(Method) :-
     countGuess,
     loginfoln('Guessing ~Q.', factNOTMethod(Method)),
+    reportGuess(factNOTMethod(Method), Rule),
     try_assert(factNOTMethod(Method)),
-    try_assert(guessedNOTMethod(Method)).
+    try_assert(guessedNOTMethod(Method), Rule).
 
 % --------------------------------------------------------------------------------------------
 % Try guessing that method is a constructor.
@@ -561,8 +577,8 @@ guessConstructor(Out) :-
     guessConstructor1(Method),
     logtraceln('Proposing ~Q.', factConstructor1(Method)),
 
-    tryOrNot(tryConstructor(Method),
-             tryNOTConstructor(Method),
+    tryOrNot(tryConstructor(Method, guessConstructor1),
+             tryNOTConstructor(Method, guessConstructor1),
              Out).
 
 % Likely virtual case, not in a vftable, writes a vftable, but has unitialized reads.
@@ -580,8 +596,8 @@ guessConstructor(Out) :-
     guessConstructor2(Method),
     logtraceln('Proposing ~Q.', factConstructor2(Method)),
 
-    tryOrNot(tryConstructor(Method),
-             tryNOTConstructor(Method),
+    tryOrNot(tryConstructor(Method, guessConstructor2),
+             tryNOTConstructor(Method, guessConstructor2),
              Out).
 
 % Normal non-virtual case, not in a vftable, doesn't write a vftable, and has no uninitialized
@@ -600,8 +616,8 @@ guessConstructor(Out) :-
     guessConstructor3(Method),
     logtraceln('Proposing ~Q.', factConstructor3(Method)),
 
-    tryOrNot(tryConstructor(Method),
-             tryNOTConstructor(Method),
+    tryOrNot(tryConstructor(Method, guessConstructor3),
+             tryNOTConstructor(Method, guessConstructor3),
              Out).
 
 % Unusual non-virtual case presumably with inheritance -- not in a vftable, doesn't write a
@@ -620,19 +636,21 @@ guessUnlikelyConstructor(Out) :-
     guessConstructor4(Method),
     logtraceln('Proposing ~Q.', factConstructor4(Method)),
 
-    tryOrNot(tryConstructor(Method),
-             tryNOTConstructor(Method),
+    tryOrNot(tryConstructor(Method, guessConstructor4),
+             tryNOTConstructor(Method, guessConstructor4),
              Out).
 
-tryConstructor(Method) :-
+tryConstructor(Method, Rule) :-
     countGuess,
     loginfoln('Guessing ~Q.', factConstructor(Method)),
+    reportGuess(factConstructor(Method), Rule),
     try_assert(factConstructor(Method)),
     try_assert(guessedConstructor(Method)).
 
-tryNOTConstructor(Method) :-
+tryNOTConstructor(Method, Rule) :-
     countGuess,
     loginfoln('Guessing ~Q.', factNOTConstructor(Method)),
+    reportGuess(factNOTConstructor(Method), Rule),
     try_assert(factNOTConstructor(Method)),
     try_assert(guessedNOTConstructor(Method)).
 
@@ -662,8 +680,8 @@ guessClassHasNoBase(Out) :-
     guessClassHasNoBaseB(Class),
     logtraceln('Proposing ~P.', 'ClassHasNoBase_B'(Class)),
 
-    tryOrNot(tryClassHasNoBase(Class),
-             tryClassHasUnknownBase(Class),
+    tryOrNot(tryClassHasNoBase(Class, guessClassHasNoBaseB),
+             tryClassHasUnknownBase(Class, guessClassHasNoBaseB),
              Out).
 
 
@@ -680,19 +698,21 @@ guessClassHasNoBase(Out) :-
     guessClassHasNoBaseC(Class),
     logtraceln('Proposing ~P.', 'ClassHasNoBase_C'(Class)),
 
-    tryOrNot(tryClassHasNoBase(Class),
-             tryClassHasUnknownBase(Class),
+    tryOrNot(tryClassHasNoBase(Class, guessClassHasNoBaseC),
+             tryClassHasUnknownBase(Class, guessClassHasNoBaseC),
              Out).
 
-tryClassHasNoBase(Class) :-
+tryClassHasNoBase(Class, Rule) :-
     countGuess,
     loginfoln('Guessing ~Q.', factClassHasNoBase(Class)),
+    reportGuess(factClassHasNoBase(Class), Rule),
     try_assert(factClassHasNoBase(Class)),
     try_assert(guessedClassHasNoBase(Class)).
 
-tryClassHasUnknownBase(Class) :-
+tryClassHasUnknownBase(Class, Rule) :-
     countGuess,
     loginfoln('Guessing ~Q.', factClassHasUnknownBase(Class)),
+    reportGuess(factClassHasUnknownBase(Class), Rule),
     try_assert(factClassHasUnknownBase(Class)),
     try_assert(guessedClassHasUnknownBase(Class)).
 
@@ -717,8 +737,8 @@ guessCommitClassHasNoBase(Out) :-
     guessClassHasNoBaseSpecial(Class),
     logtraceln('Proposing ~P.', 'CommitClassHasNoBase'(Class)),
 
-    tryOrNot(tryClassHasNoBase(Class),
-             tryClassHasUnknownBase(Class),
+    tryOrNot(tryClassHasNoBase(Class, guessCommitClassHasNoBase),
+             tryClassHasUnknownBase(Class, guessCommitClassHasNoBase),
              Out).
 
 % The following merge guesses should occur late so that we can identify all classes which have
@@ -762,8 +782,8 @@ guessLateMergeClasses(Out) :-
     !,
     logtraceln('Proposing ~Q.', factLateMergeClasses_F1(Class, Method)),
 
-    tryOrNot(tryMergeClasses(Class, Method),
-             tryNOTMergeClasses(Class, Method),
+    tryOrNot(tryMergeClasses(Class, Method, guessLateMergeClasses1),
+             tryNOTMergeClasses(Class, Method, guessLateMergeClasses1),
              Out).
 
 guessLateMergeClasses(Out) :-
@@ -773,8 +793,8 @@ guessLateMergeClasses(Out) :-
     !,
     logtraceln('Proposing ~Q.', factLateMergeClasses_F2(Class, Method)),
 
-    tryOrNot(tryMergeClasses(Class, Method),
-             tryNOTMergeClasses(Class, Method),
+    tryOrNot(tryMergeClasses(Class, Method, guessLateMergeClasses2),
+             tryNOTMergeClasses(Class, Method, guessLateMergeClasses2),
              Out).
 
 % ejs 1/27/21 This rule used to be a normal merge guess instead of a late merge guess.  But we
@@ -803,8 +823,8 @@ guessLateMergeClasses(Out) :-
           guessLateMergeClassesG(Class, Method)),
     !,
 
-    tryOrNot(tryMergeClasses(Class, Method),
-             tryNOTMergeClasses(Class, Method),
+    tryOrNot(tryMergeClasses(Class, Method, guessLateMergeClassesG),
+             tryNOTMergeClasses(Class, Method, guessLateMergeClassesG),
              Out).
 
 
@@ -851,8 +871,8 @@ guessNOTMergeClassesSymmetric(Class1, Class2) :-
 guessNOTMergeClasses(Out) :-
     guessNOTMergeClassesSymmetric(Class1, Class2),
 
-    tryOrNot(tryNOTMergeClasses(Class1, Class2),
-             tryMergeClasses(Class1, Class2),
+    tryOrNot(tryNOTMergeClasses(Class1, Class2, guessNOTMergeClasses),
+             tryMergeClasses(Class1, Class2, guessNOTMergeClasses),
              Out).
 
 % This is one of the strongest of several rules for guessing arbitrary method assignments.  We
@@ -959,8 +979,8 @@ guessMergeClasses(Out) :-
           guessMergeClassesB(Class, Method)),
     !,
 
-    tryOrNot(tryMergeClasses(Class, Method),
-             tryNOTMergeClasses(Class, Method),
+    tryOrNot(tryMergeClasses(Class, Method, guessMergeClassesB),
+             tryNOTMergeClasses(Class, Method, guessMergeClassesB),
              Out).
 
 % A Derived class calls a method.  Does that method belong to the base or derived class?
@@ -1014,8 +1034,8 @@ guessMergeClasses(Out) :-
           guessMergeClassesC1(Class, Method)),
     !,
 
-    tryOrNot(tryMergeClasses(Class, Method),
-             tryNOTMergeClasses(Class, Method),
+    tryOrNot(tryMergeClasses(Class, Method, guessMergeClassesC1),
+             tryNOTMergeClasses(Class, Method, guessMergeClassesC1),
              Out).
 
 % If the called method installs a base VFTable, guess that the method belongs on the base class.
@@ -1041,8 +1061,8 @@ guessMergeClasses(Out) :-
           guessMergeClassesC2(Class, Method)),
     !,
 
-    tryOrNot(tryMergeClasses(Class, Method),
-             tryNOTMergeClasses(Class, Method),
+    tryOrNot(tryMergeClasses(Class, Method, guessMergeClassesC2),
+             tryNOTMergeClasses(Class, Method, guessMergeClassesC2),
              Out).
 
 % If we haven't made a guess about the called method, guess that it is on the derived class.
@@ -1063,8 +1083,8 @@ guessMergeClasses(Out) :-
           guessMergeClassesC3(Class, Method)),
     !,
 
-    tryOrNot(tryMergeClasses(Class, Method),
-             tryNOTMergeClasses(Class, Method),
+    tryOrNot(tryMergeClasses(Class, Method, guessMergeClassesC3),
+             tryNOTMergeClasses(Class, Method, guessMergeClassesC3),
              Out).
 
 % If we still haven't made a guess about the called method, guess that it is on the base class.
@@ -1085,8 +1105,8 @@ guessMergeClasses(Out) :-
           guessMergeClassesC4(Class, Method)),
     !,
 
-    tryOrNot(tryMergeClasses(Class, Method),
-             tryNOTMergeClasses(Class, Method),
+    tryOrNot(tryMergeClasses(Class, Method, guessMergeClassesC4),
+             tryNOTMergeClasses(Class, Method, guessMergeClassesC4),
              Out).
 
 
@@ -1156,8 +1176,8 @@ guessMergeClasses(Out) :-
           guessMergeClassesG(Class, Method)),
     !,
 
-    tryOrNot(tryMergeClasses(Class, Method),
-             tryNOTMergeClasses(Class, Method),
+    tryOrNot(tryMergeClasses(Class, Method, guessMergeClassesG),
+             tryNOTMergeClasses(Class, Method, guessMergeClassesG),
              Out).
 
 
@@ -1176,26 +1196,28 @@ checkMergeClasses(Method1, Method2) :-
     not(reasonClassRelationship(Class2, Class1)).
 
 % If we are merging classes that have already been merged, just ignore it.
-tryMergeClasses(Method1, Method2) :-
+tryMergeClasses(Method1, Method2, Rule) :-
     find_current(Method1, Class),
     find_current(Method2, Class),
     logerrorln('tryMergeClasses on same class'),
     throw_with_backtrace(error(system_error(tryMergeClasses, Method1, Method2, Class))),
     !.
 
-tryMergeClasses(Method1, Method2) :-
+tryMergeClasses(Method1, Method2, Rule) :-
     countGuess,
     find_current(Method1, Class1),
     find_current(Method2, Class2),
     loginfoln('Guessing ~Q.', mergeClasses(Class1, Class2)),
+    reportGuess(mergeClasses(Class1, Class2), Rule),
     mergeClasses(Class1, Class2),
     try_assert(guessedMergeClasses(Class1, Class2)).
 
-tryNOTMergeClasses(Method1, Method2) :-
+tryNOTMergeClasses(Method1, Method2, Rule) :-
     countGuess,
     find_current(Method1, Class1),
     find_current(Method2, Class2),
     loginfoln('Guessing ~Q.', factNOTMergeClasses(Class1, Class2)),
+    reportGuess(mergeClasses(Class1, Class2), Rule),
     try_assert(factNOTMergeClasses(Class1, Class2)),
     try_assert(guessedNOTMergeClasses(Class1, Class2)).
 
@@ -1211,8 +1233,8 @@ guessRealDestructor(Out) :-
            doNotGuessHelper(factRealDestructor(Method),
                             factNOTRealDestructor(Method)))),
 
-    tryOrNot(tryRealDestructor(Method),
-             tryNOTRealDestructor(Method),
+    tryOrNot(tryRealDestructor(Method, guessRealDestructor),
+             tryNOTRealDestructor(Method, guessRealDestructor),
              Out).
 
 % Establish that the candidate meets minimal requirements.
@@ -1247,8 +1269,8 @@ guessFinalRealDestructor(Out) :-
     callTarget(_Insn, OtherDestructor, Method),
     factDeletingDestructor(OtherDestructor),
 
-    tryOrNot(tryRealDestructor(Method),
-             tryNOTRealDestructor(Method),
+    tryOrNot(tryRealDestructor(Method, guessFinalRealDestructor1),
+             tryNOTRealDestructor(Method, guessFinalRealDestructor1),
              Out).
 
 % Prioritize methods that call other real destructors.
@@ -1257,8 +1279,8 @@ guessFinalRealDestructor(Out) :-
     callTarget(_Insn, Method, OtherDestructor),
     factRealDestructor(OtherDestructor),
 
-    tryOrNot(tryRealDestructor(Method),
-             tryNOTRealDestructor(Method),
+    tryOrNot(tryRealDestructor(Method, guessFinalRealDestructor2),
+             tryNOTRealDestructor(Method, guessFinalRealDestructor2),
              Out).
 
 % Prioritize methods that do not call delete to avoid confusion with deleting destructors.
@@ -1267,25 +1289,27 @@ guessFinalRealDestructor(Out) :-
     minimalRealDestructor(Method),
     not(insnCallsDelete(_Insn, Method, _SV)),
 
-    tryOrNot(tryRealDestructor(Method),
-             tryNOTRealDestructor(Method),
+    tryOrNot(tryRealDestructor(Method, guessFinalRealDestructor3),
+             tryNOTRealDestructor(Method, guessFinalRealDestructor3),
              Out).
 
 % Guess if it meets the minimal criteria.
 guessFinalRealDestructor(Out) :-
     minimalRealDestructor(Method),
 
-    tryOrNot(tryRealDestructor(Method),
-             tryNOTRealDestructor(Method),
+    tryOrNot(tryRealDestructor(Method, guessFinalRealDestructor4),
+             tryNOTRealDestructor(Method, guessFinalRealDestructor4),
              Out).
 
-tryRealDestructor(Method) :-
+tryRealDestructor(Method, Rule) :-
     loginfoln('Guessing ~Q.', factRealDestructor(Method)),
+    reportGuess(factRealDestructor(Method), Rule),
     try_assert(factRealDestructor(Method)),
     try_assert(guessedRealDestructor(Method)).
 
-tryNOTRealDestructor(Method) :-
+tryNOTRealDestructor(Method, Rule) :-
     loginfoln('Guessing ~Q.', factNOTRealDestructor(Method)),
+    reportGuess(factNOTRealDestructor(Method), Rule),
     try_assert(factNOTRealDestructor(Method)),
     try_assert(guessedNOTRealDestructor(Method)).
 
@@ -1314,8 +1338,8 @@ guessDeletingDestructor(Out) :-
                       factNOTDeletingDestructor(Method)),
     !,
 
-    tryOrNot(tryDeletingDestructor(Method),
-             tryNOTDeletingDestructor(Method),
+    tryOrNot(tryDeletingDestructor(Method, guessDeletingDestructor1),
+             tryNOTDeletingDestructor(Method, guessDeletingDestructor1),
              Out).
 
 guessDeletingDestructor(Out) :-
@@ -1325,8 +1349,8 @@ guessDeletingDestructor(Out) :-
                             factNOTDeletingDestructor(Method)))),
     !,
 
-    tryOrNot(tryDeletingDestructor(Method),
-             tryNOTDeletingDestructor(Method),
+    tryOrNot(tryDeletingDestructor(Method, guessDeletingDestructor2),
+             tryNOTDeletingDestructor(Method, guessDeletingDestructor2),
              Out).
 
 guessFinalDeletingDestructor(Out) :-
@@ -1346,8 +1370,8 @@ guessFinalDeletingDestructor(Out) :-
        )),
 
     !,
-    tryOrNot(tryDeletingDestructor(Method),
-             tryNOTDeletingDestructor(Method),
+    tryOrNot(tryDeletingDestructor(Method, guessFinalDeletingDestructor1),
+             tryNOTDeletingDestructor(Method, guessFinalDeletingDestructor1),
              Out).
 
 %
@@ -1379,17 +1403,19 @@ guessFinalDeletingDestructor(Out) :-
     iso_dif(Entry1, Entry2),
 
     !,
-    tryOrNot(tryDeletingDestructor(Method),
-             tryNOTDeletingDestructor(Method),
+    tryOrNot(tryDeletingDestructor(Method, guessFinalDeletingDestructor2),
+             tryNOTDeletingDestructor(Method, guessFinalDeletingDestructor2),
              Out).
 
-tryDeletingDestructor(Method) :-
+tryDeletingDestructor(Method, Rule) :-
     loginfoln('Guessing ~Q.', factDeletingDestructor(Method)),
+    reportGuess(factDeletingDestructor(Method), Rule),
     try_assert(factDeletingDestructor(Method)),
     try_assert(guessedDeletingDestructor(Method)).
 
-tryNOTDeletingDestructor(Method) :-
+tryNOTDeletingDestructor(Method, Rule) :-
     loginfoln('Guessing ~Q.', factDeletingDestructor(Method)),
+    reportGuess(factNOTDeletingDestructor(Method), Rule),
     try_assert(factNOTDeletingDestructor(Method)),
     try_assert(guessedNOTDeletingDestructor(Method)).
 
