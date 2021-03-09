@@ -32,6 +32,8 @@ complex_pred(,).
 complex_pred(;).
 complex_pred(>=).
 complex_pred(=<).
+complex_pred(>).
+complex_pred(<).
 complex_pred(iso_dif).
 
 % Translate inside a negation
@@ -46,7 +48,8 @@ translate_negation(Pred, X, Y), compound(X), X =.. [InnerPred|Args], complex_pre
     Y =.. [InnerPred|TranslatedArgs].
 
 translate_negation(Pred, X, Y), compound(X) =>
-    format('~Q statically references ~Q inside negation~n', [Pred, X]),
+    X =.. [InnerPredName|_],
+    format('~Q statically references ~Q (~Q) inside negation~n', [Pred, InnerPredName, X]),
     Y = X.
 
 translate_negation(_Pred, X, Out) => Out = X.
