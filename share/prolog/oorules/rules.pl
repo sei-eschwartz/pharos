@@ -4,21 +4,55 @@
 
 %term_expansion(Term1,_) :- format('Term: ~Q~n', [Term1]), fail.
 
-term_expansion((Head :- Body), _Out) :-
+term_expansion((Head :- Body), (Head :- NewBody)) :-
     Head =.. [PredName|_Args],
     (sub_string(PredName, 0, 6, _After, reason);
      sub_string(PredName, 0, 5, _After, guess)),
-    format('~Q~n', Head :- Body),
-    translate(PredName, Body, _NewBody),
-    fail.
+    translate(PredName, Body, NewBody).
+    %format('~n~Q ->~n ~Q~n', [(Head :- Body), (Head :- NewBody)]).
 
 %translate(_Pred, In, _Out), format('translate(~Q)~n', [In]), fail => true.
+
+% These are compounds we should keep recursing into but ignore the root
+
+complex_pred(,).
+complex_pred(;).
+complex_pred(>=).
+complex_pred(=<).
+complex_pred(>).
+complex_pred(<).
+complex_pred(iso_dif).
+complex_pred(purecall).
+%complex_pred(symbolProperty).
+
+% Don't recurse on these
+
+ignore_pred(logtraceln).
+
+% Static
+
+% possibleFoo are always static by convention
+static_pred(PredName) :-
+    sub_atom(PredName, 0, 8, _, possible).
+static_pred(PredName) :-
+    sub_atom(PredName, 0, 8, _, possibly).
+static_pred(insnCallsDelete).
+static_pred(symbolProperty).
+static_pred(symbolClass).
+static_pred(uninitializedReads).
+static_pred(callTarget).
+
+%translate(_Pred, X, _), format('translate(~Q).~n', [X]), fail => true.
 
 translate(Pred, not(X), Out) =>
     %format('NOT ~Q~n', [X]),
     translate_negation(Pred, X, Xout),
     %format('NOT ~Q -> ~Q~n', [X, Xout]),
     Out = not(Xout).
+
+% Don't recurse on these
+translate(_Pred, X, Y), compound(X), X =.. [InnerPred|_Args], ignore_pred(InnerPred) =>
+    Y = X.
 
 translate(Pred, X, Y), compound(X) =>
     %format('Compound ~Q~n', [X]),
@@ -28,17 +62,13 @@ translate(Pred, X, Y), compound(X) =>
 
 translate(_Pred, X, Out) => Out=X.
 
-complex_pred(,).
-complex_pred(;).
-complex_pred(>=).
-complex_pred(=<).
-complex_pred(>).
-complex_pred(<).
-complex_pred(iso_dif).
-
 % Translate inside a negation
-translate_negation(_Pred, not(_), _) =>
-    throw(translate).
+
+%translate_negation(_Pred, X, _), format('translate_negation(~Q).~n', [X]), fail => true.
+
+translate_negation(_Pred, not(_), _), format('Warning: Double negation~n'), fail => true.
+%    throw((translate_error, not(X))).
+
 
 % Keep recursing if we get to , or ;
 translate_negation(Pred, X, Y), compound(X), X =.. [InnerPred|Args], complex_pred(InnerPred) =>
@@ -47,10 +77,14 @@ translate_negation(Pred, X, Y), compound(X), X =.. [InnerPred|Args], complex_pre
     maplist(translate_negation(Pred), Args, TranslatedArgs),
     Y =.. [InnerPred|TranslatedArgs].
 
+translate_negation(_Pred, X, Y), compound(X), X =.. [InnerPred|_], static_pred(InnerPred) =>
+    Y = X.
+
 translate_negation(Pred, X, Y), compound(X) =>
     X =.. [InnerPredName|_],
-    format('~Q statically references ~Q (~Q) inside negation~n', [Pred, InnerPredName, X]),
-    Y = X.
+    Y = (logerrorln('~Q dynamically references ~Q (~Q) inside negation', [Pred, InnerPredName, X]),
+         X,
+         logerrorln('~Q dynamically references BLOCKED ~Q (~Q) inside negation', [Pred, InnerPredName, X])).
 
 translate_negation(_Pred, X, Out) => Out = X.
 
@@ -1381,6 +1415,7 @@ reasonEmbeddedObject_C(Class, EmbeddedClass, Offset) :-
 % better due to testing explicitly true facts rather than using "not()".
 reasonEmbeddedObject_D(Class, EmbeddedClass, Offset) :-
     factObjectInObject(Class, EmbeddedClass, Offset),
+    % XXX: Can this be true?
     not(factDerivedClass(Class, EmbeddedClass, Offset)),
     iso_dif(Offset, 0),
     factEmbeddedObject(Class, _, LowerOffset),
