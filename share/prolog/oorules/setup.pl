@@ -403,8 +403,8 @@ reasonForwardAsManyTimesAsPossible :-
     logtraceln('reasonForwardAsManyTimesAsPossible'),
     %(sanityChecks -> true; (logwarnln('Failed sanity check during forward reasoning'),
     %                       throw_with_backtrace(error(system_error(reasonForwardAsManyTimesAsPossible))))),
-    if_(reasonForward,
-        reasonForwardAsManyTimesAsPossible,
+    if_((reasonForward, logtraceln('success')),
+        (logtraceln('as many times'), reasonForwardAsManyTimesAsPossible),
         logdebugln('reasonForwardAsManyTimesAsPossible complete.')).
 
 % Go forward: Make a guess, reason forward, and then sanity check
