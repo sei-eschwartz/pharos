@@ -2554,6 +2554,7 @@ reasonNOTMergeClasses_L(Class1, Class2) :-
     % twice, but reduces the number of NOTMergeClass facts created by this rule.
     Class1 < Class2,
     % Debugging
+    ((Class1=0x4034a2, Class2=0x4040af) -> gtrace; true),
     logtraceln('~@~Q.', [not(dynFactNOTMergeClasses(Class1, Class2)),
                          reasonNOTMergeClasses_L(Class1, Class2)]).
 
