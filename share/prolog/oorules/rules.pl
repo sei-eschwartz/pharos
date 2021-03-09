@@ -2,6 +2,55 @@
 
 :- use_module(library(lists), [member/2, max_list/2]).
 
+%term_expansion(Term1,_) :- format('Term: ~Q~n', [Term1]), fail.
+
+term_expansion((Head :- Body), _Out) :-
+    Head =.. [PredName|_Args],
+    (sub_string(PredName, 0, 6, _After, reason);
+     sub_string(PredName, 0, 5, _After, guess)),
+    format('~Q~n', Head :- Body),
+    translate(PredName, Body, _NewBody),
+    fail.
+
+%translate(_Pred, In, _Out), format('translate(~Q)~n', [In]), fail => true.
+
+translate(Pred, not(X), Out) =>
+    %format('NOT ~Q~n', [X]),
+    translate_negation(Pred, X, Xout),
+    %format('NOT ~Q -> ~Q~n', [X, Xout]),
+    Out = not(Xout).
+
+translate(Pred, X, Y), compound(X) =>
+    %format('Compound ~Q~n', [X]),
+    X =.. [InnerPred|Args],
+    maplist(translate(Pred), Args, TranslatedArgs),
+    Y =.. [InnerPred|TranslatedArgs].
+
+translate(_Pred, X, Out) => Out=X.
+
+complex_pred(,).
+complex_pred(;).
+complex_pred(>=).
+complex_pred(=<).
+complex_pred(iso_dif).
+
+% Translate inside a negation
+translate_negation(_Pred, not(_), _) =>
+    throw(translate).
+
+% Keep recursing if we get to , or ;
+translate_negation(Pred, X, Y), compound(X), X =.. [InnerPred|Args], complex_pred(InnerPred) =>
+    %format('~Q statically references ~Q inside negation~n', [Pred, X]),
+    %Y = X.
+    maplist(translate_negation(Pred), Args, TranslatedArgs),
+    Y =.. [InnerPred|TranslatedArgs].
+
+translate_negation(Pred, X, Y), compound(X) =>
+    format('~Q statically references ~Q inside negation~n', [Pred, X]),
+    Y = X.
+
+translate_negation(_Pred, X, Out) => Out = X.
+
 % --------------------------------------------------------------------------------------------
 % The method is certain to be an object-oriented method.
 :- table reasonMethod/1 as incremental.
