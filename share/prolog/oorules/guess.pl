@@ -1095,7 +1095,7 @@ tryMergeClasses(Method1, Method2, Rule) :-
 tryNOTMergeClasses(Method1, Method2, Rule) :-
     find_current(Method1, Class1),
     find_current(Method2, Class2),
-    reportGuess(NOTMergeClasses(Class1, Class2), Rule),
+    reportGuess(factNOTMergeClasses(Class1, Class2), Rule),
     try_assert(factNOTMergeClasses(Class1, Class2)),
     try_assert(guessedNOTMergeClasses(Class1, Class2)).
 
