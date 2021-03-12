@@ -2554,7 +2554,8 @@ reasonNOTMergeClasses_L(Class1, Class2) :-
     % twice, but reduces the number of NOTMergeClass facts created by this rule.
     Class1 < Class2,
     % Debugging
-    ((Class1=0x4034a2, Class2=0x4040af) -> gtrace; true),
+    %((Class1=0x4034a2, Class2=0x4040af) -> (leash(-all), protocol('/tmp/bad.log'), trace); true),
+    ((Class1=0x4034a2, Class2=0x4040af) -> (spy(reasonNOTMergeClasses_N/2), gtrace); true),
     logtraceln('~@~Q.', [not(dynFactNOTMergeClasses(Class1, Class2)),
                          reasonNOTMergeClasses_L(Class1, Class2)]).
 
@@ -2583,6 +2584,9 @@ reasonNOTMergeClasses_N(Class1, Class2) :-
     % Debugging
     logtraceln('~@~Q.', [not(dynFactNOTMergeClasses(Class1, Class2)),
                          reasonNOTMergeClasses_N(Class1, Class2, GTESize, LTESize)]).
+
+reasonNOTMergeClasses_N(_, _) :-
+    logwarnln('second rule'), fail.
 
 % Because the method accesses members that aren't there.
 % PAPER: Merging-15
