@@ -115,7 +115,7 @@ reasonMethod_M(Method) :-
     thisPtrUsage(_Insn2, Func, ThisPtr, Method),
     % Require that the Method also read/use the value.
     funcParameter(Method, ecx, _SymbolicValue),
-    logtraceln('~@~Q.', [not(factMethod(Method)), reasonMethod_M(Method)]).
+    logtraceln('~@~Q.', [bnot(factMethod(Method)), reasonMethod_M(Method)]).
 
 % Because the thisptr is known to be an object pointer.
 reasonMethod_N(Func) :-
