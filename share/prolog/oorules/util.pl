@@ -5,6 +5,20 @@
 
 :- use_module(library(lists), [append/3, nth1/4, list_to_set/2]).
 
+% This predicate is used to block monotonic dependencies from being recorded
+:- meta_predicate
+     block_deps(0).
+
+block_deps(Goal) :-
+     reset(Goal, dependency(_), Cont),
+     (   Cont=0
+     ->  true
+     ;   call(Cont)).
+
+:- meta_predicate bnot(0).
+bnot(Goal) :-
+    not(block_deps(Goal)).
+
 sort_tuple((A,B), (C,D)) :-
     (A < B -> (C=A, D=B); (C=B, D=A)).
 
