@@ -337,10 +337,20 @@ possiblyVirtual(Method) :-
 % memory consumption, potentially at a small expense of run time.  This is also useful just for
 % ensuring that the symmetry is applied consistently when writing rules.
 dynFactNOTMergeClasses(Class1, Class2) :-
-    % If the first one is true, don't try the second ordering.
-    (factNOTMergeClasses(Class1, Class2) -> true;
-     % If the first one isn't true, try the second one.
-     factNOTMergeClasses(Class2, Class1)).
+
+    % ejs: Since this can be called in monotonic predicates, we cannot commit to an order.
+    % This could cause some extra backtracking when called in a non-tabled context though, so
+    % we might want to have separate implementations.
+
+    factNOTMergeClasses(Class1, Class2);
+    factNOTMergeClasses(Class2, Class1).
+
+    % Old code not safe for monotonic tabling:
+    %% % If the first one is true, don't try the second ordering.
+    %%    factNOTMergeClasses(Class1, Class2)
+    %% -> true;
+    %% % If the first one isn't true, try the second one.
+    %%    factNOTMergeClasses(Class2, Class1)).
 
 % ============================================================================================
 % Rules for setting up preconditions for good guesses...

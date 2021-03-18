@@ -485,6 +485,7 @@ guessConstructor2(Method) :-
     possibleConstructor(Method),
     not(possiblyVirtual(Method)),
     factVFTableWrite(_Insn, Method, _ObjectOffset, _VFTable2),
+
     % We don't whether their were unitialized reads or not.  Presumably we called our parent
     % constructor (which kind of makes sense giving that we've already got virtual methods).
     doNotGuessHelper(factConstructor(Method),
@@ -1210,8 +1211,8 @@ likelyAVirtualDestructor(Method) :-
 guessDeletingDestructor(Out) :-
     reportFirstSeen('guessDeletingDestructor'),
     likelyAVirtualDestructor(Method),
-     doNotGuessHelper(factDeletingDestructor(Method),
-                      factNOTDeletingDestructor(Method)),
+    doNotGuessHelper(factDeletingDestructor(Method),
+                     factNOTDeletingDestructor(Method)),
     !,
 
     tryOrNot(tryDeletingDestructor(Method, guessDeletingDestructor1),
@@ -1312,7 +1313,7 @@ likelyDeletingDestructor(DeletingDestructor, RealDestructor) :-
     % This indicates that the method met some basic criteria in C++.
     possibleDestructor(DeletingDestructor),
     % That's not already certain to NOT be a deleting destructor.
-    not(factNOTDeletingDestructor(DeletingDestructor)),
+    bnot(factNOTDeletingDestructor(DeletingDestructor)),
     % And the deleting destructor must also call delete (we think), since that's what makes it
     % deleting.  Using this instead of the more complicated rule below led toa very slight
     % improvement in the fast test suite F=0.43 -> F=0.44.
@@ -1341,7 +1342,11 @@ likelyDeletingDestructor(DeletingDestructor, RealDestructor) :-
     % And while it's premature to require the real destructor to be certain, it shouldn't be
     % disproven.
     possibleDestructor(RealDestructor),
-    not(factNOTRealDestructor(RealDestructor)),
+    bnot(factNOTRealDestructor(RealDestructor)),
+
+    % Duplicated for monotonic reasoning
+    bnot(factNOTDeletingDestructor(DeletingDestructor)),
+
     true.
 
 %% Local Variables:

@@ -806,7 +806,7 @@ reasonVFTableBelongsToClass_internal(VFTable, Offset, Method, Class, Rule, VFTab
     % directly instantiated, because the "no other class trying to install this vftable" will
     % be trivially true, and without this clause, the vftable will simply belong to an
     % arbitrary method that installs it.
-    not(factVFTableOverwrite(Method, VFTable, _OverwriteVFTable, Offset)),
+    bnot(factVFTableOverwrite(Method, VFTable, _OverwriteVFTable, Offset)),
 
     % Constructors may inline embedded constructors.  If non-offset
     % zero, we must make sure that there is an inherited class at this
@@ -830,6 +830,10 @@ reasonVFTableBelongsToClass_internal(VFTable, Offset, Method, Class, Rule, VFTab
         % more conservative.
         % ejs 9/13/20: We now use factConstructor anyway, so perhaps we could relax this.
         % ejs 10/9/20: Since we call not(mayHavePendingOverwrites(Method)) above, should we change this to factVFTableOverwrite?
+
+        % Duplicated for monotonic reasoning
+        bnot(factVFTableOverwrite(Method, VFTable, _OverwriteVFTable, Offset)),
+
         (not(possibleVFTableOverwrite(_Insn3, _Insn4, Method, Offset, VFTable, _OtherVFTable)),
          % ejs 9/13/20: In mysqld.exe, we were using this rule to incorrectly associate
          % vftables with destructors before any determination about constructors or destructors
@@ -1819,7 +1823,7 @@ reasonClassCallsMethod_A(Class1, Method2) :-
     % Function could be a derived constructor calling Method1 (a base constructor) and Method2
     % (a method on Function's class).  This incorrectly concludes that Method2 is called from
     % Method1 unless it is blocked by a clause like this...  but what is really correct here?
-    not((find(Function, FunctionClass), factObjectInObject(FunctionClass, Class1, 0))),
+    bnot((find(Function, FunctionClass), factObjectInObject(FunctionClass, Class1, 0))),
 
     % Functions that are methods can call base methods
 
@@ -1947,7 +1951,7 @@ reasonReusedImplementation(Method) :-
     find(VFTable1, Class1),
     find(VFTable2, Class2),
     iso_dif(Class1, Class2),
-    not((
+    bnot((
                reasonClassRelationship(Class1, Class2);
                reasonClassRelationship(Class2, Class1)
        )),
@@ -2056,7 +2060,7 @@ reasonMergeClasses_B(BaseClass, MethodClass) :-
     % Which has a Method
     reasonMethodInVFTable(BaseVFTable, _Offset, Method),
     not(purecall(Method)),
-    not(factReusedImplementation(Method)),
+    bnot(factReusedImplementation(Method)),
 
     % We don't have to check purecall because reasonMethodInVFTable does already
 
@@ -2082,14 +2086,17 @@ reasonMergeClasses_C(Class, ExistingClass) :-
     % If we have no bases, it can't be on a base class.
     factClassHasNoBase(Class),
     % And if there's no object (embedded or base?) at offset zero...
-    not(factObjectInObject(Class, _0InnerClass, 0)),
+    bnot(factObjectInObject(Class, _0InnerClass, 0)),
 
     find(Method, ExistingClass),
     iso_dif(Class, ExistingClass),
     % Confusingly, the method's class must also have no base and no object at offset zero,
     % because the method being called could actually be the base class method...
     factClassHasNoBase(ExistingClass),
-    not(factObjectInObject(ExistingClass, _0InnerClass, 0)),
+    bnot(factObjectInObject(ExistingClass, _0InnerClass, 0)),
+
+    % Re-check for monotonic tabling in case it became true later
+    bnot(factObjectInObject(Class, _0InnerClass, 0)),
 
     % Debugging
     logtraceln('~@~Q.', [bnot(find(Class, ExistingClass)),
@@ -2157,7 +2164,7 @@ reasonMergeClasses_D(Class1, Class2) :-
 
     % Also ensure that the two methods not in a class relationship already.  Merging them would
     % ultimately result in merging a class with it's own ancestor.
-    not((
+    bnot((
                reasonClassRelationship(Class1, Class2);
                reasonClassRelationship(Class2, Class1)
        )),
@@ -2229,7 +2236,7 @@ reasonMergeClasses_H(DerivedClass, MethodClass) :-
     % need to sum the sizes of the base class vftables, be confident in their layout order, and
     % no that there aren't any other complexities involving multiple inheritance.  In the mean
     % time, just disable this rule where there's more than one base class.
-    not((factDerivedClass(DerivedClass, OtherBase, _OtherOffset), iso_dif(OtherBase, BaseClass))),
+    bnot((factDerivedClass(DerivedClass, OtherBase, OtherOffset), iso_dif(OtherBase, BaseClass))),
 
     findVFTable(DerivedVFTable, 0, DerivedClass),
     findVFTable(BaseVFTable, 0, BaseClass),
@@ -2238,10 +2245,15 @@ reasonMergeClasses_H(DerivedClass, MethodClass) :-
     % There's an entry in the derived vftable that's to big to be in the base vftable.
     factVFTableEntry(DerivedVFTable, VOffset, Method),
     not(purecall(Method)),
-    not(factReusedImplementation(Method)),
+    bnot(factReusedImplementation(Method)),
     VOffset > BaseSize,
     find(Method, MethodClass),
     iso_dif(DerivedClass, MethodClass),
+
+    % Duplicated negation checks
+    bnot((factDerivedClass(DerivedClass, OtherBase, OtherOffset), iso_dif(OtherBase, BaseClass))),
+    bnot(factReusedImplementation(Method)),
+
     % Debugging
     logtraceln('~@~Q.', [bnot(find(DerivedClass, MethodClass)),
                          reasonMergeClasses_H(BaseVFTable, DerivedVFTable, BaseSize, VOffset,
@@ -2407,7 +2419,7 @@ reasonNOTMergeClasses_C_asymmetric(DerivedClass, MethodClass) :-
     % the wrong classes.  See the case of 0x403659 in Lite/poly, where the vector deleting
     % destructor for std::out_of_range appears in it's PARENT virtual function table of
     % std::logic_error.   So this fix works, but technically for the wrong reasons.
-    % not(factDeletingDestructor(Method)),
+    % bnot(factDeletingDestructor(Method)),
 
     % Debugging
     logtraceln('~@~Q.', [bnot(dynFactNOTMergeClasses(DerivedClass, MethodClass)),
@@ -2452,8 +2464,8 @@ reasonNOTMergeClasses_C(Class1, Class2) :-
 %%     % But one counter example that we need to protect against is the inlining of base class
 %%     % VFTable writes.  The intention here is very similar to factVFTableOverwrite, but without
 %%     % the complications of caring which value overwrote which other value.
-%%     not((factVFTableWrite(_Insn3, Method1, 0, VFTable2))),
-%%     not((factVFTableWrite(_Insn4, Method2, 0, VFTable1))),
+%%     bnot((factVFTableWrite(_Insn3, Method1, 0, VFTable2))),
+%%     bnot((factVFTableWrite(_Insn4, Method2, 0, VFTable1))),
 %%     % Debugging
 %%     logtraceln('~@~Q.', [bnot(dynFactNOTMergeClasses(Class1, Class2)),
 %%                          reasonNOTMergeClasses_E(Class1, Class2)]).
@@ -2620,7 +2632,7 @@ reasonNOTMergeClasses_P(Class1Sorted, Class2Sorted) :-
     factMethod(Method),
     iso_dif(Method, Caller),
     (factConstructor(Method);
-     (factDeletingDestructor(Method), not(factRealDestructor(Caller)));
+     (factDeletingDestructor(Method), bnot(factRealDestructor(Caller)));
      factRealDestructor(Method)),
     % Handle symmetry
     sort_tuple((Class1, Class2), (Class1Sorted, Class2Sorted)),
@@ -2754,7 +2766,7 @@ certainMemberNOTOnExactClass(Class, Offset, Size) :-
 certainMemberOnExactClass(Class, Offset, Size) :-
     certainMemberOnClass(Class, Offset, Size),
     % Exclude members that are actually on the embedded objects or base classes.
-    not(certainMemberNOTOnExactClass(Class, Offset, Size)).
+    bnot(certainMemberNOTOnExactClass(Class, Offset, Size)).
 
 certainMemberOnExactClassSet(Class, Set) :-
     setof(Offset, Size^certainMemberOnExactClass(Class, Offset, Size), Set).
