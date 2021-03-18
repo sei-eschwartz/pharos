@@ -43,13 +43,13 @@ countGuess :-
 :- meta_predicate
     doNotGuessHelper(0,0).
 doNotGuessHelper(Fact, Fact2) :-
-    (   Fact
+    (   block_deps(Fact)
     ->  fail
-    ;   doNotGuess(Fact)
+    ;   block_deps(doNotGuess(Fact))
     ->  fail
-    ;   Fact2
+    ;   block_deps(Fact2)
     ->  fail
-    ;   doNotGuess(Fact2)
+    ;   block_deps(doNotGuess(Fact2))
     ->  fail
     ;   true
     ).
