@@ -806,7 +806,7 @@ reasonVFTableBelongsToClass_internal(VFTable, Offset, Method, Class, Rule, VFTab
     % directly instantiated, because the "no other class trying to install this vftable" will
     % be trivially true, and without this clause, the vftable will simply belong to an
     % arbitrary method that installs it.
-    bnot(factVFTableOverwrite(Method, VFTable, _OverwriteVFTable, Offset)),
+    bnot(factVFTableOverwrite(Method, VFTable, OverwriteVFTable, Offset)),
 
     % Constructors may inline embedded constructors.  If non-offset
     % zero, we must make sure that there is an inherited class at this
@@ -832,7 +832,7 @@ reasonVFTableBelongsToClass_internal(VFTable, Offset, Method, Class, Rule, VFTab
         % ejs 10/9/20: Since we call not(mayHavePendingOverwrites(Method)) above, should we change this to factVFTableOverwrite?
 
         % Duplicated for monotonic reasoning
-        bnot(factVFTableOverwrite(Method, VFTable, _OverwriteVFTable, Offset)),
+        bnot(factVFTableOverwrite(Method, VFTable, OverwriteVFTable, Offset)),
 
         (not(possibleVFTableOverwrite(_Insn3, _Insn4, Method, Offset, VFTable, _OtherVFTable)),
          % ejs 9/13/20: In mysqld.exe, we were using this rule to incorrectly associate
