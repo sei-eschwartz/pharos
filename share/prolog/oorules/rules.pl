@@ -976,9 +976,9 @@ reasonVFTableSizeGTE(VFTable, Size) :-
 % PAPER: VSize-1
 reasonVFTableSizeGTE(VFTable, Size) :-
 
-    % XXX: This should really just answer subsumption
+    % XXX: This should really be answer subsumption
     factVFTableEntry(VFTable, LastEntry, _E),
-    not((factVFTableEntry(VFTable, LargerEntry, _E2), LargerEntry > LastEntry)),
+    bnot((factVFTableEntry(VFTable, LargerEntry, _E2), LargerEntry > LastEntry)),
 
     %% % Ed says: By prefixing E^ we tell setof NOT to case on E.
     %% % If we leave E as _, it will case on different values of E!
@@ -1334,7 +1334,7 @@ reasonEmbeddedObject_C(Class, EmbeddedClass, Offset) :-
 % better due to testing explicitly true facts rather than using "not()".
 reasonEmbeddedObject_D(Class, EmbeddedClass, Offset) :-
     factObjectInObject(Class, EmbeddedClass, Offset),
-    not(factDerivedClass(Class, EmbeddedClass, Offset)),
+    bnot(factDerivedClass(Class, EmbeddedClass, Offset)),
     iso_dif(Offset, 0),
     factEmbeddedObject(Class, _, LowerOffset),
     LowerOffset < Offset.
