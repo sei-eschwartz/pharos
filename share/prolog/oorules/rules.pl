@@ -655,14 +655,18 @@ certainConstructorOrDestructorSet(Set) :-
 % are constructors or destructors.  But sometimes we know that there is an overwrite, but not
 % which direction.  The following facts attempt to express this so that it can be used to delay
 % decisions that rely on whether there is an overwrite.
-certainConstructorOrDestructorButUndecided(Method) :-
-    % We know it's one or the other
-    certainConstructorOrDestructor(Method),
-    % But haven't decided yet
-    not((factConstructor(Method); factNOTConstructor(Method))).
 
-mayHavePendingOverwrites(Method) :-
-    certainConstructorOrDestructorButUndecided(Method).
+doesNotHavePendingOverwrites(Method) :-
+    var(Method),
+    !,
+    throw(doesNotHavePendingOverwrites).
+
+doesNotHavePendingOverwrites(Method) :-
+    certainConstructorOrDestructor(Method)
+    ->
+        (factConstructor(Method); factNOTConstructor(Method))
+    ;
+    true.
 
 % ============================================================================================
 % Rules for virtual function tables, virtual function calls, etc.
@@ -775,18 +779,9 @@ reasonVFTableOverwrite(Method, VFTable2, VFTable1, Offset) :-
 % case of multiple inheritance.  The "Primary" VFTable is simply defined to be the one at
 % offset 0.
 
-:- table reasonVFTableBelongsToClass_internal/6 as incremental.
+:- table reasonVFTableBelongsToClass/6 as incremental.
 
 reasonVFTableBelongsToClass(VFTable, Offset, Method, Class, Rule, VFTableWrite) :-
-    reasonVFTableBelongsToClass_internal(VFTable, Offset, Method, Class, Rule, VFTableWrite),
-
-    % ejs 10/9/20: We found the destructor rule was applying to a method which we had not
-    % decided was a constructor or destructor.  The problem is that factVFTableOverwrite facts
-    % are not produced when that happens.  So the following clause forces us to wait for that
-    % decision to be made.
-    not(mayHavePendingOverwrites(Method)).
-
-reasonVFTableBelongsToClass_internal(VFTable, Offset, Method, Class, Rule, VFTableWrite) :-
     factVFTableWrite(Insn, Method, Offset, VFTable),
     VFTableWrite=factVFTableWrite(Insn, Method, Offset, VFTable),
     find(Method, Class),
@@ -795,9 +790,7 @@ reasonVFTableBelongsToClass_internal(VFTable, Offset, Method, Class, Rule, VFTab
     % decided was a constructor or destructor.  The problem is that factVFTableOverwrite facts
     % are not produced when that happens.  So the following clause forces us to wait for that
     % decision to be made.
-    % ejs 3/3/21: This is non-monotonic so we move it into the non-tabled wrapper
-    % reasonVFTableBelongsToClass/6.
-    %not(mayHavePendingOverwrites(Method)),
+    doesNotHavePendingOverwrites(Method),
 
     % ejs 9/13/20: If a factVFTableOverwrite exists, then the VFTable doesn't belong to this
     % class.  This is different than the first case below, which says that the absence of
