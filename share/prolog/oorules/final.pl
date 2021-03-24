@@ -189,8 +189,10 @@ finalClass(ClassID, VFTableOrNull, CSize, LSize, RealDestructorOrNull, MethodLis
          VFTableOrNull=VFTable
      ;
      VFTableOrNull=0),
+    % Work around lack of answer subsumption
+    bagof(CSize, reasonClassSizeGTE(Class, CSize), CSizes),
+    max_list(CSizes, CSize),
     % Get the certain and likely class sizes.  BUG! This is sooo old, fix me!
-    reasonClassSizeGTE(Class, CSize),
     LSize is CSize,
     % Optionally find the the real destructor as well.
     ((find_current(RealDestructor, Class),
