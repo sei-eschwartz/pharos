@@ -1608,7 +1608,7 @@ reasonNOTDerivedClass(DerivedClass, BaseClass, ObjectOffset) :-
     factConstructor(DerivedConstructor),
 
     % The derived constructor does not write a vftable at offset 0
-    bnot(factVFTableWrite(_Insn, DerivedConstructor, 0, _DVFTable)),
+    bnot(factVFTableWrite(Insn, DerivedConstructor, 0, DVFTable)),
 
     % The base class has a primary vftable
     find(BaseConstructor, BaseClass),
@@ -1617,7 +1617,7 @@ reasonNOTDerivedClass(DerivedClass, BaseClass, ObjectOffset) :-
     findVFTable(_BVFTable, 0, BaseClass),
 
     % Repeated check for monotonic tabling
-    bnot(factVFTableWrite(_Insn, DerivedConstructor, 0, _DVFTable)).
+    bnot(factVFTableWrite(Insn, DerivedConstructor, 0, DVFTable)).
 
 
 % Add rule for: We cannot be a derived constructor if the table we write was the certain normal
