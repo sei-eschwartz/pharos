@@ -6,14 +6,21 @@
 :- use_module(library(lists), [append/3, nth1/4, list_to_set/2]).
 
 % This predicate is used to block monotonic dependencies from being recorded
-:- meta_predicate
-     block_deps(0).
 
+:- meta_predicate
+       block_deps(0,+).
+block_deps(Goal, Dep) :-
+    reset(Goal, Dep, Cont),
+    (   Cont=0
+    ->  true
+    ;   (!, call(Cont))).
+
+:- meta_predicate
+       block_deps(0).
 block_deps(Goal) :-
-     reset(Goal, dependency(_), Cont),
-     (   Cont=0
-     ->  true
-     ;   call(Cont)).
+    !,
+    block_deps(block_deps(Goal, dependency(_)),
+               dependency(_,_,_)).
 
 :- meta_predicate bnot(0).
 bnot(Goal) :-
