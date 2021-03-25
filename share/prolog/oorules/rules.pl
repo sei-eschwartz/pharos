@@ -808,7 +808,7 @@ reasonVFTableBelongsToClass(VFTable, Offset, Method, Class, Rule, VFTableWrite) 
 
     % VFTables from a base class can be reused in a derived class.  If this happens, we know
     % that the VFTable does not belong to the derived class.
-    (Offset = 0 -> true; forall(factVFTableWrite(_Insn2, _OtherMethod, OtherOffset, VFTable), OtherOffset > 0)),
+    (Offset = 0 -> true; bforall(factVFTableWrite(_Insn2, _OtherMethod, OtherOffset, VFTable), OtherOffset > 0)),
 
     % Additional checks.  One of the following must be true...
     (
@@ -849,7 +849,10 @@ reasonVFTableBelongsToClass(VFTable, Offset, Method, Class, Rule, VFTableWrite) 
         (factClassHasNoBase(Class),
          Rule=hasnobase)
 
-    ).
+    ),
+
+    % Duplicated for monotonic tabling
+    (Offset = 0 -> true; bforall(factVFTableWrite(_Insn2, _OtherMethod, OtherOffset, VFTable), OtherOffset > 0)).
 
 % --------------------------------------------------------------------------------------------
 % The offset in the VFTable is a valid VFTable entry.
@@ -1218,7 +1221,7 @@ reasonObjectInObject_D(OuterClass, InnerClass, Offset) :-
 
     % Prevent grand ancestors from being decalred object in object.  See commentary below.
     % It's unclear of this constraint is really required in cases where Offset is non-zero.
-    not(reasonClassRelationship(OuterClass, InnerClass)),
+    bnot(reasonClassRelationship(OuterClass, InnerClass)),
 
     % Debugging
     logtraceln('~@~Q.', [bnot(factObjectInObject(OuterClass, InnerClass, Offset)),
@@ -1256,7 +1259,7 @@ reasonObjectInObject_E(OuterClass, InnerClass, Offset) :-
     % The hierarchy is length_error is a logic_error, which is an exception, but this rule
     % concludes that there's an exception in length_error, which is probably not what we
     % wanted.  This blocks that condition, but it's not clear that it does so optimally.
-    not(reasonClassRelationship(OuterClass, InnerClass)),
+    bnot(reasonClassRelationship(OuterClass, InnerClass)),
 
     % Debugging
     logtraceln('~@~Q.', [bnot(factObjectInObject(OuterClass, InnerClass, Offset)),
@@ -1430,11 +1433,17 @@ reasonDerivedClass_B(DerivedClass, BaseClass, ObjectOffset) :-
     factVFTableWrite(_Insn1, DerivedConstructor, ObjectOffset, DerivedVFTable),
 
     % No one overwrites the vftable
-    not(factVFTableOverwrite(DerivedConstructor, DerivedVFTable, _OverwrittenDerivedVFTable, ObjectOffset)),
+    bnot(factVFTableOverwrite(DerivedConstructor, DerivedVFTable, OverwrittenDerivedVFTable, ObjectOffset)),
+
+    find(DerivedConstructor, DerivedClass),
+    find(BaseConstructor, BaseClass),
+
+    % There's not already a relationship.  (Prevent grand ancestors)
+    bnot(reasonClassRelationship(DerivedClass, BaseClass)),
 
     ((factVFTableWrite(_Insn2, BaseConstructor, 0, BaseVFTable),
       % No one overwrites the vftable
-      not(factVFTableOverwrite(BaseConstructor, BaseVFTable, _OverwrittenBaseVFTable, 0)),
+      bnot(factVFTableOverwrite(BaseConstructor, BaseVFTable, _OverwrittenBaseVFTable, 0)),
       % And the vtables values written were different
       iso_dif(DerivedVFTable, BaseVFTable));
      % Right now we assume that if a class inherits from an imported class, the base class is
@@ -1445,11 +1454,9 @@ reasonDerivedClass_B(DerivedClass, BaseClass, ObjectOffset) :-
      % https://docs.microsoft.com/en-us/cpp/mfc/accessing-run-time-class-information?view=vs-2019.
      symbolClass(BaseConstructor, _MangledName, _ClassName, _MethodName)),
 
-    find(DerivedConstructor, DerivedClass),
-    find(BaseConstructor, BaseClass),
-
-    % There's not already a relationship.  (Prevent grand ancestors)
-    not(reasonClassRelationship(DerivedClass, BaseClass)),
+    % Duplicated checks for monotonic tabling
+    bnot(factVFTableOverwrite(DerivedConstructor, DerivedVFTable, OverwrittenDerivedVFTable, ObjectOffset)),
+    bnot(reasonClassRelationship(DerivedClass, BaseClass)),
 
     % Debugging
     logtraceln('~@DEBUG Derived VFTable: ~Q~n Base VFTable: ~Q~n Derived Constructor: ~Q~n Base Constructor: ~Q',
@@ -1820,7 +1827,9 @@ reasonClassCallsMethod_A(Class1, Method2) :-
     % Function could be a derived constructor calling Method1 (a base constructor) and Method2
     % (a method on Function's class).  This incorrectly concludes that Method2 is called from
     % Method1 unless it is blocked by a clause like this...  but what is really correct here?
-    bnot((find(Function, FunctionClass), factObjectInObject(FunctionClass, Class1, 0))),
+    %bnot((find(Function, FunctionClass), factObjectInObject(FunctionClass, Class1, 0))),
+    bnot(find(Function, FunctionClass)),
+    bnot(factObjectInObject(FunctionClass, Class1, 0)),
 
     % Functions that are methods can call base methods
 
