@@ -1827,9 +1827,7 @@ reasonClassCallsMethod_A(Class1, Method2) :-
     % Function could be a derived constructor calling Method1 (a base constructor) and Method2
     % (a method on Function's class).  This incorrectly concludes that Method2 is called from
     % Method1 unless it is blocked by a clause like this...  but what is really correct here?
-    %bnot((find(Function, FunctionClass), factObjectInObject(FunctionClass, Class1, 0))),
-    bnot(find(Function, FunctionClass)),
-    bnot(factObjectInObject(FunctionClass, Class1, 0)),
+    bnot((find(Function, FunctionClass), factObjectInObject(FunctionClass, Class1, 0))),
 
     % Functions that are methods can call base methods
 
