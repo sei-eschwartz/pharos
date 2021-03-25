@@ -808,7 +808,7 @@ reasonVFTableBelongsToClass(VFTable, Offset, Method, Class, Rule, VFTableWrite) 
 
     % VFTables from a base class can be reused in a derived class.  If this happens, we know
     % that the VFTable does not belong to the derived class.
-    (Offset = 0 -> true; bforall(factVFTableWrite(_Insn2, _OtherMethod, OtherOffset, VFTable), OtherOffset > 0)),
+    (Offset = 0 -> true; bforall(factVFTableWrite(_, _, OtherOffset, VFTable), OtherOffset > 0)),
 
     % Additional checks.  One of the following must be true...
     (
@@ -852,7 +852,7 @@ reasonVFTableBelongsToClass(VFTable, Offset, Method, Class, Rule, VFTableWrite) 
     ),
 
     % Duplicated for monotonic tabling
-    (Offset = 0 -> true; bforall(factVFTableWrite(_Insn2, _OtherMethod, OtherOffset, VFTable), OtherOffset > 0)).
+    (Offset = 0 -> true; bforall(factVFTableWrite(_, _, OtherOffset, VFTable), OtherOffset > 0)).
 
 % --------------------------------------------------------------------------------------------
 % The offset in the VFTable is a valid VFTable entry.
