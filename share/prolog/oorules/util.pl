@@ -26,6 +26,11 @@ block_deps(Goal) :-
 bnot(Goal) :-
     not(block_deps(Goal)).
 
+:- meta_predicate bforall(0,0).
+bforall(A,B) :-
+    forall(block_deps(A),
+           block_deps(B)).
+
 sort_tuple((A,B), (C,D)) :-
     (A < B -> (C=A, D=B); (C=B, D=A)).
 

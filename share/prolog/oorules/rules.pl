@@ -662,7 +662,7 @@ doesNotHavePendingOverwrites(Method) :-
     throw(doesNotHavePendingOverwrites).
 
 doesNotHavePendingOverwrites(Method) :-
-    certainConstructorOrDestructor(Method)
+    block_deps(certainConstructorOrDestructor(Method))
     ->
         (factConstructor(Method); factNOTConstructor(Method))
     ;
@@ -838,7 +838,7 @@ reasonVFTableBelongsToClass(VFTable, Offset, Method, Class, Rule, VFTableWrite) 
         % Alternatively, if we are a destructor, make sure there is no other class trying to
         % install this vftable
         % XXX: Should Offset = Offset2?
-        (forall(factVFTableWrite(_Insn5, Method2, Offset2, VFTable),
+        (bforall(factVFTableWrite(_Insn5, Method2, Offset2, VFTable),
                % It is ok to ignore overwritten vftables
                (factVFTableOverwrite(Method2, VFTable, _OtherVFTable, Offset2);
                 % Otherwise it better be the same class
