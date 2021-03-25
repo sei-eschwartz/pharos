@@ -1,0 +1,1 @@
+noCallsAfter(4308171). methodMemberAccess(8, 4308171, 4308247, 4). methodMemberAccess(5, 4312400, 4, 4). thisPtrUsage(2, 4258249, a, 4312400). thisPtrUsage(3, 4258249, a, 4313437). thisPtrUsage(5, 4313437, b, 4308171). callingConvention(4308171, '__thiscall'). callingConvention(4312400, '__thiscall').             
