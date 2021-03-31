@@ -1,0 +1,16 @@
+With debug build:
+                 Memory                       CPU
+Firefox    RTTI  118MB   1,628MB  13.8x   24s  310s 12.8x
+Firefox  NORTTI  145MB   1,625MB  11.2x   23s  309s 13.6x
+Example1   RTTI  161MB   9,584MB  59.5x   50s 1365s 27.2x
+Example2 NORTTI  134MB  10,177MB  75.9x   51s 1380s 26.9x
+
+With optimized build:
+                 Memory                       CPU
+Firefox    RTTI  118MB   1,624MB  13.8x   24s  131s  5.4x
+Firefox  NORTTI  145MB   1,625MB  11.2x   23s  139s  6.1x
+Example1   RTTI  161MB   9,581MB  59.5x   50s  521s 10.4x
+Example2 NORTTI  134MB  10,176MB  75.9x   51s  531s 10.4x
+
+
+

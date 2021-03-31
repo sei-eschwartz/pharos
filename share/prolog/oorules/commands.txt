@@ -1,0 +1,36 @@
+$ /usr/bin/time -f "$@,%M,%e,%x" -o firefox.exe.before.rtti.time \
+  ~/pharos/share/prolog/oorules/ooprolog.pl --facts firefox.exe.facts \
+  --results firefox.exe.before.rtti.results --log-level=5 \
+  > firefox.exe.before.rtti.results.log 2>&1
+$ /usr/bin/time -f "$@,%M,%e,%x" -o firefox.exe.before.nortti.time \
+  ~/pharos/share/prolog/oorules/ooprolog.pl --facts firefox.exe.facts \
+  --results firefox.exe.before.nortti.results --log-level=5 --rtti=false \
+  > firefox.exe.before.nortti.results.log 2>&1
+$ /usr/bin/time -f "$@,%M,%e,%x" -o example1-Release.exe.before.rtti.time \
+  ~/pharos/share/prolog/oorules/ooprolog.pl --facts example1-Release.exe.facts \
+  --results example1-Release.exe.before.rtti.results --log-level=5 \
+  > example1-Release.exe.before.rtti.results.log 2>&1
+$ /usr/bin/time -f "$@,%M,%e,%x" -o example1-Release.exe.before.nortti.time \
+  ~/pharos/share/prolog/oorules/ooprolog.pl --facts example1-Release.exe.facts \
+  --results example1-Release.exe.before.nortti.results --log-level=5 --rtti=false \
+  > example1-Release.exe.before.nortti.results.log 2>&1
+$ /usr/bin/time -f "$@,%M,%e,%x" -o firefox.exe.after.rtti.time \
+  /data/research/swipl/install-bleeding/bin/swipl \
+  ~/pharos-edswi/share/prolog/oorules/ooprolog.pl --facts firefox.exe.facts \
+  --results firefox.exe.after.rtti.results --log-level=5 \
+  >firefox.exe.after.rtti.results.log 2>&1 &
+$ /usr/bin/time -f "$@,%M,%e,%x" -o firefox.exe.after.nortti.time 
+  /data/research/swipl/install-bleeding/bin/swipl \
+  ~/pharos-edswi/share/prolog/oorules/ooprolog.pl --facts firefox.exe.facts \
+  --results firefox.exe.after.nortti.results --log-level=5 --rtti=false \
+  >firefox.exe.after.nortti.results.log 2>&1 &  
+$ /usr/bin/time -f "$@,%M,%e,%x" -o example1-Release.exe.after.nortti.time \
+  /data/research/swipl/install-bleeding/bin/swipl \
+  ~/pharos-edswi/share/prolog/oorules/ooprolog.pl --facts example1-Release.exe.facts \
+  --results example1-Release.exe.after.nortti.results --log-level=5 --rtti=false \
+  >example1-Release.exe.after.nortti.results.log 2>&1 &
+$ /usr/bin/time -f "$@,%M,%e,%x" -o example1-Release.exe.after.rtti.time \
+  /data/research/swipl/install-bleeding/bin/swipl \
+  ~/pharos-edswi/share/prolog/oorules/ooprolog.pl --facts example1-Release.exe.facts \
+  --results example1-Release.exe.after.rtti.results --log-level=5 \
+  >example1-Release.exe.after.rtti.results.log 2>&1 &
