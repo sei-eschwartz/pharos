@@ -13,12 +13,12 @@ block_deps(Goal, Dep) :-
     reset(Goal, Dep, Cont),
     (   Cont=0
     ->  true
-    ;   (!, call(Cont))).
+    ;   block_deps(Cont)
+    ).
 
 :- meta_predicate
        block_deps(0).
 block_deps(Goal) :-
-    !,
     block_deps(block_deps(Goal, dependency(_)),
                dependency(_,_,_)).
 
