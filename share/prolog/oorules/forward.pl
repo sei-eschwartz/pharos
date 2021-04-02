@@ -44,6 +44,8 @@
 
 :- use_module(library(apply), [maplist/2, maplist/3]).
 
+:- dynamic forward_pending/1.
+
 % --------------------------------------------------------------------------------------------
 % Make a singleton class for any method in Set.
 makeObjects(Set) :-
@@ -378,10 +380,19 @@ concludeVBTableEntry(Out) :-
 
 % --------------------------------------------------------------------------------------------
 
+% XXX Can we generalize the _wrapper funcs?  Should be able to.
+
+:- table reasonClassSizeGTE_wrapper/0 as (monotonic, lazy).
+reasonClassSizeGTE_wrapper :-
+    reasonClassSizeGTE(Class, Size),
+    logtraceln('Queueing ~Q.', reasonClassSizeGTE(Class, Size)),
+    assert(forward_pending(reasonClassSizeGTE(Class, Size))).
+
 concludeClassSizeGTE(Out) :-
     reportFirstSeen('concludeClassSizeGTE'),
+    reasonClassSizeGTE_wrapper,
     setof((Class, Size),
-          (reasonClassSizeGTE(Class, Size),
+          (retract(forward_pending(reasonClassSizeGTE(Class, Size))),
            is_current(Class),
            not((factClassSizeGTE(Class, KnownSize), KnownSize >= Size)),
            loginfoln('Concluding ~Q.',
@@ -451,22 +462,18 @@ concludeClassCallsMethod(Out) :-
     maplist(try_assert_builder(factClassCallsMethod), TupleSets, ActionSets),
     Out = all(ActionSets).
 
-% XXX Can we generalize this?
-
-:- dynamic pending/1.
-
 :- table reasonNOTMergeClasses_new_wrapper/0 as (monotonic, lazy).
 reasonNOTMergeClasses_new_wrapper :-
     reasonNOTMergeClasses_new(Class1, Class2),
-    logtraceln('Queueing ~Q.', factNOTMergeClasses(Class1, Class2)),
-    assert(pending(factNOTMergeClasses(Class1, Class2))).
+    logtraceln('Queueing ~Q.', reasonNOTMergeClasses_new(Class1, Class2)),
+    assert(forward_pending(reasonNOTMergeClasses_new(Class1, Class2))).
 
 concludeNOTMergeClasses(Out) :-
     reportFirstSeen('concludeNOTMergeClasses'),
     reasonNOTMergeClasses_new_wrapper,
     setof((Class1, Class2),
-          (retract(pending(factNOTMergeClasses(Class1, Class2))),
-           logtraceln('Considering ~Q.', factNOTMergeClasses(Class1, Class2)),
+          (retract(forward_pending(reasonNOTMergeClasses_new(Class1, Class2))),
+           logtraceln('Considering ~Q.', reasonNOTMergeClasses_new(Class1, Class2)),
            is_current(Class1),
            is_current(Class2),
            iso_dif(Class1, Class2),
