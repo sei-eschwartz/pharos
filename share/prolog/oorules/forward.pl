@@ -458,7 +458,7 @@ concludeClassCallsMethod(Out) :-
 :- table reasonNOTMergeClasses_new_wrapper/0 as (monotonic, lazy).
 reasonNOTMergeClasses_new_wrapper :-
     reasonNOTMergeClasses_new(Class1, Class2),
-    logtracelnln('Queueing ~Q.', factNOTMergeClasses(Class1, Class2)),
+    logtraceln('Queueing ~Q.', factNOTMergeClasses(Class1, Class2)),
     assert(pending(factNOTMergeClasses(Class1, Class2))).
 
 concludeNOTMergeClasses(Out) :-
