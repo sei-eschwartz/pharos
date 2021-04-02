@@ -451,10 +451,22 @@ concludeClassCallsMethod(Out) :-
     maplist(try_assert_builder(factClassCallsMethod), TupleSets, ActionSets),
     Out = all(ActionSets).
 
+% XXX Can we generalize this?
+
+:- dynamic pending/1.
+
+:- table reasonNOTMergeClasses_new_wrapper/0 as (monotonic, lazy).
+reasonNOTMergeClasses_new_wrapper :-
+    reasonNOTMergeClasses_new(Class1, Class2),
+    logtracelnln('Queueing ~Q.', factNOTMergeClasses(Class1, Class2)),
+    assert(pending(factNOTMergeClasses(Class1, Class2))).
+
 concludeNOTMergeClasses(Out) :-
     reportFirstSeen('concludeNOTMergeClasses'),
+    reasonNOTMergeClasses_new_wrapper,
     setof((Class1, Class2),
-          (reasonNOTMergeClasses_new(Class1, Class2),
+          (retract(pending(factNOTMergeClasses(Class1, Class2))),
+           logtraceln('Considering ~Q.', factNOTMergeClasses(Class1, Class2)),
            is_current(Class1),
            is_current(Class2),
            iso_dif(Class1, Class2),
