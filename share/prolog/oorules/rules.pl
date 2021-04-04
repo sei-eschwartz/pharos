@@ -1816,8 +1816,15 @@ reasonClassCallsMethod(Class, Method) :-
 % discussed changing it into a guessing rule that guesses the direction of the relationship.
 % PAPER: Call-1
 reasonClassCallsMethod_A(Class1, Method2) :-
-    thisPtrUsage(_, Function, ThisPtr, Method1),
-    thisPtrUsage(_, Function, ThisPtr, Method2),
+    % No need to include duplicates because of Insn bindings
+
+    setof((Function, ThisPtr, Method),
+          Insn^thisPtrUsage(Insn, Function, ThisPtr, Method),
+          ThisPtrSet),
+
+    member((Function, ThisPtr, Method1), ThisPtrSet),
+    member((Function, ThisPtr, Method2), ThisPtrSet),
+
     iso_dif(Method1, Method2),
     find(Method1, Class1),
     % Don't propose assignments we already know.
