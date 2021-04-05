@@ -84,10 +84,18 @@ try_assert_builder(Extra, Pred, ArgTuple, Out) :-
     Out = (try_assert(Fact),
            call(Extra, Fact)).
 
+:- meta_predicate make_wrapper(0).
+:- table make_wrapper/1 as incremental.
+make_wrapper(Goal) :-
+    forall(call(Goal),
+           (logtraceln('Queueing ~Q.', Goal),
+            assert(forward_pending(Goal)))).
+
 concludeMethod(Out) :-
     reportFirstSeen('concludeMethod'),
+    make_wrapper(reasonMethod(Method)),
     setof(Method,
-          (reasonMethod(Method),
+          (retract(forward_pending(reasonMethod(Method))),
            not(factMethod(Method)),
            not(factNOTMethod(Method)),
            loginfoln('Concluding ~Q.', factMethod(Method))),
@@ -100,8 +108,9 @@ concludeMethod(Out) :-
 
 concludeConstructor(Out) :-
     reportFirstSeen('concludeConstructor'),
+    make_wrapper(reasonConstructor(Method)),
     setof(Method,
-          (reasonConstructor(Method),
+          (retract(forward_pending(reasonConstructor(Method))),
            not(factConstructor(Method)),
            not(factNOTConstructor(Method)),
            loginfoln('Concluding ~Q.', factConstructor(Method))),
@@ -111,8 +120,9 @@ concludeConstructor(Out) :-
 
 concludeNOTConstructor(Out) :-
     reportFirstSeen('concludeNOTConstructor'),
+    make_wrapper(reasonNOTConstructor(Method)),
     setof(Method,
-          (reasonNOTConstructor(Method),
+          (retract(forward_pending(reasonNOTConstructor(Method))),
            not(factNOTConstructor(Method)),
            not(factConstructor(Method)),
            loginfoln('Concluding ~Q.', factNOTConstructor(Method))),
@@ -122,8 +132,9 @@ concludeNOTConstructor(Out) :-
 
 concludeRealDestructor(Out) :-
     reportFirstSeen('concludeRealDestructor'),
+    make_wrapper(reasonRealDestructor(Method)),
     setof(Method,
-          (reasonRealDestructor(Method),
+          (retract(forward_pending(reasonRealDestructor(Method))),
            not(factRealDestructor(Method)),
            not(factNOTRealDestructor(Method)),
            loginfoln('Concluding ~Q.', factRealDestructor(Method))),
@@ -133,8 +144,9 @@ concludeRealDestructor(Out) :-
 
 concludeNOTRealDestructor(Out) :-
     reportFirstSeen('concludeNOTRealDestructor'),
+    make_wrapper(reasonNOTRealDestructor(Method)),
     setof(Method,
-          (reasonNOTRealDestructor(Method),
+          (retract(forward_pending(reasonNOTRealDestructor(Method))),
            not(factRealDestructor(Method)),
            not(factNOTRealDestructor(Method)),
            loginfoln('Concluding ~Q.', factNOTRealDestructor(Method))),
@@ -144,8 +156,9 @@ concludeNOTRealDestructor(Out) :-
 
 concludeDeletingDestructor(Out) :-
     reportFirstSeen('concludeDeletingDestructor'),
+    make_wrapper(reasonDeletingDestructor(Method)),
     setof(Method,
-          (reasonDeletingDestructor(Method),
+          (retract(forward_pending(reasonDeletingDestructor(Method))),
            not(factDeletingDestructor(Method)),
            not(factNOTDeletingDestructor(Method)),
            loginfoln('Concluding ~Q.', factDeletingDestructor(Method))),
@@ -154,8 +167,11 @@ concludeDeletingDestructor(Out) :-
     Out = all(ActionSets).
 
 concludeNOTDeletingDestructor(Out) :-
+    reportFirstSeen('concludeNOTDeletingDestructor'),
+    break,
+    make_wrapper(reasonNOTDeletingDestructor(Method)),
     setof(Method,
-          (reasonNOTDeletingDestructor(Method),
+          (retract(forward_pending(reasonNOTDeletingDestructor(Method))),
            not(factDeletingDestructor(Method)),
            not(factNOTDeletingDestructor(Method)),
            loginfoln('Concluding ~Q.', factNOTDeletingDestructor(Method))),
@@ -166,8 +182,9 @@ concludeNOTDeletingDestructor(Out) :-
 % This fact is only reasoned about, and it's similar to derived constructor.
 concludeObjectInObject(Out) :-
     reportFirstSeen('concludeObjectInObject'),
+    make_wrapper(reasonObjectInObject(OuterClass, InnerClass, Offset)),
     setof((OuterClass, InnerClass, Offset),
-          (reasonObjectInObject(OuterClass, InnerClass, Offset),
+          (retract(forward_pending(reasonObjectInObject(OuterClass, InnerClass, Offset))),
            is_current(OuterClass),
            is_current(InnerClass),
            iso_dif(OuterClass, InnerClass),
@@ -180,8 +197,9 @@ concludeObjectInObject(Out) :-
 
 concludeDerivedClass(Out) :-
     reportFirstSeen('concludeDerivedClass'),
+    make_wrapper(reasonDerivedClass(DerivedClass, BaseClass, ObjectOffset)),
     setof((DerivedClass, BaseClass, ObjectOffset),
-          (reasonDerivedClass(DerivedClass, BaseClass, ObjectOffset),
+          (retract(forward_pending(reasonDerivedClass(DerivedClass, BaseClass, ObjectOffset))),
            is_current(DerivedClass),
            is_current(BaseClass),
            iso_dif(DerivedClass, BaseClass),
@@ -195,8 +213,9 @@ concludeDerivedClass(Out) :-
 
 concludeNOTDerivedClass(Out) :-
     reportFirstSeen('concludeNOTDerivedClass'),
+    make_wrapper(reasonNOTDerivedClass(DerivedClass, BaseClass, ObjectOffset)),
     setof((DerivedClass, BaseClass, ObjectOffset),
-          (reasonNOTDerivedClass(DerivedClass, BaseClass, ObjectOffset),
+          (retract(forward_pending(reasonNOTDerivedClass(DerivedClass, BaseClass, ObjectOffset))),
            is_current(DerivedClass),
            is_current(BaseClass),
            iso_dif(DerivedClass, BaseClass),
@@ -210,8 +229,9 @@ concludeNOTDerivedClass(Out) :-
 
 concludeEmbeddedObject(Out) :-
     reportFirstSeen('concludeEmbeddedObject'),
+    make_wrapper(reasonEmbeddedObject(OuterClass, InnerClass, ObjectOffset)),
     setof((OuterClass, InnerClass, ObjectOffset),
-          (reasonEmbeddedObject(OuterClass, InnerClass, ObjectOffset),
+          (retract(forward_pending(reasonEmbeddedObject(OuterClass, InnerClass, ObjectOffset))),
            is_current(OuterClass),
            is_current(InnerClass),
            iso_dif(OuterClass, InnerClass),
@@ -225,8 +245,9 @@ concludeEmbeddedObject(Out) :-
 
 concludeNOTEmbeddedObject(Out) :-
     reportFirstSeen('concludeNOTEmbeddedObject'),
+    make_wrapper(reasonNOTEmbeddedObject(OuterClass, InnerClass, ObjectOffset)),
     setof((OuterClass, InnerClass, ObjectOffset),
-          (reasonNOTEmbeddedObject(OuterClass, InnerClass, ObjectOffset),
+          (retract(forward_pending(reasonNOTEmbeddedObject(OuterClass, InnerClass, ObjectOffset))),
            is_current(OuterClass),
            is_current(InnerClass),
            iso_dif(OuterClass, InnerClass),
@@ -242,8 +263,9 @@ concludeNOTEmbeddedObject(Out) :-
 
 concludeVFTable(Out) :-
     reportFirstSeen('concludeVFTable'),
+    make_wrapper(reasonVFTable(VFTable)),
     setof(VFTable,
-          (reasonVFTable(VFTable),
+          (retract(forward_pending(reasonVFTable(VFTable))),
            not(factVFTable(VFTable)),
            not(factNOTVFTable(VFTable)),
            loginfoln('Concluding ~Q.', factVFTable(VFTable))),
@@ -257,8 +279,9 @@ concludeVFTable(Out) :-
 
 concludeVFTableWrite(Out) :-
     reportFirstSeen('concludeVFTableWrite'),
+    make_wrapper(reasonVFTableWrite(Insn, Method, Offset, VFTable)),
     setof((Insn, Method, Offset, VFTable),
-          (reasonVFTableWrite(Insn, Method, Offset, VFTable),
+          (retract(forward_pending(reasonVFTableWrite(Insn, Method, Offset, VFTable))),
            not(factVFTableWrite(Insn, Method, Offset, VFTable)),
            %not(reasonNOTVFTableWrite(Insn, Method, Offset, VFTable)),
            loginfoln('Concluding ~Q.', factVFTableWrite(Insn, Method, Offset, VFTable))),
@@ -268,8 +291,9 @@ concludeVFTableWrite(Out) :-
 
 concludeVFTableOverwrite(Out) :-
     reportFirstSeen('concludeVFTableOverwrite'),
+    make_wrapper(reasonVFTableOverwrite(Method, VFTable1, VFTable2, Offset)),
     setof((Method, VFTable1, VFTable2, Offset),
-          (reasonVFTableOverwrite(Method, VFTable1, VFTable2, Offset),
+          (retract(forward_pending(reasonVFTableOverwrite(Method, VFTable1, VFTable2, Offset))),
            not(factVFTableOverwrite(Method, VFTable1, VFTable2, Offset)),
            %not(reasonNOTVFTableOverwrite(Method, VFTable1, VFTable2, Offset)),
            loginfoln('Concluding ~Q.',
@@ -280,8 +304,9 @@ concludeVFTableOverwrite(Out) :-
 
 concludeVFTableEntry(Out) :-
     reportFirstSeen('concludeVFTableEntry'),
+    make_wrapper(reasonVFTableEntry(VFTable, VFTableOffset, Address)),
     setof((VFTable, VFTableOffset, Address),
-          (reasonVFTableEntry(VFTable, VFTableOffset, Address),
+          (retract(forward_pending(reasonVFTableEntry(VFTable, VFTableOffset, Address))),
            not(factVFTableEntry(VFTable, VFTableOffset, Address)),
            not(factNOTVFTableEntry(VFTable, VFTableOffset, Address)),
            loginfoln('Concluding ~Q.',
@@ -292,8 +317,9 @@ concludeVFTableEntry(Out) :-
 
 concludeNOTVFTableEntry(Out) :-
     reportFirstSeen('concludeNOTVFTableEntry'),
+    make_wrapper(reasonNOTVFTableEntry(VFTable, VFTableOffset, Address)),
     setof((VFTable, VFTableOffset, Address),
-          (reasonNOTVFTableEntry(VFTable, VFTableOffset, Address),
+          (retract(forward_pending(reasonNOTVFTableEntry(VFTable, VFTableOffset, Address))),
            not(factVFTableEntry(VFTable, VFTableOffset, Address)),
            not(factNOTVFTableEntry(VFTable, VFTableOffset, Address)),
            loginfoln('Concluding ~Q.',
@@ -304,8 +330,9 @@ concludeNOTVFTableEntry(Out) :-
 
 concludeVFTableSizeGTE(Out) :-
     reportFirstSeen('concludeVFTableSizeGTE'),
+    make_wrapper(reasonVFTableSizeGTE(VFTable, Size)),
     setof((VFTable, Size),
-          (reasonVFTableSizeGTE(VFTable, Size),
+          (retract(forward_pending(reasonVFTableSizeGTE(VFTable, Size))),
            not((factVFTableSizeGTE(VFTable, KnownSize), KnownSize >= Size)),
            loginfoln('Concluding ~Q.',
                      factVFTableSizeGTE(VFTable, Size))),
@@ -315,8 +342,9 @@ concludeVFTableSizeGTE(Out) :-
 
 concludeVFTableSizeLTE(Out) :-
     reportFirstSeen('concludeVFTableSizeLTE'),
+    make_wrapper(reasonVFTableSizeLTE(VFTable, Size)),
     setof((VFTable, Size),
-          (reasonVFTableSizeLTE(VFTable, Size),
+          (retract(forward_pending(reasonVFTableSizeLTE(VFTable, Size))),
            not((factVFTableSizeLTE(VFTable, KnownSize), KnownSize >= Size)),
            loginfoln('Concluding ~Q.',
                      factVFTableSizeLTE(VFTable, Size))),
@@ -325,8 +353,10 @@ concludeVFTableSizeLTE(Out) :-
     Out = all(ActionSets).
 
 concludeVirtualFunctionCall(Out) :-
+    reportFirstSeen('concludeVirtualFunctionCall'),
+    make_wrapper(reasonVirtualFunctionCall(Insn, Method, OOffset, VFTable, TOffset)),
     setof((Insn, Method, OOffset, VFTable, TOffset),
-          (reasonVirtualFunctionCall(Insn, Method, OOffset, VFTable, TOffset),
+          (retract(forward_pending(reasonVirtualFunctionCall(Insn, Method, OOffset, VFTable, TOffset))),
            not(factVirtualFunctionCall(Insn, Method, OOffset, VFTable, TOffset)),
            not(factNOTVirtualFunctionCall(Insn, Method, OOffset, VFTable, TOffset)),
            loginfoln('Concluding ~Q.',
@@ -339,8 +369,9 @@ concludeVirtualFunctionCall(Out) :-
 
 concludeVBTable(Out) :-
     reportFirstSeen('concludeVBTable'),
+    make_wrapper(reasonVBTable(VBTable)),
     setof(VBTable,
-          (reasonVBTable(VBTable),
+          (retract(forward_pending(reasonVBTable(VBTable))),
            not(factVBTable(VBTable)),
            not(factNOTVBTable(VBTable)),
            loginfoln('Concluding ~Q.', factVBTable(VBTable))),
@@ -352,8 +383,9 @@ concludeVBTable(Out) :-
 
 concludeVBTableWrite(Out) :-
     reportFirstSeen('concludeVBTableWrite'),
+    make_wrapper(reasonVBTableWrite(Insn, Method, Offset, VBTable)),
     setof((Insn, Method, Offset, VBTable),
-          (reasonVBTableWrite(Insn, Method, Offset, VBTable),
+          (retract(forward_pending(reasonVBTableWrite(Insn, Method, Offset, VBTable))),
            not(factVBTableWrite(Insn, Method, Offset, VBTable)),
            %not(reasonNOTVBTableWrite(Insn, Method, Offset, VBTable)),
            loginfoln('Concluding ~Q.',
@@ -366,8 +398,9 @@ concludeVBTableWrite(Out) :-
 
 concludeVBTableEntry(Out) :-
     reportFirstSeen('concludeVBTableEntry'),
+    make_wrapper(reasonVBTableEntry(VBTable, VBTableOffset, Value)),
     setof((VBTable, VBTableOffset, Value),
-          (reasonVBTableEntry(VBTable, VBTableOffset, Value),
+          (retract(forward_pending(reasonVBTableEntry(VBTable, VBTableOffset, Value))),
            not(factVBTableEntry(VBTable, VBTableOffset, Value)),
            not(factNOTVBTableEntry(VBTable, VBTableOffset, Value)),
            loginfoln('Concluding ~Q.',
@@ -382,15 +415,10 @@ concludeVBTableEntry(Out) :-
 
 % XXX Can we generalize the _wrapper funcs?  Should be able to.
 
-:- table reasonClassSizeGTE_wrapper/0 as (monotonic, lazy).
-reasonClassSizeGTE_wrapper :-
-    reasonClassSizeGTE(Class, Size),
-    logtraceln('Queueing ~Q.', reasonClassSizeGTE(Class, Size)),
-    assert(forward_pending(reasonClassSizeGTE(Class, Size))).
 
 concludeClassSizeGTE(Out) :-
     reportFirstSeen('concludeClassSizeGTE'),
-    reasonClassSizeGTE_wrapper,
+    make_wrapper(reasonClassSizeGTE(Class, Size)),
     setof((Class, Size),
           (retract(forward_pending(reasonClassSizeGTE(Class, Size))),
            is_current(Class),
@@ -403,8 +431,9 @@ concludeClassSizeGTE(Out) :-
 
 concludeClassSizeLTE(Out) :-
     reportFirstSeen('concludeClassSizeLTE'),
+    make_wrapper(reasonClassSizeLTE(Class, Size)),
     setof((Class, Size),
-          (reasonClassSizeLTE(Class, Size),
+          (retract(forward_pending(reasonClassSizeLTE(Class, Size))),
            is_current(Class),
            not((factClassSizeLTE(Class, KnownSize), KnownSize =< Size)),
            loginfoln('Concluding ~Q.',
@@ -415,8 +444,9 @@ concludeClassSizeLTE(Out) :-
 
 concludeClassHasNoBase(Out) :-
     reportFirstSeen('concludeClassHasNoBase'),
+    make_wrapper(reasonClassHasNoBase(Class)),
     setof(Class,
-          (reasonClassHasNoBase(Class),
+          (retract(forward_pending(reasonClassHasNoBase(Class))),
            is_current(Class),
            not(factClassHasNoBase(Class)),
            not(factClassHasUnknownBase(Class)),
@@ -427,8 +457,9 @@ concludeClassHasNoBase(Out) :-
 
 concludeClassHasUnknownBase(Out) :-
     reportFirstSeen('concludeClassHasUnknownBase'),
+    make_wrapper(reasonClassHasUnknownBase(Class)),
     setof(Class,
-          (reasonClassHasUnknownBase(Class),
+          (retract(forward_pending(reasonClassHasUnknownBase(Class))),
            is_current(Class),
            not(factClassHasUnknownBase(Class)),
            not(factClassHasNoBase(Class)),
@@ -439,8 +470,9 @@ concludeClassHasUnknownBase(Out) :-
 
 concludeReusedImplementation(Out) :-
     reportFirstSeen('concludeReusedImplementation'),
+    make_wrapper(reasonReusedImplementation(Method)),
     setof(Method,
-          (reasonReusedImplementation(Method),
+          (retract(forward_pending(reasonReusedImplementation(Method))),
            not(factReusedImplementation(Method)),
            loginfoln('Concluding ~Q.', factReusedImplementation(Method))),
           MethodSets),
@@ -449,8 +481,9 @@ concludeReusedImplementation(Out) :-
 
 concludeClassCallsMethod(Out) :-
     reportFirstSeen('concludeClassCallsMethod'),
+    make_wrapper(reasonClassCallsMethod(Class, Method)),
     setof((Class, Method),
-          ExistingClass^(reasonClassCallsMethod(Class, Method),
+          ExistingClass^(retract(forward_pending(reasonClassCallsMethod(Class, Method))),
            iso_dif(Class, Method),
            find_current(Method, ExistingClass),
            iso_dif(Class, ExistingClass),
@@ -462,15 +495,9 @@ concludeClassCallsMethod(Out) :-
     maplist(try_assert_builder(factClassCallsMethod), TupleSets, ActionSets),
     Out = all(ActionSets).
 
-:- table reasonNOTMergeClasses_new_wrapper/0 as (monotonic, lazy).
-reasonNOTMergeClasses_new_wrapper :-
-    reasonNOTMergeClasses_new(Class1, Class2),
-    logtraceln('Queueing ~Q.', reasonNOTMergeClasses_new(Class1, Class2)),
-    assert(forward_pending(reasonNOTMergeClasses_new(Class1, Class2))).
-
 concludeNOTMergeClasses(Out) :-
     reportFirstSeen('concludeNOTMergeClasses'),
-    reasonNOTMergeClasses_new_wrapper,
+    make_wrapper(reasonNOTMergeClasses_new(Class1, Class2)),
     setof((Class1, Class2),
           (retract(forward_pending(reasonNOTMergeClasses_new(Class1, Class2))),
            logtraceln('Considering ~Q.', reasonNOTMergeClasses_new(Class1, Class2)),
