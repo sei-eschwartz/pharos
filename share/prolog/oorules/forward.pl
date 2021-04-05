@@ -471,6 +471,7 @@ reasonNOTMergeClasses_new_wrapper :-
 concludeNOTMergeClasses(Out) :-
     reportFirstSeen('concludeNOTMergeClasses'),
     reasonNOTMergeClasses_new_wrapper,
+    break,
     setof((Class1, Class2),
           (retract(forward_pending(reasonNOTMergeClasses_new(Class1, Class2))),
            logtraceln('Considering ~Q.', reasonNOTMergeClasses_new(Class1, Class2)),
