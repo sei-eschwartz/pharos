@@ -2371,7 +2371,7 @@ reasonMergeClasses_J(VFTable1Class, VFTable2Class) :-
 :- table reasonNOTMergeClasses_O/2 as incremental.
 :- table reasonNOTMergeClasses_P/2 as incremental.
 :- table reasonNOTMergeClasses_Q/2 as incremental.
-:- table reasonNOTMergeClasses_Qhelper/3 as incremental.
+:- table reasonNOTMergeClasses_Qhelper/3 as opaque.
 :- table reasonNOTMergeClasses_R/2 as incremental.
 
 reasonNOTMergeClasses(M1,M2) :-
