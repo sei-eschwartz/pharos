@@ -1221,7 +1221,12 @@ reasonObjectInObject_D(OuterClass, InnerClass, Offset) :-
 
     % Prevent grand ancestors from being decalred object in object.  See commentary below.
     % It's unclear of this constraint is really required in cases where Offset is non-zero.
+    logtraceln('Here we are... ~Q ~Q', [OuterClass, InnerClass]),
+    (   OuterClass=0x411940, InnerClass=0x4116f0
+    ->  break
+    ;   true),
     bnot(reasonClassRelationship(OuterClass, InnerClass)),
+    logtraceln('After bnot'),
 
     % Debugging
     logtraceln('~@~Q.', [bnot(factObjectInObject(OuterClass, InnerClass, Offset)),
