@@ -513,20 +513,24 @@ concludeNOTMergeClasses(Out) :-
 
 concludeMergeVFTables(Out) :-
     reportFirstSeen('concludeMergeVFTables'),
-    reasonMergeVFTables(Class1, Class2),
-    is_current(Class1),
-    is_current(Class2),
-    not(dynFactNOTMergeClasses(Class1, Class2)),
-    loginfoln('Concluding ~Q.', mergeVFTables(Class1, Class2)),
+    make_wrapper(reasonMergeVFTables(Class1, Class2)),
+    minof((Class1, Class2),
+          (retract(forward_pending(user:reasonMergeVFTables(Class1, Class2))),
+           is_current(Class1),
+           is_current(Class2),
+           not(dynFactNOTMergeClasses(Class1, Class2)),
+           loginfoln('Concluding ~Q.', mergeVFTables(Class1, Class2)))),
     Out = mergeClasses(Class1, Class2).
 
 concludeMergeClasses(Out) :-
     reportFirstSeen('concludeMergeClasses'),
-    reasonMergeClasses(Class1, Class2),
-    is_current(Class1),
-    is_current(Class2),
-    not(dynFactNOTMergeClasses(Class1, Class2)),
-    loginfoln('Concluding ~Q.', mergeClasses(Class1, Class2)),
+    make_wrapper(reasonMergeClasses(Class1, Class2)),
+    minof((Class1, Class2),
+          (retract(forward_pending(user:reasonMergeClasses(Class1, Class2))),
+           is_current(Class1),
+           is_current(Class2),
+           not(dynFactNOTMergeClasses(Class1, Class2)),
+           loginfoln('Concluding ~Q.', mergeClasses(Class1, Class2)))),
     Out = mergeClasses(Class1, Class2).
 
 /* Local Variables:   */
