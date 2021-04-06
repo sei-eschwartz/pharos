@@ -85,8 +85,16 @@ try_assert_builder(Extra, Pred, ArgTuple, Out) :-
            call(Extra, Fact)).
 
 :- meta_predicate make_wrapper(0).
-:- table make_wrapper/1 as incremental.
 make_wrapper(Goal) :-
+    make_wrapper__(Goal, _).
+
+% Jan says:
+% This is (indeed) because a table without free variables is considered
+% complete at the moment one answer has arrived.  One simple hack is to add
+% an argument that you can bind to anything you want.
+:- meta_predicate make_wrapper__(0,+).
+:- table make_wrapper__/2 as incremental.
+make_wrapper__(Goal, Hack) :-
     forall(call(Goal),
            (logtraceln('Queueing ~Q.', Goal),
             assert(forward_pending(Goal)))).
