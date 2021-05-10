@@ -9,7 +9,7 @@
 :- use_module(library(debug)).
 :- use_module(library(prolog_wrap)).
 :- use_module(library(prolog_code)).
-:- use_module(library(dialect/xsb/increval)).
+:- use_module(library(increval)).
 :- use_module(library(prolog_stack)).
 :- use_module(library(tables)).
 :- use_module(library(tdump)).
