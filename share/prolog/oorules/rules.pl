@@ -2665,7 +2665,7 @@ reasonNOTMergeClasses_new(M1,M2) :-
         reasonNOTMergeClasses_C(M1,M2),
         %reasonNOTMergeClasses_D(M1,M2),
         % _E is now handled in trigger.pl
-        %reasonNOTMergeClasses_E(M1,M2),
+        reasonNOTMergeClasses_E(M1,M2,_,_,_,_),
         reasonNOTMergeClasses_F(M1,M2),
         reasonNOTMergeClasses_G(M1,M2),
         %reasonNOTMergeClasses_H(M1,M2),
@@ -2673,13 +2673,13 @@ reasonNOTMergeClasses_new(M1,M2) :-
         reasonNOTMergeClasses_K(M1,M2),
         reasonNOTMergeClasses_L(M1,M2),
         % _M is now handled in trigger.pl
-        %reasonNOTMergeClasses_M(M1,M2),
+        reasonNOTMergeClasses_M(_,M1,M2,_,_),
         % _N is now handled in trigger.pl
         %reasonNOTMergeClasses_N(M1,M2),
         reasonNOTMergeClasses_O(M1,M2),
         reasonNOTMergeClasses_P(M1,M2),
         % _Q is now handled in trigger.pl
-        %reasonNOTMergeClasses_Q(M1,M2)
+        reasonNOTMergeClasses_Q(M1,M2,_,_),
         reasonNOTMergeClasses_R(M1,M2)
       ]).
 
