@@ -2654,6 +2654,9 @@ reasonNOTMergeClasses(M1,M2) :-
 reasonNOTMergeClasses(M1,M2) :-
     reasonNOTMergeClasses_new(M1,M2).
 
+factNOTMergeClasses(M1,M2) :-
+    reasonNOTMergeClasses_new(M1,M2).
+
 :- table reasonNOTMergeClasses_new/2 as incremental.
 reasonNOTMergeClasses_new(M1,M2) :-
     %logwarnln('Recomputing reasonNOTMergeClasses...'),

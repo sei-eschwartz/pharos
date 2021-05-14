@@ -413,7 +413,7 @@ reasonForward :-
           concludeClassHasNoBase(Out);
           concludeClassHasUnknownBase(Out);
           concludeReusedImplementation(Out);
-          concludeNOTMergeClasses(Out);
+          %concludeNOTMergeClasses(Out);
           % We should probably be more intelligent about how we order here for trigger
           concludeTrigger(Out);
           concludeMergeVFTables(Out);
