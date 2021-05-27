@@ -95,9 +95,15 @@ make_wrapper(Goal) :-
 :- meta_predicate make_wrapper__(0,+).
 :- table make_wrapper__/2 as incremental.
 make_wrapper__(Goal, _) :-
-    forall(call(Goal),
-           (logtraceln('Queueing ~Q.', Goal),
-            assert(forward_pending(Goal)))).
+    %% forall(call(Goal),
+    %%        (logtraceln('Queueing ~Q.', Goal),
+    %%         assert(forward_pending(Goal)))).
+    (   call(Goal),
+        logtraceln('Queueing ~Q.', Goal),
+        assert(forward_pending(Goal)),
+        fail
+    ;   true
+    ).
 
 concludeMethod(Out) :-
     reportFirstSeen('concludeMethod'),
