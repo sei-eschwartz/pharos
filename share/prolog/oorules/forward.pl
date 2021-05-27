@@ -102,14 +102,19 @@ make_wrapper__(Goal, _) :-
     (   call(Goal),
         logtraceln('Queueing ~Q.', Goal),
         assert(forward_pending(Goal)),
-        fail
+        (    forward_pending(Goal)
+         ->
+             logtraceln('XXX good.')
+         ;   logtraceln('XXX WHAT?'), break)
     ;   true
     ),
     logtraceln('XXX: END make_wrapper__ ~Q.', Goal).
 
 concludeMethod(Out) :-
     reportFirstSeen('concludeMethod'),
-    make_wrapper(reasonMethod(Method)),
+    make_wrapper(user:reasonMethod(Method)),
+    logtraceln('XXX after make_wrapper'),
+    %trace,
     setof(Method,
           (retract(forward_pending(user:reasonMethod(Method))),
            logtraceln('XXX dequeued ~Q', Method),
