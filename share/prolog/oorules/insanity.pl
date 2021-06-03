@@ -212,7 +212,9 @@ insanityContradictoryMerges(Out) :-
     dynFactNOTMergeClasses(Method1, Method2),
 
     Out = (
-        logwarnln(true, 'Contradictory information about merging classes: Method1=~Q Method2=~Q', [Method1, Method2])
+        logwarnln(true, 'Contradictory information about merging classes: Method1=~Q Method2=~Q', [Method1, Method2]),
+        (reasonMergeClasses(Method1, Method2) -> true; break)
+
     ).
 
 :- table insanityContradictoryNOTConstructor/1 as incremental.
