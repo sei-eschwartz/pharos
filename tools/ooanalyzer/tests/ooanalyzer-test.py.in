@@ -153,7 +153,7 @@ def run_prolog_test(args):
     prolog_spew_path = test_output_path(args) + ".swioutput"
 
     redirection = ">%s 2>&1" % (prolog_spew_path,)
-    prolog_cmd = ("%s -d MSG_SHIFT_CHOICE %s --log-level 7 --facts %s --results %s --json %s %s" %
+    prolog_cmd = ("%s %s --log-level 7 --facts %s --results %s --json %s %s" %
                   (exe_path, script_path,
                    ground_facts_path, gen_results_path, prolog_json_path,
                    redirection))
