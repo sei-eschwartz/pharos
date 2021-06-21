@@ -446,13 +446,13 @@ guessReasonAndCheckGuarded(Guess) :-
     ).
 
 sanityChecksOrRevert(When) :-
-    updated(Variants),
+    %% updated(Variants),
     (   sanityChecks
     ->  loginfoln('Constraint checks succeeded ~w!', When)
     ;   logwarnln('Constraint checks failed, retracting guess!'),
-        loginfoln(true, 'Invalidating affected variants: ~p', [Variants]),
-        invalidate(Variants),
-        logdebugln('Rollback transaction ~w', When),
+        %% loginfoln(true, 'Invalidating affected variants: ~p', [Variants]),
+        %% invalidate(Variants),
+        %% logdebugln('Rollback transaction ~w', When),
         fail
     ).
 
