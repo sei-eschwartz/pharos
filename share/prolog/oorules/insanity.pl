@@ -212,8 +212,8 @@ insanityContradictoryMerges(Out) :-
     dynFactNOTMergeClasses(Method1, Method2),
 
     Out = (
-        logwarnln(true, 'Contradictory information about merging classes: Method1=~Q Method2=~Q', [Method1, Method2]),
-        (reasonMergeClasses(Method1, Method2) -> true; break)
+        logwarnln(true, 'Contradictory information about merging classes: Method1=~Q Method2=~Q', [Method1, Method2])
+        %(reasonMergeClasses(Method1, Method2) -> true; break)
 
     ).
 
@@ -223,7 +223,10 @@ insanityContradictoryNOTConstructor(Out) :-
     factConstructor(M),
 
     Out = (
-        logwarnln(true, 'Contradictory information about constructor: factConstructor(~Q) but reasonNOTConstructor(~Q)', [M, M])
+        logwarnln(true, 'Contradictory information about constructor: factConstructor(~Q) but reasonNOTConstructor(~Q)', [M, M]),
+        (M=0x4284fc -> break; true)
+        %(reasonNOTConstructor(M) -> true; break)
+
     ).
 
 
