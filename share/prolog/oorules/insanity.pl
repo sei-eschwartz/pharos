@@ -263,7 +263,7 @@ sanityChecks(Out) :-
     insanityBaseVFTableLarger(Out);
     insanityConstructorAndDeletingDestructor(Out);
     insanityInheritanceLoop(Out);
-    insanityContradictoryMerges(Out);
+    %insanityContradictoryMerges(Out);
     insanityContradictoryNOTConstructor(Out);
     insanityTwoRealDestructorsOnClass(Out).
 
