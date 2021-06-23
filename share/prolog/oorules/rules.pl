@@ -2009,7 +2009,7 @@ reasonMergeVFTables(VFTableClass, Class) :-
 %:- table reasonMergeClasses_A/2 as incremental.
 :- table reasonMergeClasses_B/2 as incremental.
 :- table reasonMergeClasses_C/2 as incremental.
-:- table reasonMergeClasses_D/2 as incremental.
+%:- table reasonMergeClasses_D/2 as incremental.
 :- table reasonMergeClasses_E/2 as incremental.
 %:- table reasonMergeClasses_F/2 as incremental.
 :- table reasonMergeClasses_G/2 as incremental.
@@ -2020,7 +2020,7 @@ reasonMergeVFTables(VFTableClass, Class) :-
 reasonMergeClasses(C,M) :-
     (   reasonMergeClasses_B(C,M)
     ;   reasonMergeClasses_C(C,M)
-    ;   reasonMergeClasses_D(C,M)
+%   ;   reasonMergeClasses_D(C,M)
     ;   reasonMergeClasses_E(C,M)
 %   ;   reasonMergeClasses_F(C,M)
     ;   reasonMergeClasses_G(C,M)
@@ -2113,6 +2113,7 @@ reasonMergeClasses_C(Class, ExistingClass) :-
     logtraceln('~@~Q.', [bnot(find(Class, ExistingClass)),
                          reasonMergeClasses_C(Class, ExistingClass, Method)]).
 
+<<<<<<< HEAD
 % If there are two implementations of the constructor on the same class, they should be merged
 % into a single class.  For example Cls1(int x) and Cls1(char y).  When the class has virtual
 % methods, this case can be easily detected by observing that the same VFTable is written into
