@@ -208,7 +208,7 @@ main([], []) :-
     usage(user_output, 0).
 
 % How can we do this better?
-:- [v].
+%:- [v].
 
 main(Opts, []) :-
     load(Opts),
