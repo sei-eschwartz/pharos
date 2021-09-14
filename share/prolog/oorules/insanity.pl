@@ -165,7 +165,14 @@ insanityConstructorAndNotConstructor(Out) :-
     factNOTConstructor(Method),
 
     Out = (
-        logwarnln(true, 'A method may not be a constructor and not a constructor: Method=~Q', [Method])
+        logwarnln(true, 'A method may not be a constructor and not a constructor: Method=~Q', [Method]),
+        (factConstructor(Method),
+         factNOTConstructor(Method))
+        ->
+            true
+        ;
+        logerrorln(true, 'BAD', []),
+        break
     ).
 
 % A method may not be both a constructor and a real destructor.
@@ -212,7 +219,14 @@ insanityContradictoryMerges(Out) :-
     dynFactNOTMergeClasses(Method1, Method2),
 
     Out = (
-        logwarnln(true, 'Contradictory information about merging classes: Method1=~Q Method2=~Q', [Method1, Method2])
+        logwarnln(true, 'Contradictory information about merging classes: Method1=~Q Method2=~Q', [Method1, Method2]),
+        (reasonMergeClasses(Method1, Method2),
+         dynFactNOTMergeClasses(Method1, Method2))
+        ->
+            logwarnln(true, 'still true', [])
+        ;
+        logerrorln(true, 'BAD', []),
+        break
     ).
 
 :- table insanityContradictoryNOTConstructor/1 as incremental.
