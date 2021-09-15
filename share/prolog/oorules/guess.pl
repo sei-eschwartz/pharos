@@ -1073,8 +1073,9 @@ guessMergeClasses(Out) :-
     minof((Class, Method),
           guessMergeClassesD(Class, Method)),
     !,
-    OneTuple=[(Class, Method)],
-    Out = tryBinarySearch(tryMergeClasses, tryNOTMergeClasses, OneTuple, 1).
+    tryOrNot(tryMergeClasses(Class, Method, guessMergeClassesD),
+             tryNOTMergeClasses(Class, Method, guessMergeClassesD),
+             Out).
 
 % Try guessing that a VFTable belongs to a method.
 
