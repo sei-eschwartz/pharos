@@ -1,0 +1,32 @@
+returnsSelf(0x40c170).
+returnsSelf(0x426e40).
+noCallsBefore(0x426e40).
+methodMemberAccess(0x428710, 0x428710, 0, 0x4).
+possibleVFTableWrite(0x426e67, 0x426e40, 0, 0x49f37c).
+possibleVFTableWrite(0x428bca, 0x428bc0, 0x1b8, 0x47cbdc).
+possibleVFTableWrite(0x428bd4, 0x428bc0, 0, 0x47cbdc).
+rTTICompleteObjectLocator(0x47cbd8, 0x7c1ca8, 0x83d2e8, 0x7c1cbc, 0, 0).
+rTTICompleteObjectLocator(0x49f378, 0x7c2bd0, 0x83d920, 0x7c2be4, 0, 0).
+rTTITypeDescriptor(0x83d2e8, 0x736108, '.?AVMode_BASE@TaoCrypt@@', 'TaoCrypt::Mode_BASE').
+rTTITypeDescriptor(0x83d30c, 0x736108, '.?AVvirtual_base@TaoCrypt@@', 'TaoCrypt::virtual_base').
+rTTITypeDescriptor(0x83d38c, 0x736108, '.?AVHandShakeBase@yaSSL@@', 'yaSSL::HandShakeBase').
+rTTITypeDescriptor(0x83d3cc, 0x736108, '.?AVHASHwithTransform@TaoCrypt@@', 'TaoCrypt::HASHwithTransform').
+rTTITypeDescriptor(0x83d538, 0x736108, '.?AUServerKeyBase@yaSSL@@', 'yaSSL::ServerKeyBase').
+rTTITypeDescriptor(0x83d55c, 0x736108, '.?AUFortezza_Server@yaSSL@@', 'yaSSL::Fortezza_Server').
+rTTITypeDescriptor(0x83d5a0, 0x736108, '.?AURSA_Server@yaSSL@@', 'yaSSL::RSA_Server').
+rTTITypeDescriptor(0x83d610, 0x736108, '.?AUServerHelloDone@yaSSL@@', 'yaSSL::ServerHelloDone').
+rTTITypeDescriptor(0x83d920, 0x736108, '.?AVDES@TaoCrypt@@', 'TaoCrypt::DES').
+rTTITypeDescriptor(0x83dc64, 0x736108, '.?AVDSA_Public_Decoder@TaoCrypt@@', 'TaoCrypt::DSA_Public_Decoder').
+rTTIClassHierarchyDescriptor(0x7c1cbc, 0, [0x7c1cd8, 0x7c1cf4]).
+rTTIClassHierarchyDescriptor(0x7c1ec8, 0, [0x7c1ee8, 0x7c1eac, 0x7c1cf4]).
+rTTIClassHierarchyDescriptor(0x7c2be4, 0x1, [0x7c2c08, 0x7c1cd8, 0x7c1cf4, 0x7c2c24]).
+rTTIClassHierarchyDescriptor(0x7c2d24, 0, [0x7c2d44, 0x7c2cf4, 0x7c1cf4]).
+rTTIClassHierarchyDescriptor(0x7c2d74, 0, [0x7c2d90, 0x7c1cf4]).
+rTTIClassHierarchyDescriptor(0x7c2dfc, 0, [0x7c2e1c, 0x7c1eac, 0x7c1cf4]).
+rTTIClassHierarchyDescriptor(0x7c2ef4, 0, [0x7c2f18, 0x7c2e1c, 0x7c1eac, 0x7c1cf4]).
+rTTIBaseClassDescriptor(0x7c1cd8, 0x83d2e8, 0x1, 0, 0xffffffff, 0, 0x40, 0x7c1cbc).
+rTTIBaseClassDescriptor(0x7c225c, 0x83d538, 0x1, 0, 0xffffffff, 0, 0x40, 0x7c2240).
+rTTIBaseClassDescriptor(0x7c234c, 0x83d5a0, 0x2, 0, 0xffffffff, 0, 0x40, 0x7c232c).
+rTTIBaseClassDescriptor(0x7c2c08, 0x83d920, 0x3, 0, 0xffffffff, 0, 0x40, 0x7c2be4).
+thisPtrAllocation(0x426dfb, 0x426dc0, sv_17568889379238833109, type_Heap, 0x170).
+thisPtrUsage(0x426e09, 0x426dc0, sv_17568889379238833109, 0x426e40).
