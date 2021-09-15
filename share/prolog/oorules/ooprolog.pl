@@ -120,6 +120,8 @@ ooprolog_opts_spec(
        default(true), help('enable RTTI analysis')],
       [opt(guess), longflags([guess]), shortflags(['G']), type(boolean),
        default(true), help('enable guessing')],
+      [opt(det), longflags(['deterministic']), shortflags(['D']), type(boolean),
+       default(false), help('enable determinism')],
       [opt(loglevel), longflags(['log-level']), shortflags([l]),
        type(integer), default(3), help('logging level (0-7)')],
 
@@ -224,6 +226,7 @@ load(Opts) :-
     option(stacklimit(Stacklimit), Opts),
     option(tablespace(Tablespace), Opts),
     option(rtti(RTTI), Opts),
+    option(det(Deterministic), Opts),
     option(guess(Guess), Opts),
     (   option(halt(true), Opts),
         \+ option(load_only(true), Opts)
@@ -237,8 +240,9 @@ load(Opts) :-
     consult([pharos(report), pharos(oojson), pharos(validate)]),
     ignore(check_option(oorulespath(Path), Opts) ->
                asserta(file_search_path(pharos, Path))),
+    ignore(Deterministic -> assert(deterministicEnabled)),
     ignore(RTTI -> assert(rTTIEnabled)),
-    (Guess, ! ; assert(guessingDisabled)).
+    (Guess -> true; assert(guessingDisabled)).
 
 run :-
     runOptions(Opts),
