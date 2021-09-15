@@ -68,6 +68,7 @@ tryOrNot(Pos, Neg, [Pos, Neg, upstreamFail(Pos, Neg)]).
 % --------------------------------------------------------------------------------------------
 guessVirtualFunctionCall(Out) :-
     reportFirstSeen('guessVirtualFunctionCall'),
+
     minof((Insn, Constructor, OOffset, VFTable, VOffset),
           (likelyVirtualFunctionCall(Insn, Constructor, OOffset, VFTable, VOffset),
            not(factNOTConstructor(Constructor)),
@@ -97,7 +98,8 @@ guessVFTable(Out) :-
     reportFirstSeen('guessVFTable'),
     % See the commentary at possibleVFTable for how this goal constrains our guesses (and
     % ordering).
-    possibleVFTable(VFTable),
+
+    osetof2(VFTable, possibleVFTable(VFTable)),
     doNotGuessHelper(factVFTable(VFTable),
                      factNOTVFTable(VFTable)),
 
@@ -122,7 +124,8 @@ tryNOTVFTable(VFTable, Rule) :-
 % --------------------------------------------------------------------------------------------
 guessVBTable(Out) :-
     reportFirstSeen('guessVBTable'),
-    validVBTableWrite(_Insn, Method, _Offset, VBTable),
+
+    osetof2(VBTable, validVBTableWrite(_Insn, Method, _Offset, VBTable)),
     factMethod(Method),
     doNotGuessHelper(factVBTable(VBTable),
                      factNOTVBTable(VBTable)),
@@ -190,14 +193,14 @@ guessVFTableEntry2(VFTable, Offset, Entry) :-
 
 guessVFTableEntry(Out) :-
     reportFirstSeen('guessVFTableEntry'),
-    guessVFTableEntry1(VFTable, Offset, Entry),
+    osetof2((VFTable, Offset, Entry), guessVFTableEntry1(VFTable, Offset, Entry)),
 
     tryOrNot(tryVFTableEntry(VFTable, Offset, Entry, guessVFTableEntry1),
              tryNOTVFTableEntry(VFTable, Offset, Entry, guessVFTableEntry1),
              Out).
 
 guessVFTableEntry(Out) :-
-    guessVFTableEntry2(VFTable, Offset, Entry),
+    osetof2((VFTable, Offset, Entry), guessVFTableEntry2(VFTable, Offset, Entry)),
 
     tryOrNot(tryVFTableEntry(VFTable, Offset, Entry, guessVFTableEntry2),
              tryNOTVFTableEntry(VFTable, Offset, Entry, guessVFTableEntry2),
@@ -232,7 +235,7 @@ guessDerivedClass(DerivedClass, BaseClass, Offset) :-
                      factEmbeddedObject(DerivedClass, BaseClass, Offset)).
 
 guessDerivedClass(Out) :-
-    guessDerivedClass(DerivedClass, BaseClass, Offset),
+    osetof2((DerivedClass, BaseClass, Offset), guessDerivedClass(DerivedClass, BaseClass, Offset)),
 
     tryOrNot(tryDerivedClass(DerivedClass, BaseClass, Offset, guessDerivedClass),
              tryEmbeddedObject(DerivedClass, BaseClass, Offset, guessDerivedClass),
@@ -292,7 +295,7 @@ guessMethodA(Method) :-
 
 guessMethod(Out) :-
     reportFirstSeen('guessMethod'),
-    guessMethodA(Method),
+    osetof2(Method, guessMethodA(Method)),
 
     tryOrNot(tryMethod(Method, guessMethodA),
              tryNOTMethod(Method, guessMethodA),
@@ -313,7 +316,7 @@ guessMethodB(Method) :-
 % Guess that calls passed offsets into existing objects are methods.  This rule is not
 % literally true, but objects are commonly in other objects.
 guessMethod(Out) :-
-    guessMethodB(Method),
+    osetof2(Method, guessMethodB(Method)),
 
     tryOrNot(tryMethod(Method, guessMethodB),
              tryNOTMethod(Method, guessMethodB),
@@ -335,7 +338,7 @@ guessMethodC(Method) :-
     factMethod(Caller).
 
 guessMethod(Out) :-
-    guessMethodC(Method),
+    osetof2(Method, guessMethodC(Method)),
 
     tryOrNot(tryMethod(Method, guessMethodC),
              tryNOTMethod(Method, guessMethodC),
@@ -359,7 +362,7 @@ guessMethodD(Method) :-
     iso_dif(Caller1, Caller3).
 
 guessMethod(Out) :-
-    guessMethodD(Method),
+    osetof2(Method, guessMethodD(Method)),
     tryOrNot(tryMethod(Method, guessMethodD),
              tryNOTMethod(Method, guessMethodD),
              Out).
@@ -381,7 +384,7 @@ guessMethodE(Method) :-
 
 
 guessMethod(Out) :-
-    guessMethodE(Method),
+    osetof2(Method, guessMethodE(Method)),
 
     tryOrNot(tryMethod(Method, guessMethodE),
              tryNOTMethod(Method, guessMethodE),
@@ -399,7 +402,7 @@ guessMethodF(Method) :-
     (possibleConstructor(Method); possibleDestructor(Method)).
 
 guessMethod(Out) :-
-    guessMethodF(Method),
+    osetof2(Method, guessMethodF(Method)),
 
     tryOrNot(tryMethod(Method, guessMethodF),
              tryNOTMethod(Method, guessMethodF),
@@ -415,7 +418,7 @@ guessMethodG(Method) :-
     (possibleConstructor(Method); possibleDestructor(Method)).
 
 guessMethod(Out) :-
-    guessMethodG(Method),
+    osetof2(Method, guessMethodG(Method)),
 
     tryOrNot(tryMethod(Method, guessMethodG),
              tryNOTMethod(Method, guessMethodG),
@@ -473,7 +476,7 @@ guessConstructor1(Method) :-
 
 guessConstructor(Out) :-
     reportFirstSeen('guessConstructor'),
-    guessConstructor1(Method),
+    osetof2(Method, guessConstructor1(Method)),
 
     tryOrNot(tryConstructor(Method, guessConstructor1),
              tryNOTConstructor(Method, guessConstructor1),
@@ -492,7 +495,7 @@ guessConstructor2(Method) :-
                      factNOTConstructor(Method)).
 
 guessConstructor(Out) :-
-    guessConstructor2(Method),
+    osetof2(Method, guessConstructor2(Method)),
 
     tryOrNot(tryConstructor(Method, guessConstructor2),
              tryNOTConstructor(Method, guessConstructor2),
@@ -511,7 +514,7 @@ guessConstructor3(Method) :-
                      factNOTConstructor(Method)).
 
 guessConstructor(Out) :-
-    guessConstructor3(Method),
+    osetof2(Method, guessConstructor3(Method)),
 
     tryOrNot(tryConstructor(Method, guessConstructor3),
              tryNOTConstructor(Method, guessConstructor3),
@@ -530,7 +533,7 @@ guessConstructor4(Method) :-
 
 guessUnlikelyConstructor(Out) :-
     reportFirstSeen('guessUnlikelyConstructor'),
-    guessConstructor4(Method),
+    osetof2(Method, guessConstructor4(Method)),
 
     tryOrNot(tryConstructor(Method, guessConstructor4),
              tryNOTConstructor(Method, guessConstructor4),
@@ -569,7 +572,7 @@ guessClassHasNoBaseB(Class) :-
 
 guessClassHasNoBase(Out) :-
     reportFirstSeen('guessClassHasNoBase'),
-    guessClassHasNoBaseB(Class),
+    osetof2(Class, guessClassHasNoBaseB(Class)),
 
     tryOrNot(tryClassHasNoBase(Class, guessClassHasNoBaseB),
              tryClassHasUnknownBase(Class, guessClassHasNoBaseB),
@@ -586,7 +589,7 @@ guessClassHasNoBaseC(Class) :-
                      factClassHasUnknownBase(Class)).
 
 guessClassHasNoBase(Out) :-
-    guessClassHasNoBaseC(Class),
+    osetof2(Class, guessClassHasNoBaseC(Class)),
 
     tryOrNot(tryClassHasNoBase(Class, guessClassHasNoBaseC),
              tryClassHasUnknownBase(Class, guessClassHasNoBaseC),
@@ -620,7 +623,7 @@ guessClassHasNoBaseSpecial(Class) :-
 
 guessCommitClassHasNoBase(Out) :-
     reportFirstSeen('guessCommitClassHasNoBase'),
-    guessClassHasNoBaseSpecial(Class),
+    osetof2(Class, guessClassHasNoBaseSpecial(Class)),
 
     tryOrNot(tryClassHasNoBase(Class, guessCommitClassHasNoBase),
              tryClassHasUnknownBase(Class, guessCommitClassHasNoBase),
@@ -751,7 +754,7 @@ guessNOTMergeClassesSymmetric(Class1, Class2) :-
     true.
 
 guessNOTMergeClasses(Out) :-
-    guessNOTMergeClassesSymmetric(Class1, Class2),
+    osetof2((Class1, Class2), guessNOTMergeClassesSymmetric(Class1, Class2)),
 
     tryOrNot(tryNOTMergeClasses(Class1, Class2, guessNOTMergeClasses),
              tryMergeClasses(Class1, Class2, guessNOTMergeClasses),
@@ -1224,7 +1227,7 @@ minimalRealDestructor(Method) :-
 
 % Prioritize methods called by deleteing destructors.
 guessFinalRealDestructor(Out) :-
-    minimalRealDestructor(Method),
+    osetof2(Method, minimalRealDestructor(Method)),
     callTarget(_Insn, OtherDestructor, Method),
     factDeletingDestructor(OtherDestructor),
 
@@ -1234,7 +1237,7 @@ guessFinalRealDestructor(Out) :-
 
 % Prioritize methods that call other real destructors.
 guessFinalRealDestructor(Out) :-
-    minimalRealDestructor(Method),
+    osetof2(Method, minimalRealDestructor(Method)),
     callTarget(_Insn, Method, OtherDestructor),
     factRealDestructor(OtherDestructor),
 
@@ -1245,7 +1248,7 @@ guessFinalRealDestructor(Out) :-
 % Prioritize methods that do not call delete to avoid confusion with deleting destructors.
 % This eliminates a couple of false positives in the fast test suite.
 guessFinalRealDestructor(Out) :-
-    minimalRealDestructor(Method),
+    osetof2(Method, minimalRealDestructor(Method)),
     not(insnCallsDelete(_Insn, Method, _SV)),
 
     tryOrNot(tryRealDestructor(Method, guessFinalRealDestructor3),
@@ -1254,7 +1257,7 @@ guessFinalRealDestructor(Out) :-
 
 % Guess if it meets the minimal criteria.
 guessFinalRealDestructor(Out) :-
-    minimalRealDestructor(Method),
+    osetof2(Method, minimalRealDestructor(Method)),
 
     tryOrNot(tryRealDestructor(Method, guessFinalRealDestructor4),
              tryNOTRealDestructor(Method, guessFinalRealDestructor4),
@@ -1290,7 +1293,7 @@ likelyAVirtualDestructor(Method) :-
 
 guessDeletingDestructor(Out) :-
     reportFirstSeen('guessDeletingDestructor'),
-    likelyAVirtualDestructor(Method),
+    minof(Method, likelyAVirtualDestructor(Method)),
     doNotGuessHelper(factDeletingDestructor(Method),
                      factNOTDeletingDestructor(Method)),
     !,
@@ -1312,7 +1315,8 @@ guessDeletingDestructor(Out) :-
 
 guessFinalDeletingDestructor(Out) :-
     reportFirstSeen('guessFinalDeletingDestructor'),
-    possibleDestructor(Method),
+
+    osetof2(Method, possibleDestructor(Method)),
     doNotGuessHelper(factDeletingDestructor(Method),
                      factNOTDeletingDestructor(Method)),
 
@@ -1334,7 +1338,7 @@ guessFinalDeletingDestructor(Out) :-
 %
 guessFinalDeletingDestructor(Out) :-
     % Establish that the candidate meets minimal requirements.
-    possibleDestructor(Method),
+    osetof2(Method, possibleDestructor(Method)),
     doNotGuessHelper(factDeletingDestructor(Method),
                      factNOTDeletingDestructor(Method)),
 

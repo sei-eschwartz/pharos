@@ -36,12 +36,18 @@ sort_tuple((A,B), (C,D)) :-
 
 :- meta_predicate
     osetof(?, ^, -),
+    osetof2(?, ^),
     minof(?, ^).
 
 osetof(A, B, C) :-
     bagof(A, B, Cp),
     list_to_set(Cp, Cp2),
     (deterministicEnabled -> sort(Cp2, C); C = Cp2).
+
+% This function returns answers in a deterministic order
+osetof2(A, B) :-
+    osetof(A, B, Csort),
+    member(A, Csort).
 
 minof(A, B) :-
     deterministicEnabled
