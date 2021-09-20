@@ -144,6 +144,13 @@ concludeNOTConstructor(Out) :-
     maplist(try_assert_builder(factNOTConstructor), MethodSets, ActionSets),
     Out = all(ActionSets).
 
+concludeNOTConstructor(_Out) :-
+    reasonNOTConstructor(0x443980),
+    bnot(factNOTConstructor(0x443980)),
+    logwarnln('reasonNOTConstructor(0x443980) but factNOTConstructor(0x443980) has not been concluded?'),
+    break,
+    fail.
+
 concludeRealDestructor(Out) :-
     reportFirstSeen('concludeRealDestructor'),
     make_wrapper(reasonRealDestructor(Method)),
