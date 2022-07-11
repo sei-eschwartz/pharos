@@ -981,6 +981,10 @@ reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
     !,
     find(Method, Class),
     factVFTableWrite(Insn, Method, Offset, VFTable),
+    % Verify that this vftable write is in method's this class
+    possibleVFTableWrite(Insn, Method, ThisPtr, Offset, VFTable),
+    funcParameter(Method, ecx, ThisPtr),
+
     VFTableWrite=factVFTableWrite(Insn, Method, Offset, VFTable),
 
     % ejs 10/9/20: We found the destructor rule was applying to a method which we had not
@@ -1078,6 +1082,9 @@ reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
 % Free, _, Free: OK
 reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
     factVFTableWrite(Insn, Method, Offset, VFTable),
+    % Verify that this vftable write is in method's this class
+    possibleVFTableWrite(Insn, Method, ThisPtr, Offset, VFTable),
+    funcParameter(Method, ecx, ThisPtr),
     VFTableWrite=factVFTableWrite(Insn, Method, Offset, VFTable),
     find(Method, Class),
 
