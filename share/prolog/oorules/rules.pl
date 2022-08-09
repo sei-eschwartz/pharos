@@ -1001,35 +1001,7 @@ reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
     % Constructors may inline embedded constructors.  If non-offset
     % zero, we must make sure that there is an inherited class at this
     % offset.
-    % (Offset = 0 -> true; factDerivedClass(Class, _BaseClass, Offset)),
-
-    % ejs 5/5/22: Basically, there are two operations that can cause a vftable to be installed
-    % at a non-zero offset: inheritance or embedding.  We need to know which because
-    % inheritance results in vftable ownership, but embedding does not!  The old version of
-    % this rule attempts to say that if there is a derived class immediately at Offset then
-    % Class owns the vftable.  Sadly, there are a bunch of problems here:
-
-    % 1. There could be a zero-size derived class without a vftable and an embedded class with
-    % a vftable at Offset
-
-    % 2. There could be a derived class at Offset without a vftable, but containing an embedded
-    % class at (inner) offset 0
-
-    % 3. There could be multiple inheritance, which can cause a vftable that is owned by the
-    % outer class at an offset at which there is not an immediate base
-
-    (
-        % One way for us to own the vftable is if there is an inherited ancestor at Offset that has
-        % a vftable we need to replace
-        (reasonDerivedClassRelationship(Class, AncestorClass, Offset) ->
-             reasonVFTableBelongsToClass(_SomeVFTableWeNeedToReplace, 0, AncestorClass, _Rule, _OtherWrite));
-
-        % The other way for us to own the vftable is if we're starting a new inheritance
-        % hierarchy ourselves.  If this is the case, Offset will be 0.  If there are no
-        % embedded objects at offset 0, then we must own the vftable.
-        (Offset = 0, (factNOTEmbeddedObject(Class, _AnyClass, 0);
-                      % Not ideal...
-                      not(factEmbeddedObject(Class, _AnyClass2, 0))))),
+    (Offset = 0 -> true; factDerivedClass(Class, _BaseClass, Offset)),
 
     % VFTables from a base class can be reused in a derived class.  If this happens, we know
     % that the VFTable does not belong to the derived class.
@@ -1100,35 +1072,7 @@ reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
     % Constructors may inline embedded constructors.  If non-offset
     % zero, we must make sure that there is an inherited class at this
     % offset.
-    % (Offset = 0 -> true; factDerivedClass(Class, _BaseClass, Offset)),
-
-    % ejs 5/5/22: Basically, there are two operations that can cause a vftable to be installed
-    % at a non-zero offset: inheritance or embedding.  We need to know which because
-    % inheritance results in vftable ownership, but embedding does not!  The old version of
-    % this rule attempts to say that if there is a derived class immediately at Offset then
-    % Class owns the vftable.  Sadly, there are a bunch of problems here:
-
-    % 1. There could be a zero-size derived class without a vftable and an embedded class with
-    % a vftable at Offset
-
-    % 2. There could be a derived class at Offset without a vftable, but containing an embedded
-    % class at (inner) offset 0
-
-    % 3. There could be multiple inheritance, which can cause a vftable that is owned by the
-    % outer class at an offset at which there is not an immediate base
-
-    (
-        % One way for us to own the vftable is if there is an inherited ancestor at Offset that has
-        % a vftable we need to replace
-        (reasonDerivedClassRelationship(Class, AncestorClass, Offset) ->
-             reasonVFTableBelongsToClass(_SomeVFTableWeNeedToReplace, 0, AncestorClass, _Rule, _OtherWrite));
-
-        % The other way for us to own the vftable is if we're starting a new inheritance
-        % hierarchy ourselves.  If this is the case, Offset will be 0.  If there are no
-        % embedded objects at offset 0, then we must own the vftable.
-        (Offset = 0, (factNOTEmbeddedObject(Class, _AnyClass, 0);
-                      % Not ideal...
-                      not(factEmbeddedObject(Class, _AnyClass2, 0))))),
+    (Offset = 0 -> true; factDerivedClass(Class, _BaseClass, Offset)),
 
     % VFTables from a base class can be reused in a derived class.  If this happens, we know
     % that the VFTable does not belong to the derived class.
