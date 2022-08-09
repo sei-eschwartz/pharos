@@ -1053,6 +1053,15 @@ reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
          % vftables with destructors before any determination about constructors or destructors
          % was made.  So we must actually wait for a definitive constructor conclusion rather
          % than the absence of contradictory evidence.
+
+         % ejs 8/9/22: When a virtual base containing a vfptr is initialized (initVBases=1),
+         % the vbase's original vftable is installed by its fixed offset.  But in the
+         % unconditional constructor code that replaces the vftable, the vftable is installed
+         % using the vbtable.  Thus right now we can't detect the overwrite.  This constraint
+         % detects whether the vftable write we are looking at is in the initVBases=1 branch
+         % and if so excludes it.
+         not(possibleVFTableWrite(Insn, Method, _Ptr, Offset, 1, VFTable)),
+
          factConstructor(Method),
          Rule=constructor);
 
@@ -1152,6 +1161,15 @@ reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
          % vftables with destructors before any determination about constructors or destructors
          % was made.  So we must actually wait for a definitive constructor conclusion rather
          % than the absence of contradictory evidence.
+
+         % ejs 8/9/22: When a virtual base containing a vfptr is initialized (initVBases=1),
+         % the vbase's original vftable is installed by its fixed offset.  But in the
+         % unconditional constructor code that replaces the vftable, the vftable is installed
+         % using the vbtable.  Thus right now we can't detect the overwrite.  This constraint
+         % detects whether the vftable write we are looking at is in the initVBases=1 branch
+         % and if so excludes it.
+         not(possibleVFTableWrite(Insn, Method, _Ptr, Offset, 1, VFTable)),
+
          factConstructor(Method),
          Rule=constructor);
 
