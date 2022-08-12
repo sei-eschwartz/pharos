@@ -25,8 +25,7 @@
 
 reasonMethod(Method) :-
     %logwarnln('Recomputing reasonMethod...'),
-    or([reasonMethod_A(Method),
-        reasonMethod_B(Method),
+    or([reasonMethod_B(Method),
         reasonMethod_C(Method),
         reasonMethod_D(Method),
         reasonMethod_E(Method),
@@ -42,11 +41,6 @@ reasonMethod(Method) :-
       %        reasonMethod_O(Method),
       %        reasonMethod_P(Method)
       ]).
-
-% Because we already know.
-% PAPER: ??? This entire rule is new and still pretty experimental.
-reasonMethod_A(Method) :-
-    factMethod(Method).
 
 % Because contructors are definitely methods.
 reasonMethod_B(Method) :-
@@ -262,8 +256,7 @@ reasonConstructorSet(Set) :-
 
 reasonNOTConstructor(Method) :-
     %logwarnln('Recomputing reasonNOTConstructor...'),
-    or([reasonNOTConstructor_A(Method),
-        reasonNOTConstructor_B(Method),
+    or([reasonNOTConstructor_B(Method),
         reasonNOTConstructor_C(Method),
         reasonNOTConstructor_D(Method),
         %reasonNOTConstructor_E(Method),
@@ -273,11 +266,6 @@ reasonNOTConstructor(Method) :-
         reasonNOTConstructor_I(Method),
         reasonNOTConstructor_J(Method)
       ]).
-
-% Because it is already known to NOT be a constructor.
-% PAPER: NA
-reasonNOTConstructor_A(Method) :-
-    factNOTConstructor(Method).
 
 % Because it is a real destructor.
 % PAPER: Logic
@@ -424,8 +412,7 @@ reasonRealDestructorSet(Set) :-
 
 reasonNOTRealDestructor(Method) :-
     %logwarnln('Recomputing reasonNOTRealDestructor...'),
-    or([reasonNOTRealDestructor_A(Method),
-        reasonNOTRealDestructor_B(Method),
+    or([reasonNOTRealDestructor_B(Method),
         reasonNOTRealDestructor_C(Method),
         reasonNOTRealDestructor_D(Method),
         reasonNOTRealDestructor_E(Method),
@@ -435,11 +422,6 @@ reasonNOTRealDestructor(Method) :-
         reasonNOTRealDestructor_I(Method),
         reasonNOTRealDestructor_J(Method)
       ]).
-
-% Because it is already known to NOT be a real destructor.
-% PAPER: NA
-reasonNOTRealDestructor_A(Method) :-
-    factNOTRealDestructor(Method).
 
 % Because it is a constructor.
 % PAPER: Logic
@@ -1225,9 +1207,6 @@ reasonNOTVFTableEntrySet(VFTable, Set) :-
 % 4 byte (32-bit) function pointers.  So a table with one entry will have size 4, with two
 % entries size 8, and so on.
 
-reasonVFTableSizeGTE(VFTable, Size) :-
-    factVFTableSizeGTE(VFTable, Size).
-
 % PAPER: VSize-1
 reasonVFTableSizeGTE(VFTable, Size) :-
     % Ed says: By prefixing E^ we tell setof NOT to case on E.
@@ -1278,9 +1257,6 @@ reasonVFTableSizeGTE(VFTable, Size) :-
 % The size includes the length of the last pointer, and pointers are incorrectly assumed to by
 % 4 byte (32-bit) function pointers.  So a table with one entry will have size 4, with two
 % entries size 8, and so on.
-
-reasonVFTableSizeLTE(VFTable, Size) :-
-    factVFTableSizeLTE(VFTable, Size).
 
 % PAPER: VSize-0
 reasonVFTableSizeLTE(VFTable, Size) :-
@@ -3293,19 +3269,13 @@ certainMemberOnExactClassSet(Class, Set) :-
 
 reasonClassSizeGTE(Class, Size) :-
     %logwarnln('Recomputing reasonClassSizeGTE...'),
-    or([reasonClassSizeGTE_A(Class, Size),
-        reasonClassSizeGTE_B(Class, Size),
+    or([reasonClassSizeGTE_B(Class, Size),
         reasonClassSizeGTE_C(Class, Size),
         reasonClassSizeGTE_D(Class, Size),
         reasonClassSizeGTE_E(Class, Size),
         reasonClassSizeGTE_F(Class, Size),
         reasonClassSizeGTE_G(Class, Size)
       ]).
-
-% Because it is already known to be true.
-% PAPER: NA
-reasonClassSizeGTE_A(Class, Size) :-
-    factClassSizeGTE(Class, Size).
 
 % Because all classes must have a non-negative size.
 % PAPER: CSize-0
