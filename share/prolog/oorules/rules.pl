@@ -3487,7 +3487,13 @@ reasonClassSizeGTE_E(Class, Size) :-
 % PAPER: CSize-4
 reasonClassSizeGTE_F(Class, Size) :-
     %% find(_Method, Class),
-    factObjectInObject(Class, InnerClass, Offset),
+
+    % ejs 8/12/22: This rule does NOT apply when the inner object is on a virtual base, because
+    % it may contain a virtual base that is already also on Class, and the size would be double
+    % counted.
+    (factEmbeddedObject(Class, InnerClass, Offset);
+     factDerivedClass(Class, InnerClass, Offset, false)),
+
     % Even though Class and InnerClass shouldn't be the same, if they were permitting that in
     % this rule will introduce an endless loop preventing us from reaching sanity checks that
     % would detect the condition, so we need to prtect against it here as well.
