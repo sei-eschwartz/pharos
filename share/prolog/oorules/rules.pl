@@ -1539,6 +1539,13 @@ reasonObjectInObject_E(OuterClass, InnerClass, Offset) :-
 % If a method installs a vftable at two different offsets, it must be embedded or inherited.
 reasonObjectInObject_F(OuterClass, InnerClass, Offset) :-
     factVFTableWrite(_Insn1, Method, Offset, VFTable),
+
+    % ejs 8/13/22 This rule should not apply if we already know about a chain of inheritance or
+    % embedding that explains the vftable write.  On the other hand, this fix is not completely
+    % satisfactory because in practice we might not know about the chain early enough.  Maybe
+    % this should be a guessing rule?
+    not(reasonClassAtOffset(OuterClass, Offset, _KnownInnerClass)),
+
     find(Method, OuterClass),
     find(VFTable, InnerClass),
     iso_dif(Method, VFTable),
