@@ -2901,8 +2901,8 @@ reasonNOTMergeClasses_C_asymmetric(DerivedClass, MethodClass) :-
 % Handle the complicated asymmetry of reasonNOTMergeClasses_C_asymmetric, so that we always
 % return Class1 < Class2.
 reasonNOTMergeClasses_C(Class1, Class2) :-
-    ((reasonNOTMergeClasses_C_asymmetric(Class1, Class2), Class1 < Class2);
-     (reasonNOTMergeClasses_C_asymmetric(Class2, Class1), Class1 < Class2)),
+    ((reasonNOTMergeClasses_C_asymmetric(Class1, Class2), Class1 @< Class2);
+     (reasonNOTMergeClasses_C_asymmetric(Class2, Class1), Class1 @< Class2)),
 
     % Debugging
     logtraceln('~@~Q.', [not(dynFactNOTMergeClasses(Class1, Class2)),
@@ -2953,7 +2953,7 @@ reasonNOTMergeClasses_F(Class1, Class2) :-
     factDerivedClass(DerivedClass, Class2, ObjectOffset2),
     % This rule handles symmetry correctly, so adding this constraint causes the rule to fire
     % twice, but reduces the number of NOTMergeClass facts created by this rule.
-    Class1 < Class2,
+    Class1 @< Class2,
     iso_dif(ObjectOffset1, ObjectOffset2),
     % Debugging
     logtraceln('~@~Q.', [not(dynFactNOTMergeClasses(Class1, Class2)),
@@ -2995,7 +2995,7 @@ reasonNOTMergeClasses_I(Class1, Class2) :-
     % This shouldn't be needed unless rTTITDA2Class() is misbehaving!
     % This rule handles symmetry correctly, so adding this constraint causes the rule to fire
     % twice, but reduces the number of NOTMergeClass facts created by this rule.
-    Class1 < Class2,
+    Class1 @< Class2,
     % Debugging
     logtraceln('~@~Q.', [not(dynFactNOTMergeClasses(Class1, Class2)),
                          reasonNOTMergeClasses_I(TDA1, TDA2, Class1, Class2)]).
@@ -3004,7 +3004,7 @@ reasonNOTMergeClasses_I(Class1, Class2) :-
 % ED_PAPER_INTERESTING
 reasonNOTMergeClasses_J(Class1, Class2) :-
     reasonClassRelationship(A, B),
-    % Handle asymmtery in reasonClassRelationship, so we always return Class1 < Class2.
+    % Handle asymmtery in reasonClassRelationship, so we always return Class1 @< Class2.
     sort_tuple((A, B), (Class1, Class2)),
     % Debugging
     logtraceln('~@~Q.', [not(dynFactNOTMergeClasses(Class1, Class2)),
@@ -3022,7 +3022,7 @@ reasonNOTMergeClasses_K(Class1, Class2) :-
 
     % This rule handles symmetry correctly, so adding this constraint causes the rule to fire
     % twice, but reduces the number of NOTMergeClass facts created by this rule.
-    Class1 < Class2,
+    Class1 @< Class2,
     % Debugging
     logtraceln('~@~Q.', [not(dynFactNOTMergeClasses(Class1, Class2)),
                          reasonNOTMergeClasses_K(Class1, Class2)]).
