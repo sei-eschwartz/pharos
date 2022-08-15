@@ -8,6 +8,9 @@
 paperSoundnessProblem(G) :-
     not(modelCompiler) -> G; true.
 
+notEmptyClass(Class) :-
+    factClassSizeGTE(Class, Size), Size > 0.
+
 % --------------------------------------------------------------------------------------------
 % Convert some new style facts to old style facts.
 
