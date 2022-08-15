@@ -3,6 +3,9 @@
 % Forward reasoning from given facts.
 % ============================================================================================
 
+notEmptyClass(Class) :-
+    factClassSizeGTE(Class, Size), Size > 0.
+
 % --------------------------------------------------------------------------------------------
 % Convert some new style facts to old style facts.
 
