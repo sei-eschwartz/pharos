@@ -2668,9 +2668,15 @@ reasonMergeClasses_C(Class, ExistingClass) :-
 % inverse rule under reasonNOTMergeClasses.
 % PAPER: Merging-4
 reasonMergeClasses_E(Class1, Class2) :-
+
+    % ejs 8/15/2022 We need to make sure that the classes are not empty.  If they are, they
+    % could both be at the same offset.
+
     factDerivedClass(DerivedClass, Class1, ObjectOffset),
+    notEmptyClass(Class1),
     factDerivedClass(DerivedClass, Class2, ObjectOffset),
     iso_dif(Class1, Class2),
+    notEmptyClass(Class2),
 
     % Debugging
     logtraceln('~@~Q.', [not(find(Class1, Class2)),
