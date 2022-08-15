@@ -1198,6 +1198,8 @@ reasonNOTVFTableEntry_C(VFTable, Offset, Entry) :-
 reasonNOTVFTableEntry_D(VFTable, Offset, Entry) :-
     factVFTable(VFTable),
     possibleVFTableEntry(VFTable, Offset, Entry),
+    % The model compiler doesn't use an address here, so this rule causes an error.
+    integer(VFTable),
     ComputedAddress is VFTable + Offset,
     rTTICompleteObjectLocator(ComputedAddress, _Address, _TDAddress, _CHDAddress, _O1, _O2).
 
@@ -2445,7 +2447,7 @@ reasonReusedImplementation_A(Method, Class1, VFTable1) :-
 
     % Conditions: This rule is optimized for Method or VFTable1 to be bound
     (integer(Method);
-     integer(VFTable1)),
+     ground(VFTable1)),
     !,
 
     %possiblyReused(Method),
@@ -2467,7 +2469,7 @@ reasonReusedImplementation_A(Method, Class1, VFTable1) :-
 reasonReusedImplementation_A(Method, Class1, VFTable1) :-
 
     % Conditions: This rule is optimized for Class1 to be bound
-    integer(Class1),
+    ground(Class1),
     !,
 
     find(VFTable1, Class1),
@@ -2901,8 +2903,8 @@ reasonNOTMergeClasses_C_asymmetric(DerivedClass, MethodClass) :-
 % Handle the complicated asymmetry of reasonNOTMergeClasses_C_asymmetric, so that we always
 % return Class1 < Class2.
 reasonNOTMergeClasses_C(Class1, Class2) :-
-    ((reasonNOTMergeClasses_C_asymmetric(Class1, Class2), Class1 < Class2);
-     (reasonNOTMergeClasses_C_asymmetric(Class2, Class1), Class1 < Class2)),
+    ((reasonNOTMergeClasses_C_asymmetric(Class1, Class2), Class1 @< Class2);
+     (reasonNOTMergeClasses_C_asymmetric(Class2, Class1), Class1 @< Class2)),
 
     % Debugging
     logtraceln('~@~Q.', [not(dynFactNOTMergeClasses(Class1, Class2)),
@@ -2953,7 +2955,7 @@ reasonNOTMergeClasses_F(Class1, Class2) :-
     factDerivedClass(DerivedClass, Class2, ObjectOffset2),
     % This rule handles symmetry correctly, so adding this constraint causes the rule to fire
     % twice, but reduces the number of NOTMergeClass facts created by this rule.
-    Class1 < Class2,
+    Class1 @< Class2,
     iso_dif(ObjectOffset1, ObjectOffset2),
     % Debugging
     logtraceln('~@~Q.', [not(dynFactNOTMergeClasses(Class1, Class2)),
@@ -2995,7 +2997,7 @@ reasonNOTMergeClasses_I(Class1, Class2) :-
     % This shouldn't be needed unless rTTITDA2Class() is misbehaving!
     % This rule handles symmetry correctly, so adding this constraint causes the rule to fire
     % twice, but reduces the number of NOTMergeClass facts created by this rule.
-    Class1 < Class2,
+    Class1 @< Class2,
     % Debugging
     logtraceln('~@~Q.', [not(dynFactNOTMergeClasses(Class1, Class2)),
                          reasonNOTMergeClasses_I(TDA1, TDA2, Class1, Class2)]).
@@ -3004,7 +3006,7 @@ reasonNOTMergeClasses_I(Class1, Class2) :-
 % ED_PAPER_INTERESTING
 reasonNOTMergeClasses_J(Class1, Class2) :-
     reasonClassRelationship(A, B),
-    % Handle asymmtery in reasonClassRelationship, so we always return Class1 < Class2.
+    % Handle asymmtery in reasonClassRelationship, so we always return Class1 @< Class2.
     sort_tuple((A, B), (Class1, Class2)),
     % Debugging
     logtraceln('~@~Q.', [not(dynFactNOTMergeClasses(Class1, Class2)),
@@ -3022,7 +3024,7 @@ reasonNOTMergeClasses_K(Class1, Class2) :-
 
     % This rule handles symmetry correctly, so adding this constraint causes the rule to fire
     % twice, but reduces the number of NOTMergeClass facts created by this rule.
-    Class1 < Class2,
+    Class1 @< Class2,
     % Debugging
     logtraceln('~@~Q.', [not(dynFactNOTMergeClasses(Class1, Class2)),
                          reasonNOTMergeClasses_K(Class1, Class2)]).
