@@ -3110,7 +3110,12 @@ reasonNOTMergeClasses_L(Class1, Class2) :-
                          reasonNOTMergeClasses_L(Class1, Class2)]).
 
 reasonNOTMergeClasses_M(Class1, Class2) :-
-    reasonNOTMergeClasses_M(_, Class1, Class2, _, _).
+    factClassSizeGTE(BigClass, GTESize),
+    reasonNOTMergeClasses_M(BigClass, Class1, Class2, GTESize, _).
+
+reasonNOTMergeClasses_M(Class1, Class2) :-
+    factClassSizeLTE(SmallClass, LTESize),
+    reasonNOTMergeClasses_M(SmallClass, Class1, Class2, _, LTESize).
 
 % Because the sizes are incomaptible.
 % PAPER: Class size constraints
