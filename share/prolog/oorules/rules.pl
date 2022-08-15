@@ -2908,6 +2908,9 @@ reasonNOTMergeClasses_C(Class1, Class2) :-
     logtraceln('~@~Q.', [not(dynFactNOTMergeClasses(Class1, Class2)),
                          reasonNOTMergeClasses_C(Class1, Class2)]).
 
+reasonNOTMergeClasses_E(Class1, Class2) :-
+    reasonNOTMergeClasses_E(Class1, Class2, _, _, _, _).
+
 % Any two constructors that write _different_ vftables into the same offets in their objects
 % cannot be the same class.
 % PAPER: Merging-7
@@ -3038,10 +3041,13 @@ reasonNOTMergeClasses_L(Class1, Class2) :-
     find(RealDestructor2, Class2),
     % This rule handles symmetry correctly, so adding this constraint causes the rule to fire
     % twice, but reduces the number of NOTMergeClass facts created by this rule.
-    Class1 < Class2,
+    Class1 @< Class2,
     % Debugging
     logtraceln('~@~Q.', [not(dynFactNOTMergeClasses(Class1, Class2)),
                          reasonNOTMergeClasses_L(Class1, Class2)]).
+
+reasonNOTMergeClasses_M(Class1, Class2) :-
+    reasonNOTMergeClasses_M(_, Class1, Class2, _, _).
 
 % Because the sizes are incomaptible.
 % PAPER: Class size constraints
@@ -3138,6 +3144,9 @@ reasonNOTMergeClasses_Qhelper(MethodWithSymbol, OtherMethod, ClassName) :-
     % ejs 9/2/2020 We could use find/2 here but by using factMethod/1 this table will almost never be recomputed
     factMethod(OtherMethod),
     not(symbolClass(OtherMethod, _MangledName2, ClassName, _MethodName2)).
+
+reasonNOTMergeClasses_Q(Class1, Class2) :-
+    reasonNOTMergeClasses_Q(Class1, Class2, _, _).
 
 % If one method in a class has a symbol, all other methods in the class must also have a symbol
 % for the same class.  This is tabled separately so that it can call find/2 and be recomputed
