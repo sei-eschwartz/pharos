@@ -1894,9 +1894,14 @@ reasonNOTDerivedClass(DerivedClass, BaseClass, ObjectOffset) :-
 % performance optimization.
 reasonNOTDerivedClass(DerivedClass, BaseClass, ObjectOffset) :-
 
-    % There is embedding or inheritance at non-offset 0
-    factObjectInObject(DerivedClass, BaseClass, ObjectOffset),
+    % There is embedding or non-virtual inheritance at non-offset 0
+    (factDerivedClass(DerivedClass, BaseClass, ObjectOffset, nonvirtual);
+     factEmbeddedObject(DerivedClass, BaseClass, ObjectOffset)),
     iso_dif(ObjectOffset, 0),
+
+    % The BaseClass has a virtual function table at offset 0
+    findVFTable(_BVFTable, 0, BaseClass),
+
     find(DerivedConstructor, DerivedClass),
     factConstructor(DerivedConstructor),
 
@@ -1906,8 +1911,7 @@ reasonNOTDerivedClass(DerivedClass, BaseClass, ObjectOffset) :-
     % The base class has a primary vftable
     find(BaseConstructor, BaseClass),
     % ejs: Why do these need to be constructors?
-    factConstructor(BaseConstructor),
-    findVFTable(_BVFTable, 0, BaseClass).
+    factConstructor(BaseConstructor).
 
 % Add rule for: We cannot be a derived constructor if the table we write was the certain normal
 % (unmodified) table of the base constructor.
