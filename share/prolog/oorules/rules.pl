@@ -340,9 +340,18 @@ reasonNOTConstructor_H(Method) :-
     findMethod(Method, Class),
     % The method does not install the vftable
     not(possibleVFTableWrite(_Insn, Method, _ThisPtr, _, VFTable)),
+
+    % ejs 8/16/22 Because we don't currently emit VFTable write facts when there is a
+    % non-constant offset (i.e., virtual bases) we need to make sure that the VFTable is not
+    % supposed to be installed on a virtual base so we don't see it.  This line is sufficient
+    % to fix the model compiler because we have perfect knowledge of virtual bases, but it's
+    % probably not conservative enough in practice.
+    not(factDerivedClass(Class, VirtualBase, _, virtual)),
+
     % Since we don't have visibility into VFTable writes from imported constructors and
     % destructors this rule does not apply to imported methods.
     not(symbolClass(Method, _, _, _)),
+
     logtraceln('~@~Q.', [not(factNOTConstructor(Method)),
                          reasonNOTConstructor_H(VFTable, Method)]).
 
