@@ -398,8 +398,15 @@ reasonRealDestructor(Method) :-
 % PAPER: ??? NEW!
 % This should probably be a separate type of desstructor really.
 % Disabled for now as a work-around for #61.
-%% reasonRealDestructor(Method) :-
-%%     symbolClass(Method, _MangledName, _ClassName, '`vbase destructor''').
+
+% ejs 8/17/22 We've known for a while that vbase destructors can look like real destructors,
+% and can actually be identical.  https://godbolt.org/z/hP6s9vn8s But we're now going to allow
+% classes with virtual bases to have more than one REAL destructor.  This isn't right, but it's
+% impossible to distinguish a real destructor from a vbase destructor in the worst case, so
+% it's probably the only solution.
+
+reasonRealDestructor(Method) :-
+    symbolClass(Method, _MangledName, _ClassName, '`vbase destructor''').
 
 reasonRealDestructorSet(Set) :-
     setof(Method, reasonRealDestructor(Method), Set).
@@ -458,6 +465,12 @@ reasonNOTRealDestructor_E(Method) :-
     factRealDestructor(RealDestructor),
     % And it is on Class
     find(RealDestructor, Class),
+
+    % ejs 8/17/22 Because vbase destructors can be identical to real destructors, we treat them
+    % both as real destructors.  This rule should thus only apply when there are virtual bases,
+    % since that means vbase destructors are possible.
+    not(factDerivedClass(Class, _, _, true)),
+
     % Therefore every other method on the class is NOT a real destructor
     findMethod(Method, Class),
     % Exclude RealDestructor
