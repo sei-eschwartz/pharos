@@ -2354,11 +2354,11 @@ reasonClassCallsMethod_B(Class1, Method2) :-
 
 % Because one method calls another method on the same this-pointer.  This rule is direction
 % safe because we know what class Method1 is associated with, and if that conclusion was
-% correct, this rule will be correct as well.  Does require the methodCallAtOffset offset to be
-% zero.
+% correct, this rule will be correct as well.
 % PAPER: Call-3
 reasonClassCallsMethod_C(Class1, Method2) :-
-    validMethodCallAtOffset(_Insn, Method1, Method2, 0),
+    paperSoundnessProblem(Offset=0),
+    validMethodCallAtOffset(_Insn, Method1, Method2, Offset),
 
     iso_dif(Method1, Method2),
     find(Method1, Class1),
@@ -2366,7 +2366,7 @@ reasonClassCallsMethod_C(Class1, Method2) :-
     % ejs 8/18/22 We need to make sure that there isn't a (possibly nested) embedded class at
     % offset 0.  We don't have a great way to do that yet.  But if there are no objects at all,
     % then there can't be an embedded object.
-    not(reasonClassAtOffset(Class1, 0, _InnerClass)),
+    not(reasonClassAtOffset(Class1, Offset, _InnerClass)),
 
 
     % Don't propose assignments we already know.
