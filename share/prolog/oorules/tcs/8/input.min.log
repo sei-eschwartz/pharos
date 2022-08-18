@@ -1,0 +1,1104 @@
+Enter the general maximum size (static max is 5):
+Ok, the maximum size is: 4
+Select a class of Create a class? to create between 0 and 2
+0: false
+1: true
+Selected true
+Select a class of Add a method to create between 0 and 2
+0: false
+1: true
+Selected false
+Creating new Identifier{0}
+Creating class members
+Select a class of Add new variable to context to create between 0 and 2
+0: false
+1: true
+Selected false
+Creating new Class{
+ id:0
+ bases:[]
+ methods:[Method{400, Identifier{0}, VoidType{}, Context{[]}, InitContext{[], []}, nullptr, 0, Constructor, 1}]
+ members:InitContext{[], []}
+}
+Select a class of Create a class? to create between 0 and 2
+0: false
+1: true
+Selected true
+Select a class of Add a new base class? to create between 0 and 2
+0: false
+1: true
+Selected false
+Select a class of Add a method to create between 0 and 2
+0: false
+1: true
+Selected false
+Creating new Identifier{1}
+Creating class members
+Select a class of Add new variable to context to create between 0 and 2
+0: false
+1: true
+Selected true
+Context: Creating next varidentifier
+Creating new Identifier{0}
+Context: Creating next type
+Select a class of Type to create between 0 and 3
+0: AbstractType
+1: PtrType
+2: ClassType
+Selected ClassType
+Selecting index 2
+Creating ClassType.  Selecting Class now.
+Enter a number between 0 and 1 exclusive
+Returning existing St10shared_ptrIN6Source5ClassEE Class{
+ id:0
+ bases:[]
+ methods:[Method{400, Identifier{0}, VoidType{}, Context{[]}, InitContext{[], []}, nullptr, 0, Constructor, 1}]
+ members:InitContext{[], []}
+}
+Creating new ClassType{0}
+Select a class of Add new variable to context to create between 0 and 2
+0: false
+1: true
+Selected false
+Reading Expression for InitContext initializer of Identifier{0} type ClassType{0}
+Expression creator
+Select a class of Expression to create between 0 and 2
+0: Rvalue
+1: Lvalue
+Selected Rvalue
+Selecting index 0
+Rvalue creator
+Select a class of Rvalue to create between 0 and 3
+0: AbstractLiteral
+1: Nullptr
+2: New
+Selected AbstractLiteral
+Selecting index 0
+Unable to make AbstractLiteral for type ClassType{0}
+selecting failed...
+Selecting index 0
+Unable to make Nullptr for type ClassType{0}
+selecting failed...
+Selecting index 0
+selecting failed...
+Selecting index 0
+selecting failed...
+Selecting index 0
+Lvalue creator depth=4
+Select a class of Lvalue to create between 0 and 4
+0: Varexp
+1: Call
+2: ConstructObj
+3: This
+Selected Varexp
+Selecting index 0
+Ok there are 0 compatible variables in the context
+selecting failed...
+Selecting index 0
+selecting failed...
+Selecting index 0
+Select a class of constructor to call to create between 0 and 1
+0: Method{400, Identifier{0}, VoidType{}, Context{[]}, InitContext{[], []}, nullptr, 0, Constructor, 1}
+Selected Method{400, Identifier{0}, VoidType{}, Context{[]}, InitContext{[], []}, nullptr, 0, Constructor, 1}
+Creating arguments to pass to constructor
+Creating new ObjConstruct{class=0, args=[]}
+Creating new Class{
+ id:1
+ bases:[]
+ methods:[Method{401, Identifier{1}, VoidType{}, Context{[]}, InitContext{[], []}, nullptr, 0, Constructor, 1}]
+ members:InitContext{[(Identifier{0}, ObjConstruct{class=0, args=[]})], [(Identifier{0}, ClassType{0})]}
+}
+Select a class of Create a class? to create between 0 and 2
+0: false
+1: true
+Selected false
+Select a class of Add new function to create between 0 and 2
+0: false
+1: true
+Selected false
+Populating actions for function Method{400, Identifier{0}, VoidType{}, Context{[]}, InitContext{[], []}, nullptr, 0, Constructor, 1}
+Select a class of Add new action to create between 0 and 2
+0: false
+1: true
+Selected false
+Populating actions for function Method{401, Identifier{1}, VoidType{}, Context{[]}, InitContext{[], []}, nullptr, 0, Constructor, 1}
+Select a class of Add new action to create between 0 and 2
+0: false
+1: true
+Selected false
+Creating new Program{[Class{
+   id:0
+   bases:[]
+   methods:[Method{400, Identifier{0}, VoidType{}, Context{[]}, InitContext{[], []}, [    ], 0, Constructor, 1}]
+   members:InitContext{[], []}
+  },
+  Class{
+   id:1
+   bases:[]
+   methods:[Method{401, Identifier{1}, VoidType{}, Context{[]}, InitContext{[], []}, [    ], 0, Constructor, 1}]
+   members:InitContext{[(Identifier{0}, ObjConstruct{class=0, args=[]})], [(Identifier{0}, ClassType{0})]}
+  }],
+ []}
+Done!
+Program{[Class{
+   id:0
+   bases:[]
+   methods:[Method{400, Identifier{0}, VoidType{}, Context{[]}, InitContext{[], []}, [    ], 0, Constructor, 1}]
+   members:InitContext{[], []}
+  },
+  Class{
+   id:1
+   bases:[]
+   methods:[Method{401, Identifier{1}, VoidType{}, Context{[]}, InitContext{[], []}, [    ], 0, Constructor, 1}]
+   members:InitContext{[(Identifier{0}, ObjConstruct{class=0, args=[]})], [(Identifier{0}, ClassType{0})]}
+  }],
+ []}
+
+CPP: 
+// declarations
+struct C0;
+struct C1;
+// definitions
+struct C0 {
+
+};
+struct C1 {
+
+C0 v0;
+};
+
+Reading Varidentifier for ArgContext order
+Order: [
+  
+]
+Map: {<Identifier{0} at 0x55d8c665dd50> : <ClassType{0} at 0x55d8c665dd60>}
+There are 1 unordered variables in the context remaining: [
+  Identifier{0}
+]
+Select a class of variable for the order of the ArgContext to create between 0 and 1
+0: Identifier{0}
+Selected Identifier{0}
+Accepted
+XXX ThisCall should maybe subclass FunClass
+XXX Already some compiled actions, skipping Method{400, Identifier{0}, VoidType{}, Context{[]}, InitContext{[], []}, [    ], 0, Constructor, 1} for now.
+XXX Already some compiled actions, skipping Method{401, Identifier{1}, VoidType{}, Context{[]}, InitContext{[], []}, [    ], 0, Constructor, 1} for now.
+CP before optimization: 
+Program{0,
+ [Function{0,
+   [$0 = Comment{func0,
+     Start of constructor Method{400, Identifier{0}, VoidType{}, Context{[]}, InitContext{[], []}, [    ], 0, Constructor, 1} for class 0}
+    $1 = Comment{func0, XXX: Add constructor user code actions}
+    $2 = Comment{func0,
+     End of constructor Method{400, Identifier{0}, VoidType{}, Context{[]}, InitContext{[], []}, [    ], 0, Constructor, 1} for class 0}]},
+  Function{1,
+   [$0 = Comment{func1,
+     Start of constructor Method{401, Identifier{1}, VoidType{}, Context{[]}, InitContext{[], []}, [    ], 0, Constructor, 1} for class 1}
+    $1 = Comment{func1, Call Constructor of embedded var Identifier{0} of class 0 at offset 0 for class 1}
+    $2 = GetArg{func1, 32, 0}
+    $3 = ThisCall{thisptr=$2, condition=nullptr, Function{0}, auto_call_to_base_class=0, args=[$2]}
+    $4 = Comment{func1, XXX: Add constructor user code actions}
+    $5 = Comment{func1,
+     End of constructor Method{401, Identifier{1}, VoidType{}, Context{[]}, InitContext{[], []}, [    ], 0, Constructor, 1} for class 1}]}],
+ [],
+ []}
+Select a class of Enable function inlining? to create between 0 and 2
+0: false
+1: true
+Selected false
+Select a class of Enable redundant vftable elimination? to create between 0 and 2
+0: false
+1: true
+Selected true
+CP:
+Program{0,
+ [Function{0,
+   [$0 = Comment{func0,
+     Start of constructor Method{400, Identifier{0}, VoidType{}, Context{[]}, InitContext{[], []}, [    ], 0, Constructor, 1} for class 0}
+    $1 = Comment{func0, XXX: Add constructor user code actions}
+    $2 = Comment{func0,
+     End of constructor Method{400, Identifier{0}, VoidType{}, Context{[]}, InitContext{[], []}, [    ], 0, Constructor, 1} for class 0}]},
+  Function{1,
+   [$0 = Comment{func1,
+     Start of constructor Method{401, Identifier{1}, VoidType{}, Context{[]}, InitContext{[], []}, [    ], 0, Constructor, 1} for class 1}
+    $1 = Comment{func1, Call Constructor of embedded var Identifier{0} of class 0 at offset 0 for class 1}
+    $2 = GetArg{func1, 32, 0}
+    $3 = ThisCall{thisptr=$2, condition=nullptr, Function{0}, auto_call_to_base_class=0, args=[$2]}
+    $4 = Comment{func1, XXX: Add constructor user code actions}
+    $5 = Comment{func1,
+     End of constructor Method{401, Identifier{1}, VoidType{}, Context{[]}, InitContext{[], []}, [    ], 0, Constructor, 1} for class 1}]}],
+ [],
+ []}
+Compiled VFTables:
+{}
+Class: Class{
+ id:0
+ bases:[]
+ methods:[Method{400, Identifier{0}, VoidType{}, Context{[]}, InitContext{[], []}, [    ], 0, Constructor, 1}]
+ members:InitContext{[], []}
+}
+ vfptr on: none
+ vbptr on: none
+layout: 
+class C0    size(0)
+0    +---
+0    +---
+
+VFTables for class:
+VBTables for class:
+
+
+
+Class: Class{
+ id:1
+ bases:[]
+ methods:[Method{401, Identifier{1}, VoidType{}, Context{[]}, InitContext{[], []}, [    ], 0, Constructor, 1}]
+ members:InitContext{[(Identifier{0}, ObjConstruct{class=0, args=[]})], [(Identifier{0}, ClassType{0})]}
+}
+ vfptr on: none
+ vbptr on: none
+layout: 
+class C1    size(0)
+0    +---
+0    | var0: ClassType{0}
+0    +---
+
+VFTables for class:
+VBTables for class:
+
+
+
+DUMP
+:- working_directory(_, '/home/ed/Documents/pharos/share/prolog/oorules').
+:- [setup].
+% Declare new vftable facts in case we don't export any.
+:- dynamic factVFTableWrite/3.
+:- dynamic possibleVFTableWriteHelper/5.
+:- dynamic thisPtrOffset/4.
+:- dynamic groundVFTableBelongsToClass/2.
+:- dynamic groundConstructor/1.
+:- dynamic groundDestructor/1.
+:- dynamic noCallsBefore/1.
+:- dynamic noCallsAfter/1.
+:- dynamic returnsSelf/1.
+:- dynamic factDerivedClass/4.
+noCallsBefore(function(0)).
+noCallsBefore(function(1)).
+noCallsAfter(function(0)).
+noCallsAfter(function(1)).
+XXX fix returns_self
+returnsSelf(function(0)).
+returnsSelf(function(1)).
+factClassCallsMethod(class(0), function(0)).
+factClassCallsMethod(class(1), function(1)).
+factEmbeddedObject(class(1), class(0), 0).
+factNOTDerivedClass(class(1), class(0), 0).
+factObjectInObject(class(1), class(0), 0).
+factClassHasNoBase(class(0)).
+factClassHasNoBase(class(1)).
+factClassSizeGTE(class(0), 0).
+factClassSizeLTE(class(0), 0).
+factClassSizeGTE(class(1), 0).
+factClassSizeLTE(class(1), 0).
+findint(function(0), class(0)).
+factMethod(function(0)).
+factConstructor(function(0)).
+factNOTRealDestructor(function(0)).
+factNOTDeletingDestructor(function(0)).
+findint(function(1), class(1)).
+factMethod(function(1)).
+factConstructor(function(1)).
+factNOTRealDestructor(function(1)).
+factNOTDeletingDestructor(function(1)).
+% thisptr: GetArg{func0, 32, 0}
+funcParameter(function(0), ecx, thisptr(0)).
+% thisptr: GetArg{func1, 32, 0}
+funcParameter(function(1), ecx, thisptr(1)).
+% thisptr: GetArg{func1, 32, 0}
+callParameter(0x11003, function(1), ecx, thisptr(1)).
+callTarget(0x11003, function(1), function(0)).
+% Adapt to rules that assume thisptr is in ecx
+% Assume thiscall
+callingConvention(M, '__thiscall').
+% Adapt to possibleVFTableWrite with offsets
+% Given a thisptr, try to do constant propagation as far back as we can to the oldest thisptr.
+:- table goBack/4 as opaque.
+goBack(F, Tnew, Tnew, 0) :- not(thisPtrOffset(F, _, _, Tnew)), !.
+goBack(F, Tnew, Told, Offset) :- thisPtrOffset(F, Tmid, MidOffset, Tnew), goBack(F, Tmid, Told, OldOffset), Offset is MidOffset + OldOffset.
+possibleVFTableWrite(A, F, Told, O, Cond, V) :- possibleVFTableWriteHelper(A, F, T, Cond, V), goBack(F, T, Told, O), funcParameter(F, ecx, Told).
+% Auto ignore the condition.
+possibleVFTableWrite(A, F, T, O, V) :- possibleVFTableWrite(A, F, T, O, _Cond, V).
+% Adapt thisPtrOffset
+thisPtrOffset(A,B,C) :- thisPtrOffset(_F,A,B,C).
+% Adapt to factVFTableWrite with offsets
+factVFTableWrite(A, F, O, V) :- factVFTableWrite(A, F, V), possibleVFTableWrite(A, F, _, O, V).
+groundConstructor(function(0)).
+groundConstructor(function(1)).
+check_vftable_belongs_sound :- forall((reasonVFTableBelongsToClass(VFTable, _, Class, _, _)), ((groundVFTableBelongsToClass(VFTable, Class)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','vftable_belongs','vftable_belongs',(VFTable, Class)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','vftable_belongs','vftable_belongs',(VFTable, Class)])))).
+check_vftable_belongs_complete :- forall((groundVFTableBelongsToClass(VFTable, Class)), ((reasonVFTableBelongsToClass(VFTable, _, Class, _, _)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','vftable_belongs','vftable_belongs',(VFTable, Class)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','vftable_belongs','vftable_belongs',(VFTable, Class)])))).
+check_method_sound :- forall((reasonMethod(M)), ((factMethod(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','method','method',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','method','method',(M)])))).
+check_methodB_sound :- forall((reasonMethod_B(M)), ((factMethod(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','methodB','methodB',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','methodB','methodB',(M)])))).
+check_methodC_sound :- forall((reasonMethod_C(M)), ((factMethod(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','methodC','methodC',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','methodC','methodC',(M)])))).
+check_methodD_sound :- forall((reasonMethod_D(M)), ((factMethod(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','methodD','methodD',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','methodD','methodD',(M)])))).
+check_methodE_sound :- forall((reasonMethod_E(M)), ((factMethod(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','methodE','methodE',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','methodE','methodE',(M)])))).
+check_methodF_sound :- forall((reasonMethod_F(M)), ((factMethod(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','methodF','methodF',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','methodF','methodF',(M)])))).
+check_methodG_sound :- forall((reasonMethod_G(M)), ((factMethod(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','methodG','methodG',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','methodG','methodG',(M)])))).
+check_methodH_sound :- forall((reasonMethod_H(M)), ((factMethod(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','methodH','methodH',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','methodH','methodH',(M)])))).
+check_methodI_sound :- forall((reasonMethod_I(M)), ((factMethod(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','methodI','methodI',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','methodI','methodI',(M)])))).
+check_methodJ_sound :- forall((reasonMethod_J(M)), ((factMethod(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','methodJ','methodJ',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','methodJ','methodJ',(M)])))).
+check_methodK_sound :- forall((reasonMethod_K(M)), ((factMethod(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','methodK','methodK',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','methodK','methodK',(M)])))).
+check_methodL_sound :- forall((reasonMethod_L(M)), ((factMethod(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','methodL','methodL',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','methodL','methodL',(M)])))).
+check_methodM_sound :- forall((reasonMethod_M(M)), ((factMethod(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','methodM','methodM',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','methodM','methodM',(M)])))).
+check_methodN_sound :- forall((reasonMethod_N(M)), ((factMethod(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','methodN','methodN',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','methodN','methodN',(M)])))).
+check_methodO_sound :- forall((reasonMethod_O(M)), ((factMethod(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','methodO','methodO',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','methodO','methodO',(M)])))).
+check_methodP_sound :- forall((reasonMethod_P(M)), ((factMethod(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','methodP','methodP',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','methodP','methodP',(M)])))).
+check_method_complete :- forall((factMethod(M)), ((reasonMethod(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','method','method',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','method','method',(M)])))).
+check_methodB_complete :- forall((factMethod(M)), ((reasonMethod_B(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','methodB','methodB',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','methodB','methodB',(M)])))).
+check_methodC_complete :- forall((factMethod(M)), ((reasonMethod_C(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','methodC','methodC',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','methodC','methodC',(M)])))).
+check_methodD_complete :- forall((factMethod(M)), ((reasonMethod_D(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','methodD','methodD',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','methodD','methodD',(M)])))).
+check_methodE_complete :- forall((factMethod(M)), ((reasonMethod_E(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','methodE','methodE',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','methodE','methodE',(M)])))).
+check_methodF_complete :- forall((factMethod(M)), ((reasonMethod_F(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','methodF','methodF',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','methodF','methodF',(M)])))).
+check_methodG_complete :- forall((factMethod(M)), ((reasonMethod_G(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','methodG','methodG',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','methodG','methodG',(M)])))).
+check_methodH_complete :- forall((factMethod(M)), ((reasonMethod_H(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','methodH','methodH',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','methodH','methodH',(M)])))).
+check_methodI_complete :- forall((factMethod(M)), ((reasonMethod_I(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','methodI','methodI',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','methodI','methodI',(M)])))).
+check_methodJ_complete :- forall((factMethod(M)), ((reasonMethod_J(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','methodJ','methodJ',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','methodJ','methodJ',(M)])))).
+check_methodK_complete :- forall((factMethod(M)), ((reasonMethod_K(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','methodK','methodK',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','methodK','methodK',(M)])))).
+check_methodL_complete :- forall((factMethod(M)), ((reasonMethod_L(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','methodL','methodL',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','methodL','methodL',(M)])))).
+check_methodM_complete :- forall((factMethod(M)), ((reasonMethod_M(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','methodM','methodM',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','methodM','methodM',(M)])))).
+check_methodN_complete :- forall((factMethod(M)), ((reasonMethod_N(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','methodN','methodN',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','methodN','methodN',(M)])))).
+check_methodO_complete :- forall((factMethod(M)), ((reasonMethod_O(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','methodO','methodO',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','methodO','methodO',(M)])))).
+check_methodP_complete :- forall((factMethod(M)), ((reasonMethod_P(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','methodP','methodP',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','methodP','methodP',(M)])))).
+check_NOTConstructor_sound :- forall((reasonNOTConstructor(M)), ((factMethod(M), not(groundConstructor(M))) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTConstructor','NOTConstructor',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTConstructor','NOTConstructor',(M)])))).
+check_NOTConstructorB_sound :- forall((reasonNOTConstructor_B(M)), ((factMethod(M), not(groundConstructor(M))) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTConstructorB','NOTConstructorB',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTConstructorB','NOTConstructorB',(M)])))).
+check_NOTConstructorC_sound :- forall((reasonNOTConstructor_C(M)), ((factMethod(M), not(groundConstructor(M))) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTConstructorC','NOTConstructorC',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTConstructorC','NOTConstructorC',(M)])))).
+check_NOTConstructorD_sound :- forall((reasonNOTConstructor_D(M)), ((factMethod(M), not(groundConstructor(M))) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTConstructorD','NOTConstructorD',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTConstructorD','NOTConstructorD',(M)])))).
+check_NOTConstructorF_sound :- forall((reasonNOTConstructor_F(M)), ((factMethod(M), not(groundConstructor(M))) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTConstructorF','NOTConstructorF',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTConstructorF','NOTConstructorF',(M)])))).
+check_NOTConstructorG_sound :- forall((reasonNOTConstructor_G(M)), ((factMethod(M), not(groundConstructor(M))) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTConstructorG','NOTConstructorG',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTConstructorG','NOTConstructorG',(M)])))).
+check_NOTConstructorH_sound :- forall((reasonNOTConstructor_H(M)), ((factMethod(M), not(groundConstructor(M))) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTConstructorH','NOTConstructorH',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTConstructorH','NOTConstructorH',(M)])))).
+check_NOTConstructorI_sound :- forall((reasonNOTConstructor_I(M)), ((factMethod(M), not(groundConstructor(M))) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTConstructorI','NOTConstructorI',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTConstructorI','NOTConstructorI',(M)])))).
+check_NOTConstructorJ_sound :- forall((reasonNOTConstructor_J(M)), ((factMethod(M), not(groundConstructor(M))) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTConstructorJ','NOTConstructorJ',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTConstructorJ','NOTConstructorJ',(M)])))).
+check_NOTConstructor_complete :- forall((factMethod(M), not(groundConstructor(M))), ((reasonNOTConstructor(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTConstructor','NOTConstructor',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTConstructor','NOTConstructor',(M)])))).
+check_NOTConstructorB_complete :- forall((factMethod(M), not(groundConstructor(M))), ((reasonNOTConstructor_B(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTConstructorB','NOTConstructorB',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTConstructorB','NOTConstructorB',(M)])))).
+check_NOTConstructorC_complete :- forall((factMethod(M), not(groundConstructor(M))), ((reasonNOTConstructor_C(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTConstructorC','NOTConstructorC',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTConstructorC','NOTConstructorC',(M)])))).
+check_NOTConstructorD_complete :- forall((factMethod(M), not(groundConstructor(M))), ((reasonNOTConstructor_D(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTConstructorD','NOTConstructorD',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTConstructorD','NOTConstructorD',(M)])))).
+check_NOTConstructorF_complete :- forall((factMethod(M), not(groundConstructor(M))), ((reasonNOTConstructor_F(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTConstructorF','NOTConstructorF',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTConstructorF','NOTConstructorF',(M)])))).
+check_NOTConstructorG_complete :- forall((factMethod(M), not(groundConstructor(M))), ((reasonNOTConstructor_G(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTConstructorG','NOTConstructorG',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTConstructorG','NOTConstructorG',(M)])))).
+check_NOTConstructorH_complete :- forall((factMethod(M), not(groundConstructor(M))), ((reasonNOTConstructor_H(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTConstructorH','NOTConstructorH',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTConstructorH','NOTConstructorH',(M)])))).
+check_NOTConstructorI_complete :- forall((factMethod(M), not(groundConstructor(M))), ((reasonNOTConstructor_I(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTConstructorI','NOTConstructorI',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTConstructorI','NOTConstructorI',(M)])))).
+check_NOTConstructorJ_complete :- forall((factMethod(M), not(groundConstructor(M))), ((reasonNOTConstructor_J(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTConstructorJ','NOTConstructorJ',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTConstructorJ','NOTConstructorJ',(M)])))).
+check_constructor_sound :- forall((reasonConstructor(M)), ((groundConstructor(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','constructor','constructor',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','constructor','constructor',(M)])))).
+check_constructor_complete :- forall((groundConstructor(M)), ((reasonConstructor(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','constructor','constructor',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','constructor','constructor',(M)])))).
+check_realDestructor_sound :- forall((reasonRealDestructor(M)), ((factRealDestructor(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','realDestructor','realDestructor',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','realDestructor','realDestructor',(M)])))).
+check_realDestructor_complete :- forall((factRealDestructor(M)), ((reasonRealDestructor(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','realDestructor','realDestructor',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','realDestructor','realDestructor',(M)])))).
+check_NOTRealDestructor_sound :- forall((reasonNOTRealDestructor(M)), ((factNOTRealDestructor(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTRealDestructor','NOTRealDestructor',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTRealDestructor','NOTRealDestructor',(M)])))).
+check_NOTRealDestructorB_sound :- forall((reasonNOTRealDestructor_B(M)), ((factNOTRealDestructor(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTRealDestructorB','NOTRealDestructorB',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTRealDestructorB','NOTRealDestructorB',(M)])))).
+check_NOTRealDestructorC_sound :- forall((reasonNOTRealDestructor_C(M)), ((factNOTRealDestructor(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTRealDestructorC','NOTRealDestructorC',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTRealDestructorC','NOTRealDestructorC',(M)])))).
+check_NOTRealDestructorD_sound :- forall((reasonNOTRealDestructor_D(M)), ((factNOTRealDestructor(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTRealDestructorD','NOTRealDestructorD',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTRealDestructorD','NOTRealDestructorD',(M)])))).
+check_NOTRealDestructorE_sound :- forall((reasonNOTRealDestructor_E(M)), ((factNOTRealDestructor(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTRealDestructorE','NOTRealDestructorE',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTRealDestructorE','NOTRealDestructorE',(M)])))).
+check_NOTRealDestructorF_sound :- forall((reasonNOTRealDestructor_F(M)), ((factNOTRealDestructor(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTRealDestructorF','NOTRealDestructorF',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTRealDestructorF','NOTRealDestructorF',(M)])))).
+check_NOTRealDestructorG_sound :- forall((reasonNOTRealDestructor_G(M)), ((factNOTRealDestructor(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTRealDestructorG','NOTRealDestructorG',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTRealDestructorG','NOTRealDestructorG',(M)])))).
+check_NOTRealDestructorH_sound :- forall((reasonNOTRealDestructor_H(M)), ((factNOTRealDestructor(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTRealDestructorH','NOTRealDestructorH',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTRealDestructorH','NOTRealDestructorH',(M)])))).
+check_NOTRealDestructorI_sound :- forall((reasonNOTRealDestructor_I(M)), ((factNOTRealDestructor(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTRealDestructorI','NOTRealDestructorI',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTRealDestructorI','NOTRealDestructorI',(M)])))).
+check_NOTRealDestructorJ_sound :- forall((reasonNOTRealDestructor_J(M)), ((factNOTRealDestructor(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTRealDestructorJ','NOTRealDestructorJ',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTRealDestructorJ','NOTRealDestructorJ',(M)])))).
+check_NOTRealDestructor_complete :- forall((factNOTRealDestructor(M)), ((reasonNOTRealDestructor(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTRealDestructor','NOTRealDestructor',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTRealDestructor','NOTRealDestructor',(M)])))).
+check_NOTRealDestructorB_complete :- forall((factNOTRealDestructor(M)), ((reasonNOTRealDestructor_B(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTRealDestructorB','NOTRealDestructorB',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTRealDestructorB','NOTRealDestructorB',(M)])))).
+check_NOTRealDestructorC_complete :- forall((factNOTRealDestructor(M)), ((reasonNOTRealDestructor_C(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTRealDestructorC','NOTRealDestructorC',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTRealDestructorC','NOTRealDestructorC',(M)])))).
+check_NOTRealDestructorD_complete :- forall((factNOTRealDestructor(M)), ((reasonNOTRealDestructor_D(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTRealDestructorD','NOTRealDestructorD',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTRealDestructorD','NOTRealDestructorD',(M)])))).
+check_NOTRealDestructorE_complete :- forall((factNOTRealDestructor(M)), ((reasonNOTRealDestructor_E(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTRealDestructorE','NOTRealDestructorE',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTRealDestructorE','NOTRealDestructorE',(M)])))).
+check_NOTRealDestructorF_complete :- forall((factNOTRealDestructor(M)), ((reasonNOTRealDestructor_F(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTRealDestructorF','NOTRealDestructorF',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTRealDestructorF','NOTRealDestructorF',(M)])))).
+check_NOTRealDestructorG_complete :- forall((factNOTRealDestructor(M)), ((reasonNOTRealDestructor_G(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTRealDestructorG','NOTRealDestructorG',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTRealDestructorG','NOTRealDestructorG',(M)])))).
+check_NOTRealDestructorH_complete :- forall((factNOTRealDestructor(M)), ((reasonNOTRealDestructor_H(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTRealDestructorH','NOTRealDestructorH',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTRealDestructorH','NOTRealDestructorH',(M)])))).
+check_NOTRealDestructorI_complete :- forall((factNOTRealDestructor(M)), ((reasonNOTRealDestructor_I(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTRealDestructorI','NOTRealDestructorI',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTRealDestructorI','NOTRealDestructorI',(M)])))).
+check_NOTRealDestructorJ_complete :- forall((factNOTRealDestructor(M)), ((reasonNOTRealDestructor_J(M)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTRealDestructorJ','NOTRealDestructorJ',(M)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTRealDestructorJ','NOTRealDestructorJ',(M)])))).
+check_VFTableSizeGTE_sound :- forall((reasonVFTableSizeGTE(V, S), factVFTableSizeGTE(V, Sground)), ((Sground >= S) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','VFTableSizeGTE','VFTableSizeGTE',(V, S, Sground)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','VFTableSizeGTE','VFTableSizeGTE',(V, S, Sground)])))).
+check_VFTableSizeLTE_sound :- forall((reasonVFTableSizeLTE(V, S), factVFTableSizeLTE(V, Sground)), ((Sground =< S) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','VFTableSizeLTE','VFTableSizeLTE',(V, S, Sground)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','VFTableSizeLTE','VFTableSizeLTE',(V, S, Sground)])))).
+check_ClassSizeGTE_sound :- forall((reasonClassSizeGTE(C, S), factClassSizeGTE(C, Sground)), ((Sground >= S) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','ClassSizeGTE','ClassSizeGTE',(C, S, Sground)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','ClassSizeGTE','ClassSizeGTE',(C, S, Sground)])))).
+check_ClassSizeGTEB_sound :- forall((reasonClassSizeGTE_B(C, S), factClassSizeGTE(C, Sground)), ((Sground >= S) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','ClassSizeGTEB','ClassSizeGTEB',(C, S, Sground)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','ClassSizeGTEB','ClassSizeGTEB',(C, S, Sground)])))).
+check_ClassSizeGTEC_sound :- forall((reasonClassSizeGTE_C(C, S), factClassSizeGTE(C, Sground)), ((Sground >= S) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','ClassSizeGTEC','ClassSizeGTEC',(C, S, Sground)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','ClassSizeGTEC','ClassSizeGTEC',(C, S, Sground)])))).
+check_ClassSizeGTED_sound :- forall((reasonClassSizeGTE_D(C, S), factClassSizeGTE(C, Sground)), ((Sground >= S) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','ClassSizeGTED','ClassSizeGTED',(C, S, Sground)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','ClassSizeGTED','ClassSizeGTED',(C, S, Sground)])))).
+check_ClassSizeGTEF_sound :- forall((reasonClassSizeGTE_F(C, S), factClassSizeGTE(C, Sground)), ((Sground >= S) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','ClassSizeGTEF','ClassSizeGTEF',(C, S, Sground)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','ClassSizeGTEF','ClassSizeGTEF',(C, S, Sground)])))).
+check_ClassSizeGTEG_sound :- forall((reasonClassSizeGTE_G(C, S), factClassSizeGTE(C, Sground)), ((Sground >= S) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','ClassSizeGTEG','ClassSizeGTEG',(C, S, Sground)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','ClassSizeGTEG','ClassSizeGTEG',(C, S, Sground)])))).
+check_ClassSizeLTE_sound :- forall((reasonClassSizeLTE(C, S), factClassSizeLTE(C, Sground)), ((Sground =< S) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','ClassSizeLTE','ClassSizeLTE',(C, S, Sground)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','ClassSizeLTE','ClassSizeLTE',(C, S, Sground)])))).
+check_DerivedClass_sound :- forall((reasonDerivedClass(Outer, Inner, Offset)), ((factDerivedClass(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','DerivedClass','DerivedClass',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','DerivedClass','DerivedClass',(Outer, Inner, Offset)])))).
+check_DerivedClassB_sound :- forall((reasonDerivedClass_B(Outer, Inner, Offset)), ((factDerivedClass(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','DerivedClassB','DerivedClassB',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','DerivedClassB','DerivedClassB',(Outer, Inner, Offset)])))).
+check_DerivedClassC_sound :- forall((reasonDerivedClass_C(Outer, Inner, Offset)), ((factDerivedClass(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','DerivedClassC','DerivedClassC',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','DerivedClassC','DerivedClassC',(Outer, Inner, Offset)])))).
+check_DerivedClassD_sound :- forall((reasonDerivedClass_D(Outer, Inner, Offset)), ((factDerivedClass(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','DerivedClassD','DerivedClassD',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','DerivedClassD','DerivedClassD',(Outer, Inner, Offset)])))).
+check_DerivedClassE_sound :- forall((reasonDerivedClass_E(Outer, Inner, Offset)), ((factDerivedClass(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','DerivedClassE','DerivedClassE',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','DerivedClassE','DerivedClassE',(Outer, Inner, Offset)])))).
+check_DerivedClassF_sound :- forall((reasonDerivedClass_F(Outer, Inner, Offset)), ((factDerivedClass(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','DerivedClassF','DerivedClassF',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','DerivedClassF','DerivedClassF',(Outer, Inner, Offset)])))).
+check_DerivedClass_complete :- forall((factDerivedClass(Outer, Inner, Offset)), ((reasonDerivedClass(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','DerivedClass','DerivedClass',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','DerivedClass','DerivedClass',(Outer, Inner, Offset)])))).
+check_DerivedClassB_complete :- forall((factDerivedClass(Outer, Inner, Offset)), ((reasonDerivedClass_B(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','DerivedClassB','DerivedClassB',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','DerivedClassB','DerivedClassB',(Outer, Inner, Offset)])))).
+check_DerivedClassC_complete :- forall((factDerivedClass(Outer, Inner, Offset)), ((reasonDerivedClass_C(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','DerivedClassC','DerivedClassC',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','DerivedClassC','DerivedClassC',(Outer, Inner, Offset)])))).
+check_DerivedClassD_complete :- forall((factDerivedClass(Outer, Inner, Offset)), ((reasonDerivedClass_D(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','DerivedClassD','DerivedClassD',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','DerivedClassD','DerivedClassD',(Outer, Inner, Offset)])))).
+check_DerivedClassE_complete :- forall((factDerivedClass(Outer, Inner, Offset)), ((reasonDerivedClass_E(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','DerivedClassE','DerivedClassE',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','DerivedClassE','DerivedClassE',(Outer, Inner, Offset)])))).
+check_DerivedClassF_complete :- forall((factDerivedClass(Outer, Inner, Offset)), ((reasonDerivedClass_F(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','DerivedClassF','DerivedClassF',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','DerivedClassF','DerivedClassF',(Outer, Inner, Offset)])))).
+check_NOTDerivedClass_sound :- forall((reasonNOTDerivedClass(Outer, Inner, Offset)), ((factNOTDerivedClass(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTDerivedClass','NOTDerivedClass',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTDerivedClass','NOTDerivedClass',(Outer, Inner, Offset)])))).
+check_NOTDerivedClass_complete :- forall((factNOTDerivedClass(Outer, Inner, Offset)), ((reasonNOTDerivedClass(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTDerivedClass','NOTDerivedClass',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTDerivedClass','NOTDerivedClass',(Outer, Inner, Offset)])))).
+check_EmbeddedObject_sound :- forall((reasonEmbeddedObject(Outer, Inner, Offset)), ((factEmbeddedObject(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','EmbeddedObject','EmbeddedObject',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','EmbeddedObject','EmbeddedObject',(Outer, Inner, Offset)])))).
+check_EmbeddedObjectB_sound :- forall((reasonEmbeddedObject_B(Outer, Inner, Offset)), ((factEmbeddedObject(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','EmbeddedObjectB','EmbeddedObjectB',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','EmbeddedObjectB','EmbeddedObjectB',(Outer, Inner, Offset)])))).
+check_EmbeddedObjectC_sound :- forall((reasonEmbeddedObject_C(Outer, Inner, Offset)), ((factEmbeddedObject(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','EmbeddedObjectC','EmbeddedObjectC',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','EmbeddedObjectC','EmbeddedObjectC',(Outer, Inner, Offset)])))).
+check_EmbeddedObjectD_sound :- forall((reasonEmbeddedObject_D(Outer, Inner, Offset)), ((factEmbeddedObject(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','EmbeddedObjectD','EmbeddedObjectD',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','EmbeddedObjectD','EmbeddedObjectD',(Outer, Inner, Offset)])))).
+check_EmbeddedObject_complete :- forall((factEmbeddedObject(Outer, Inner, Offset)), ((reasonEmbeddedObject(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','EmbeddedObject','EmbeddedObject',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','EmbeddedObject','EmbeddedObject',(Outer, Inner, Offset)])))).
+check_EmbeddedObjectB_complete :- forall((factEmbeddedObject(Outer, Inner, Offset)), ((reasonEmbeddedObject_B(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','EmbeddedObjectB','EmbeddedObjectB',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','EmbeddedObjectB','EmbeddedObjectB',(Outer, Inner, Offset)])))).
+check_EmbeddedObjectC_complete :- forall((factEmbeddedObject(Outer, Inner, Offset)), ((reasonEmbeddedObject_C(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','EmbeddedObjectC','EmbeddedObjectC',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','EmbeddedObjectC','EmbeddedObjectC',(Outer, Inner, Offset)])))).
+check_EmbeddedObjectD_complete :- forall((factEmbeddedObject(Outer, Inner, Offset)), ((reasonEmbeddedObject_D(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','EmbeddedObjectD','EmbeddedObjectD',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','EmbeddedObjectD','EmbeddedObjectD',(Outer, Inner, Offset)])))).
+check_ObjectInObject_sound :- forall((reasonObjectInObject(Outer, Inner, Offset)), ((factObjectInObject(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','ObjectInObject','ObjectInObject',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','ObjectInObject','ObjectInObject',(Outer, Inner, Offset)])))).
+check_ObjectInObjectB_sound :- forall((reasonObjectInObject_B(Outer, Inner, Offset)), ((factObjectInObject(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','ObjectInObjectB','ObjectInObjectB',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','ObjectInObjectB','ObjectInObjectB',(Outer, Inner, Offset)])))).
+check_ObjectInObjectC_sound :- forall((reasonObjectInObject_C(Outer, Inner, Offset)), ((factObjectInObject(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','ObjectInObjectC','ObjectInObjectC',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','ObjectInObjectC','ObjectInObjectC',(Outer, Inner, Offset)])))).
+check_ObjectInObjectD_sound :- forall((reasonObjectInObject_D(Outer, Inner, Offset)), ((factObjectInObject(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','ObjectInObjectD','ObjectInObjectD',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','ObjectInObjectD','ObjectInObjectD',(Outer, Inner, Offset)])))).
+check_ObjectInObjectE_sound :- forall((reasonObjectInObject_E(Outer, Inner, Offset)), ((factObjectInObject(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','ObjectInObjectE','ObjectInObjectE',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','ObjectInObjectE','ObjectInObjectE',(Outer, Inner, Offset)])))).
+check_ObjectInObjectF_sound :- forall((reasonObjectInObject_F(Outer, Inner, Offset)), ((factObjectInObject(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','ObjectInObjectF','ObjectInObjectF',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','ObjectInObjectF','ObjectInObjectF',(Outer, Inner, Offset)])))).
+check_ObjectInObject_complete :- forall((factObjectInObject(Outer, Inner, Offset)), ((reasonObjectInObject(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','ObjectInObject','ObjectInObject',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','ObjectInObject','ObjectInObject',(Outer, Inner, Offset)])))).
+check_ObjectInObjectB_complete :- forall((factObjectInObject(Outer, Inner, Offset)), ((reasonObjectInObject_B(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','ObjectInObjectB','ObjectInObjectB',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','ObjectInObjectB','ObjectInObjectB',(Outer, Inner, Offset)])))).
+check_ObjectInObjectC_complete :- forall((factObjectInObject(Outer, Inner, Offset)), ((reasonObjectInObject_C(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','ObjectInObjectC','ObjectInObjectC',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','ObjectInObjectC','ObjectInObjectC',(Outer, Inner, Offset)])))).
+check_ObjectInObjectD_complete :- forall((factObjectInObject(Outer, Inner, Offset)), ((reasonObjectInObject_D(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','ObjectInObjectD','ObjectInObjectD',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','ObjectInObjectD','ObjectInObjectD',(Outer, Inner, Offset)])))).
+check_ObjectInObjectE_complete :- forall((factObjectInObject(Outer, Inner, Offset)), ((reasonObjectInObject_E(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','ObjectInObjectE','ObjectInObjectE',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','ObjectInObjectE','ObjectInObjectE',(Outer, Inner, Offset)])))).
+check_ObjectInObjectF_complete :- forall((factObjectInObject(Outer, Inner, Offset)), ((reasonObjectInObject_F(Outer, Inner, Offset)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','ObjectInObjectF','ObjectInObjectF',(Outer, Inner, Offset)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','ObjectInObjectF','ObjectInObjectF',(Outer, Inner, Offset)])))).
+check_MergeClasses_sound :- forall((reasonMergeClasses(Class1, Class2)), ((find(Class1, C), find(Class2, C)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','MergeClasses','MergeClasses',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','MergeClasses','MergeClasses',(Class1, Class2)])))).
+check_MergeClassesB_sound :- forall((reasonMergeClasses_B(Class1, Class2)), ((find(Class1, C), find(Class2, C)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','MergeClassesB','MergeClassesB',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','MergeClassesB','MergeClassesB',(Class1, Class2)])))).
+check_MergeClassesC_sound :- forall((reasonMergeClasses_C(Class1, Class2)), ((find(Class1, C), find(Class2, C)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','MergeClassesC','MergeClassesC',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','MergeClassesC','MergeClassesC',(Class1, Class2)])))).
+check_MergeClassesE_sound :- forall((reasonMergeClasses_E(Class1, Class2)), ((find(Class1, C), find(Class2, C)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','MergeClassesE','MergeClassesE',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','MergeClassesE','MergeClassesE',(Class1, Class2)])))).
+check_MergeClassesG_sound :- forall((reasonMergeClasses_G(Class1, Class2)), ((find(Class1, C), find(Class2, C)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','MergeClassesG','MergeClassesG',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','MergeClassesG','MergeClassesG',(Class1, Class2)])))).
+check_MergeClassesH_sound :- forall((reasonMergeClasses_H(Class1, Class2)), ((find(Class1, C), find(Class2, C)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','MergeClassesH','MergeClassesH',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','MergeClassesH','MergeClassesH',(Class1, Class2)])))).
+check_MergeClassesJ_sound :- forall((reasonMergeClasses_J(Class1, Class2)), ((find(Class1, C), find(Class2, C)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','MergeClassesJ','MergeClassesJ',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','MergeClassesJ','MergeClassesJ',(Class1, Class2)])))).
+check_MergeClassesK_sound :- forall((reasonMergeClasses_K(Class1, Class2)), ((find(Class1, C), find(Class2, C)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','MergeClassesK','MergeClassesK',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','MergeClassesK','MergeClassesK',(Class1, Class2)])))).
+check_MergeClasses_complete :- forall((find(Class1, C), find(Class2, C)), ((reasonMergeClasses(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','MergeClasses','MergeClasses',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','MergeClasses','MergeClasses',(Class1, Class2)])))).
+check_MergeClassesB_complete :- forall((find(Class1, C), find(Class2, C)), ((reasonMergeClasses_B(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','MergeClassesB','MergeClassesB',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','MergeClassesB','MergeClassesB',(Class1, Class2)])))).
+check_MergeClassesC_complete :- forall((find(Class1, C), find(Class2, C)), ((reasonMergeClasses_C(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','MergeClassesC','MergeClassesC',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','MergeClassesC','MergeClassesC',(Class1, Class2)])))).
+check_MergeClassesE_complete :- forall((find(Class1, C), find(Class2, C)), ((reasonMergeClasses_E(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','MergeClassesE','MergeClassesE',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','MergeClassesE','MergeClassesE',(Class1, Class2)])))).
+check_MergeClassesG_complete :- forall((find(Class1, C), find(Class2, C)), ((reasonMergeClasses_G(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','MergeClassesG','MergeClassesG',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','MergeClassesG','MergeClassesG',(Class1, Class2)])))).
+check_MergeClassesH_complete :- forall((find(Class1, C), find(Class2, C)), ((reasonMergeClasses_H(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','MergeClassesH','MergeClassesH',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','MergeClassesH','MergeClassesH',(Class1, Class2)])))).
+check_MergeClassesJ_complete :- forall((find(Class1, C), find(Class2, C)), ((reasonMergeClasses_J(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','MergeClassesJ','MergeClassesJ',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','MergeClassesJ','MergeClassesJ',(Class1, Class2)])))).
+check_MergeClassesK_complete :- forall((find(Class1, C), find(Class2, C)), ((reasonMergeClasses_K(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','MergeClassesK','MergeClassesK',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','MergeClassesK','MergeClassesK',(Class1, Class2)])))).
+check_NOTMergeClasses_sound :- forall((reasonNOTMergeClasses(Class1, Class2)), ((find(_, Class1), find(_, Class2), iso_dif(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTMergeClasses','NOTMergeClasses',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTMergeClasses','NOTMergeClasses',(Class1, Class2)])))).
+check_NOTMergeClassesJ_sound :- forall((reasonNOTMergeClasses_J(Class1, Class2)), ((find(_, Class1), find(_, Class2), iso_dif(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTMergeClassesJ','NOTMergeClassesJ',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTMergeClassesJ','NOTMergeClassesJ',(Class1, Class2)])))).
+check_NOTMergeClassesC_sound :- forall((reasonNOTMergeClasses_C(Class1, Class2)), ((find(_, Class1), find(_, Class2), iso_dif(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTMergeClassesC','NOTMergeClassesC',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTMergeClassesC','NOTMergeClassesC',(Class1, Class2)])))).
+check_NOTMergeClassesE_sound :- forall((reasonNOTMergeClasses_E(Class1, Class2)), ((find(_, Class1), find(_, Class2), iso_dif(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTMergeClassesE','NOTMergeClassesE',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTMergeClassesE','NOTMergeClassesE',(Class1, Class2)])))).
+check_NOTMergeClassesF_sound :- forall((reasonNOTMergeClasses_F(Class1, Class2)), ((find(_, Class1), find(_, Class2), iso_dif(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTMergeClassesF','NOTMergeClassesF',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTMergeClassesF','NOTMergeClassesF',(Class1, Class2)])))).
+check_NOTMergeClassesG_sound :- forall((reasonNOTMergeClasses_G(Class1, Class2)), ((find(_, Class1), find(_, Class2), iso_dif(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTMergeClassesG','NOTMergeClassesG',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTMergeClassesG','NOTMergeClassesG',(Class1, Class2)])))).
+check_NOTMergeClassesI_sound :- forall((reasonNOTMergeClasses_I(Class1, Class2)), ((find(_, Class1), find(_, Class2), iso_dif(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTMergeClassesI','NOTMergeClassesI',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTMergeClassesI','NOTMergeClassesI',(Class1, Class2)])))).
+check_NOTMergeClassesK_sound :- forall((reasonNOTMergeClasses_K(Class1, Class2)), ((find(_, Class1), find(_, Class2), iso_dif(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTMergeClassesK','NOTMergeClassesK',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTMergeClassesK','NOTMergeClassesK',(Class1, Class2)])))).
+check_NOTMergeClassesL_sound :- forall((reasonNOTMergeClasses_L(Class1, Class2)), ((find(_, Class1), find(_, Class2), iso_dif(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTMergeClassesL','NOTMergeClassesL',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTMergeClassesL','NOTMergeClassesL',(Class1, Class2)])))).
+check_NOTMergeClassesM_sound :- forall((reasonNOTMergeClasses_M(Class1, Class2)), ((find(_, Class1), find(_, Class2), iso_dif(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTMergeClassesM','NOTMergeClassesM',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTMergeClassesM','NOTMergeClassesM',(Class1, Class2)])))).
+check_NOTMergeClassesO_sound :- forall((reasonNOTMergeClasses_O(Class1, Class2)), ((find(_, Class1), find(_, Class2), iso_dif(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTMergeClassesO','NOTMergeClassesO',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTMergeClassesO','NOTMergeClassesO',(Class1, Class2)])))).
+check_NOTMergeClassesP_sound :- forall((reasonNOTMergeClasses_P(Class1, Class2)), ((find(_, Class1), find(_, Class2), iso_dif(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTMergeClassesP','NOTMergeClassesP',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTMergeClassesP','NOTMergeClassesP',(Class1, Class2)])))).
+check_NOTMergeClassesQ_sound :- forall((reasonNOTMergeClasses_Q(Class1, Class2)), ((find(_, Class1), find(_, Class2), iso_dif(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTMergeClassesQ','NOTMergeClassesQ',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTMergeClassesQ','NOTMergeClassesQ',(Class1, Class2)])))).
+check_NOTMergeClassesR_sound :- forall((reasonNOTMergeClasses_R(Class1, Class2)), ((find(_, Class1), find(_, Class2), iso_dif(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','NOTMergeClassesR','NOTMergeClassesR',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','NOTMergeClassesR','NOTMergeClassesR',(Class1, Class2)])))).
+check_NOTMergeClasses_complete :- forall((find(_, Class1), find(_, Class2), iso_dif(Class1, Class2)), ((reasonNOTMergeClasses(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTMergeClasses','NOTMergeClasses',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTMergeClasses','NOTMergeClasses',(Class1, Class2)])))).
+check_NOTMergeClassesJ_complete :- forall((find(_, Class1), find(_, Class2), iso_dif(Class1, Class2)), ((reasonNOTMergeClasses_J(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTMergeClassesJ','NOTMergeClassesJ',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTMergeClassesJ','NOTMergeClassesJ',(Class1, Class2)])))).
+check_NOTMergeClassesC_complete :- forall((find(_, Class1), find(_, Class2), iso_dif(Class1, Class2)), ((reasonNOTMergeClasses_C(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTMergeClassesC','NOTMergeClassesC',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTMergeClassesC','NOTMergeClassesC',(Class1, Class2)])))).
+check_NOTMergeClassesE_complete :- forall((find(_, Class1), find(_, Class2), iso_dif(Class1, Class2)), ((reasonNOTMergeClasses_E(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTMergeClassesE','NOTMergeClassesE',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTMergeClassesE','NOTMergeClassesE',(Class1, Class2)])))).
+check_NOTMergeClassesF_complete :- forall((find(_, Class1), find(_, Class2), iso_dif(Class1, Class2)), ((reasonNOTMergeClasses_F(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTMergeClassesF','NOTMergeClassesF',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTMergeClassesF','NOTMergeClassesF',(Class1, Class2)])))).
+check_NOTMergeClassesG_complete :- forall((find(_, Class1), find(_, Class2), iso_dif(Class1, Class2)), ((reasonNOTMergeClasses_G(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTMergeClassesG','NOTMergeClassesG',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTMergeClassesG','NOTMergeClassesG',(Class1, Class2)])))).
+check_NOTMergeClassesI_complete :- forall((find(_, Class1), find(_, Class2), iso_dif(Class1, Class2)), ((reasonNOTMergeClasses_I(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTMergeClassesI','NOTMergeClassesI',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTMergeClassesI','NOTMergeClassesI',(Class1, Class2)])))).
+check_NOTMergeClassesK_complete :- forall((find(_, Class1), find(_, Class2), iso_dif(Class1, Class2)), ((reasonNOTMergeClasses_K(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTMergeClassesK','NOTMergeClassesK',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTMergeClassesK','NOTMergeClassesK',(Class1, Class2)])))).
+check_NOTMergeClassesL_complete :- forall((find(_, Class1), find(_, Class2), iso_dif(Class1, Class2)), ((reasonNOTMergeClasses_L(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTMergeClassesL','NOTMergeClassesL',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTMergeClassesL','NOTMergeClassesL',(Class1, Class2)])))).
+check_NOTMergeClassesM_complete :- forall((find(_, Class1), find(_, Class2), iso_dif(Class1, Class2)), ((reasonNOTMergeClasses_M(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTMergeClassesM','NOTMergeClassesM',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTMergeClassesM','NOTMergeClassesM',(Class1, Class2)])))).
+check_NOTMergeClassesO_complete :- forall((find(_, Class1), find(_, Class2), iso_dif(Class1, Class2)), ((reasonNOTMergeClasses_O(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTMergeClassesO','NOTMergeClassesO',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTMergeClassesO','NOTMergeClassesO',(Class1, Class2)])))).
+check_NOTMergeClassesP_complete :- forall((find(_, Class1), find(_, Class2), iso_dif(Class1, Class2)), ((reasonNOTMergeClasses_P(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTMergeClassesP','NOTMergeClassesP',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTMergeClassesP','NOTMergeClassesP',(Class1, Class2)])))).
+check_NOTMergeClassesQ_complete :- forall((find(_, Class1), find(_, Class2), iso_dif(Class1, Class2)), ((reasonNOTMergeClasses_Q(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTMergeClassesQ','NOTMergeClassesQ',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTMergeClassesQ','NOTMergeClassesQ',(Class1, Class2)])))).
+check_NOTMergeClassesR_complete :- forall((find(_, Class1), find(_, Class2), iso_dif(Class1, Class2)), ((reasonNOTMergeClasses_R(Class1, Class2)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','NOTMergeClassesR','NOTMergeClassesR',(Class1, Class2)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','NOTMergeClassesR','NOTMergeClassesR',(Class1, Class2)])))).
+check_ClassCallsMethod_sound :- forall((reasonClassCallsMethod(Class, Method)), ((factClassCallsMethod(Class, Method)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','ClassCallsMethod','ClassCallsMethod',(Class, Method)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','ClassCallsMethod','ClassCallsMethod',(Class, Method)])))).
+check_ClassCallsMethodB_sound :- forall((reasonClassCallsMethod_B(Class, Method)), ((factClassCallsMethod(Class, Method)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','ClassCallsMethodB','ClassCallsMethodB',(Class, Method)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','ClassCallsMethodB','ClassCallsMethodB',(Class, Method)])))).
+check_ClassCallsMethodC_sound :- forall((reasonClassCallsMethod_C(Class, Method)), ((factClassCallsMethod(Class, Method)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['sound','ClassCallsMethodC','ClassCallsMethodC',(Class, Method)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['sound','ClassCallsMethodC','ClassCallsMethodC',(Class, Method)])))).
+check_ClassCallsMethod_complete :- forall((factClassCallsMethod(Class, Method)), ((reasonClassCallsMethod(Class, Method)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','ClassCallsMethod','ClassCallsMethod',(Class, Method)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','ClassCallsMethod','ClassCallsMethod',(Class, Method)])))).
+check_ClassCallsMethodB_complete :- forall((factClassCallsMethod(Class, Method)), ((reasonClassCallsMethod_B(Class, Method)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','ClassCallsMethodB','ClassCallsMethodB',(Class, Method)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','ClassCallsMethodB','ClassCallsMethodB',(Class, Method)])))).
+check_ClassCallsMethodC_complete :- forall((factClassCallsMethod(Class, Method)), ((reasonClassCallsMethod_C(Class, Method)) -> (format('RESULT TRUE ~w ~w ~w(~w)~n', ['complete','ClassCallsMethodC','ClassCallsMethodC',(Class, Method)])); (format('RESULT FALSE ~w ~w ~w(~w)~n', ['complete','ClassCallsMethodC','ClassCallsMethodC',(Class, Method)])))).
+XXX fix returns_self
+XXX fix returns_self
+XXX fix returns_self
+Warning: /home/ed/Documents/pharos/share/prolog/oorules/rules.pl:336:
+Warning:    Singleton variables: [VirtualBase]
+Warning: stream:29:
+Warning:    Clauses of factClassSizeGTE/2 are not together in the source-file
+Warning:    Earlier definition at stream:27
+Warning:    Current predicate: factClassSizeLTE/2
+Warning:    Use :- discontiguous factClassSizeGTE/2. to suppress this message
+Warning: stream:30:
+Warning:    Clauses of factClassSizeLTE/2 are not together in the source-file
+Warning:    Earlier definition at stream:28
+Warning:    Current predicate: factClassSizeGTE/2
+Warning:    Use :- discontiguous factClassSizeLTE/2. to suppress this message
+Warning: stream:36:
+Warning:    Clauses of findint/2 are not together in the source-file
+Warning:    Earlier definition at stream:31
+Warning:    Current predicate: factNOTDeletingDestructor/1
+Warning:    Use :- discontiguous findint/2. to suppress this message
+Warning: stream:37:
+Warning:    Clauses of factMethod/1 are not together in the source-file
+Warning:    Earlier definition at stream:32
+Warning:    Current predicate: findint/2
+Warning:    Use :- discontiguous factMethod/1. to suppress this message
+Warning: stream:38:
+Warning:    Clauses of factConstructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:33
+Warning:    Current predicate: factMethod/1
+Warning:    Use :- discontiguous factConstructor/1. to suppress this message
+Warning: stream:39:
+Warning:    Clauses of factNOTRealDestructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:34
+Warning:    Current predicate: factConstructor/1
+Warning:    Use :- discontiguous factNOTRealDestructor/1. to suppress this message
+Warning: stream:40:
+Warning:    Clauses of factNOTDeletingDestructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:35
+Warning:    Current predicate: factNOTRealDestructor/1
+Warning:    Use :- discontiguous factNOTDeletingDestructor/1. to suppress this message
+Warning: stream:50:
+Warning:    Singleton variables: [M]
+Warning: stream:58:
+Warning:    Redefined static procedure possibleVFTableWrite/5
+Warning:    Previously defined at /home/ed/Documents/pharos/share/prolog/oorules/initial.pl:16
+RESULT TRUE sound methodB methodB(function(1))
+RESULT TRUE sound methodB methodB(function(0))
+RESULT TRUE sound methodJ methodJ(function(1))
+RESULT TRUE sound methodJ methodJ(function(0))
+RESULT TRUE sound methodK methodK(function(0))
+RESULT TRUE sound methodL methodL(function(0))
+RESULT TRUE sound methodN methodN(function(1))
+RESULT TRUE complete methodB methodB(function(0))
+RESULT TRUE complete methodB methodB(function(1))
+RESULT FALSE complete methodC methodC(function(0))
+RESULT FALSE complete methodC methodC(function(1))
+RESULT FALSE complete methodD methodD(function(0))
+RESULT FALSE complete methodD methodD(function(1))
+RESULT FALSE complete methodE methodE(function(0))
+RESULT FALSE complete methodE methodE(function(1))
+RESULT FALSE complete methodF methodF(function(0))
+RESULT FALSE complete methodF methodF(function(1))
+RESULT FALSE complete methodG methodG(function(0))
+RESULT FALSE complete methodG methodG(function(1))
+RESULT FALSE complete methodH methodH(function(0))
+RESULT FALSE complete methodH methodH(function(1))
+RESULT FALSE complete methodI methodI(function(0))
+RESULT FALSE complete methodI methodI(function(1))
+RESULT TRUE complete methodJ methodJ(function(0))
+RESULT TRUE complete methodJ methodJ(function(1))
+RESULT TRUE complete methodK methodK(function(0))
+RESULT FALSE complete methodK methodK(function(1))
+RESULT TRUE complete methodL methodL(function(0))
+RESULT FALSE complete methodL methodL(function(1))
+RESULT FALSE complete methodM methodM(function(0))
+RESULT FALSE complete methodM methodM(function(1))
+RESULT FALSE complete methodN methodN(function(0))
+RESULT TRUE complete methodN methodN(function(1))
+RESULT FALSE complete methodO methodO(function(0))
+RESULT FALSE complete methodO methodO(function(1))
+RESULT FALSE complete methodP methodP(function(0))
+RESULT FALSE complete methodP methodP(function(1))
+Success: check_methodB_sound, check_methodC_sound, check_methodD_sound, check_methodE_sound, check_methodF_sound, check_methodG_sound, check_methodH_sound, check_methodI_sound, check_methodJ_sound, check_methodK_sound, check_methodL_sound, check_methodM_sound, check_methodN_sound, check_methodO_sound, check_methodP_sound, check_methodB_complete, check_methodC_complete, check_methodD_complete, check_methodE_complete, check_methodF_complete, check_methodG_complete, check_methodH_complete, check_methodI_complete, check_methodJ_complete, check_methodK_complete, check_methodL_complete, check_methodM_complete, check_methodN_complete, check_methodO_complete, check_methodP_complete
+Warning: stream:29:
+Warning:    Clauses of factClassSizeGTE/2 are not together in the source-file
+Warning:    Earlier definition at stream:27
+Warning:    Current predicate: factClassSizeLTE/2
+Warning:    Use :- discontiguous factClassSizeGTE/2. to suppress this message
+Warning: stream:30:
+Warning:    Clauses of factClassSizeLTE/2 are not together in the source-file
+Warning:    Earlier definition at stream:28
+Warning:    Current predicate: factClassSizeGTE/2
+Warning:    Use :- discontiguous factClassSizeLTE/2. to suppress this message
+Warning: stream:36:
+Warning:    Clauses of findint/2 are not together in the source-file
+Warning:    Earlier definition at stream:31
+Warning:    Current predicate: factNOTDeletingDestructor/1
+Warning:    Use :- discontiguous findint/2. to suppress this message
+Warning: stream:37:
+Warning:    Clauses of factMethod/1 are not together in the source-file
+Warning:    Earlier definition at stream:32
+Warning:    Current predicate: findint/2
+Warning:    Use :- discontiguous factMethod/1. to suppress this message
+Warning: stream:38:
+Warning:    Clauses of factConstructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:33
+Warning:    Current predicate: factMethod/1
+Warning:    Use :- discontiguous factConstructor/1. to suppress this message
+Warning: stream:39:
+Warning:    Clauses of factNOTRealDestructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:34
+Warning:    Current predicate: factConstructor/1
+Warning:    Use :- discontiguous factNOTRealDestructor/1. to suppress this message
+Warning: stream:40:
+Warning:    Clauses of factNOTDeletingDestructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:35
+Warning:    Current predicate: factNOTRealDestructor/1
+Warning:    Use :- discontiguous factNOTDeletingDestructor/1. to suppress this message
+Warning: stream:50:
+Warning:    Singleton variables: [M]
+RESULT TRUE sound ObjectInObjectC ObjectInObjectC(class(1),class(0),0)
+RESULT FALSE complete ObjectInObjectB ObjectInObjectB(class(1),class(0),0)
+RESULT TRUE complete ObjectInObjectC ObjectInObjectC(class(1),class(0),0)
+RESULT FALSE complete ObjectInObjectD ObjectInObjectD(class(1),class(0),0)
+RESULT FALSE complete ObjectInObjectE ObjectInObjectE(class(1),class(0),0)
+RESULT FALSE complete ObjectInObjectF ObjectInObjectF(class(1),class(0),0)
+Success: check_ObjectInObjectB_sound, check_ObjectInObjectC_sound, check_ObjectInObjectD_sound, check_ObjectInObjectE_sound, check_ObjectInObjectF_sound, check_ObjectInObjectB_complete, check_ObjectInObjectC_complete, check_ObjectInObjectD_complete, check_ObjectInObjectE_complete, check_ObjectInObjectF_complete
+Warning: stream:29:
+Warning:    Clauses of factClassSizeGTE/2 are not together in the source-file
+Warning:    Earlier definition at stream:27
+Warning:    Current predicate: factClassSizeLTE/2
+Warning:    Use :- discontiguous factClassSizeGTE/2. to suppress this message
+Warning: stream:30:
+Warning:    Clauses of factClassSizeLTE/2 are not together in the source-file
+Warning:    Earlier definition at stream:28
+Warning:    Current predicate: factClassSizeGTE/2
+Warning:    Use :- discontiguous factClassSizeLTE/2. to suppress this message
+Warning: stream:36:
+Warning:    Clauses of findint/2 are not together in the source-file
+Warning:    Earlier definition at stream:31
+Warning:    Current predicate: factNOTDeletingDestructor/1
+Warning:    Use :- discontiguous findint/2. to suppress this message
+Warning: stream:37:
+Warning:    Clauses of factMethod/1 are not together in the source-file
+Warning:    Earlier definition at stream:32
+Warning:    Current predicate: findint/2
+Warning:    Use :- discontiguous factMethod/1. to suppress this message
+Warning: stream:38:
+Warning:    Clauses of factConstructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:33
+Warning:    Current predicate: factMethod/1
+Warning:    Use :- discontiguous factConstructor/1. to suppress this message
+Warning: stream:39:
+Warning:    Clauses of factNOTRealDestructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:34
+Warning:    Current predicate: factConstructor/1
+Warning:    Use :- discontiguous factNOTRealDestructor/1. to suppress this message
+Warning: stream:40:
+Warning:    Clauses of factNOTDeletingDestructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:35
+Warning:    Current predicate: factNOTRealDestructor/1
+Warning:    Use :- discontiguous factNOTDeletingDestructor/1. to suppress this message
+Warning: stream:50:
+Warning:    Singleton variables: [M]
+Success: check_NOTConstructorB_sound, check_NOTConstructorC_sound, check_NOTConstructorD_sound, check_NOTConstructorF_sound, check_NOTConstructorG_sound, check_NOTConstructorH_sound, check_NOTConstructorI_sound, check_NOTConstructorJ_sound, check_NOTConstructorB_complete, check_NOTConstructorC_complete, check_NOTConstructorD_complete, check_NOTConstructorF_complete, check_NOTConstructorG_complete, check_NOTConstructorH_complete, check_NOTConstructorI_complete, check_NOTConstructorJ_complete
+Warning: stream:29:
+Warning:    Clauses of factClassSizeGTE/2 are not together in the source-file
+Warning:    Earlier definition at stream:27
+Warning:    Current predicate: factClassSizeLTE/2
+Warning:    Use :- discontiguous factClassSizeGTE/2. to suppress this message
+Warning: stream:30:
+Warning:    Clauses of factClassSizeLTE/2 are not together in the source-file
+Warning:    Earlier definition at stream:28
+Warning:    Current predicate: factClassSizeGTE/2
+Warning:    Use :- discontiguous factClassSizeLTE/2. to suppress this message
+Warning: stream:36:
+Warning:    Clauses of findint/2 are not together in the source-file
+Warning:    Earlier definition at stream:31
+Warning:    Current predicate: factNOTDeletingDestructor/1
+Warning:    Use :- discontiguous findint/2. to suppress this message
+Warning: stream:37:
+Warning:    Clauses of factMethod/1 are not together in the source-file
+Warning:    Earlier definition at stream:32
+Warning:    Current predicate: findint/2
+Warning:    Use :- discontiguous factMethod/1. to suppress this message
+Warning: stream:38:
+Warning:    Clauses of factConstructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:33
+Warning:    Current predicate: factMethod/1
+Warning:    Use :- discontiguous factConstructor/1. to suppress this message
+Warning: stream:39:
+Warning:    Clauses of factNOTRealDestructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:34
+Warning:    Current predicate: factConstructor/1
+Warning:    Use :- discontiguous factNOTRealDestructor/1. to suppress this message
+Warning: stream:40:
+Warning:    Clauses of factNOTDeletingDestructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:35
+Warning:    Current predicate: factNOTRealDestructor/1
+Warning:    Use :- discontiguous factNOTDeletingDestructor/1. to suppress this message
+Warning: stream:50:
+Warning:    Singleton variables: [M]
+RESULT TRUE sound NOTRealDestructorB NOTRealDestructorB(function(1))
+RESULT TRUE sound NOTRealDestructorB NOTRealDestructorB(function(0))
+RESULT TRUE complete NOTRealDestructorB NOTRealDestructorB(function(0))
+RESULT TRUE complete NOTRealDestructorB NOTRealDestructorB(function(1))
+RESULT FALSE complete NOTRealDestructorC NOTRealDestructorC(function(0))
+RESULT FALSE complete NOTRealDestructorC NOTRealDestructorC(function(1))
+RESULT FALSE complete NOTRealDestructorD NOTRealDestructorD(function(0))
+RESULT FALSE complete NOTRealDestructorD NOTRealDestructorD(function(1))
+RESULT FALSE complete NOTRealDestructorE NOTRealDestructorE(function(0))
+RESULT FALSE complete NOTRealDestructorE NOTRealDestructorE(function(1))
+RESULT FALSE complete NOTRealDestructorF NOTRealDestructorF(function(0))
+RESULT FALSE complete NOTRealDestructorF NOTRealDestructorF(function(1))
+RESULT FALSE complete NOTRealDestructorG NOTRealDestructorG(function(0))
+RESULT FALSE complete NOTRealDestructorG NOTRealDestructorG(function(1))
+RESULT FALSE complete NOTRealDestructorH NOTRealDestructorH(function(0))
+RESULT FALSE complete NOTRealDestructorH NOTRealDestructorH(function(1))
+RESULT FALSE complete NOTRealDestructorI NOTRealDestructorI(function(0))
+RESULT FALSE complete NOTRealDestructorI NOTRealDestructorI(function(1))
+RESULT FALSE complete NOTRealDestructorJ NOTRealDestructorJ(function(0))
+RESULT FALSE complete NOTRealDestructorJ NOTRealDestructorJ(function(1))
+Success: check_NOTRealDestructorB_sound, check_NOTRealDestructorC_sound, check_NOTRealDestructorD_sound, check_NOTRealDestructorE_sound, check_NOTRealDestructorF_sound, check_NOTRealDestructorG_sound, check_NOTRealDestructorH_sound, check_NOTRealDestructorI_sound, check_NOTRealDestructorJ_sound, check_NOTRealDestructorB_complete, check_NOTRealDestructorC_complete, check_NOTRealDestructorD_complete, check_NOTRealDestructorE_complete, check_NOTRealDestructorF_complete, check_NOTRealDestructorG_complete, check_NOTRealDestructorH_complete, check_NOTRealDestructorI_complete, check_NOTRealDestructorJ_complete
+Warning: stream:29:
+Warning:    Clauses of factClassSizeGTE/2 are not together in the source-file
+Warning:    Earlier definition at stream:27
+Warning:    Current predicate: factClassSizeLTE/2
+Warning:    Use :- discontiguous factClassSizeGTE/2. to suppress this message
+Warning: stream:30:
+Warning:    Clauses of factClassSizeLTE/2 are not together in the source-file
+Warning:    Earlier definition at stream:28
+Warning:    Current predicate: factClassSizeGTE/2
+Warning:    Use :- discontiguous factClassSizeLTE/2. to suppress this message
+Warning: stream:36:
+Warning:    Clauses of findint/2 are not together in the source-file
+Warning:    Earlier definition at stream:31
+Warning:    Current predicate: factNOTDeletingDestructor/1
+Warning:    Use :- discontiguous findint/2. to suppress this message
+Warning: stream:37:
+Warning:    Clauses of factMethod/1 are not together in the source-file
+Warning:    Earlier definition at stream:32
+Warning:    Current predicate: findint/2
+Warning:    Use :- discontiguous factMethod/1. to suppress this message
+Warning: stream:38:
+Warning:    Clauses of factConstructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:33
+Warning:    Current predicate: factMethod/1
+Warning:    Use :- discontiguous factConstructor/1. to suppress this message
+Warning: stream:39:
+Warning:    Clauses of factNOTRealDestructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:34
+Warning:    Current predicate: factConstructor/1
+Warning:    Use :- discontiguous factNOTRealDestructor/1. to suppress this message
+Warning: stream:40:
+Warning:    Clauses of factNOTDeletingDestructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:35
+Warning:    Current predicate: factNOTRealDestructor/1
+Warning:    Use :- discontiguous factNOTDeletingDestructor/1. to suppress this message
+Warning: stream:50:
+Warning:    Singleton variables: [M]
+RESULT FALSE complete MergeClassesB MergeClassesB(function(0),function(0))
+RESULT FALSE complete MergeClassesB MergeClassesB(function(1),function(1))
+RESULT FALSE complete MergeClassesC MergeClassesC(function(0),function(0))
+RESULT FALSE complete MergeClassesC MergeClassesC(function(1),function(1))
+RESULT FALSE complete MergeClassesE MergeClassesE(function(0),function(0))
+RESULT FALSE complete MergeClassesE MergeClassesE(function(1),function(1))
+RESULT FALSE complete MergeClassesG MergeClassesG(function(0),function(0))
+RESULT FALSE complete MergeClassesG MergeClassesG(function(1),function(1))
+RESULT FALSE complete MergeClassesH MergeClassesH(function(0),function(0))
+RESULT FALSE complete MergeClassesH MergeClassesH(function(1),function(1))
+RESULT FALSE complete MergeClassesJ MergeClassesJ(function(0),function(0))
+RESULT FALSE complete MergeClassesJ MergeClassesJ(function(1),function(1))
+RESULT FALSE complete MergeClassesK MergeClassesK(function(0),function(0))
+RESULT FALSE complete MergeClassesK MergeClassesK(function(1),function(1))
+Success: check_MergeClassesB_sound, check_MergeClassesC_sound, check_MergeClassesE_sound, check_MergeClassesG_sound, check_MergeClassesH_sound, check_MergeClassesJ_sound, check_MergeClassesK_sound, check_MergeClassesB_complete, check_MergeClassesC_complete, check_MergeClassesE_complete, check_MergeClassesG_complete, check_MergeClassesH_complete, check_MergeClassesJ_complete, check_MergeClassesK_complete
+Warning: stream:29:
+Warning:    Clauses of factClassSizeGTE/2 are not together in the source-file
+Warning:    Earlier definition at stream:27
+Warning:    Current predicate: factClassSizeLTE/2
+Warning:    Use :- discontiguous factClassSizeGTE/2. to suppress this message
+Warning: stream:30:
+Warning:    Clauses of factClassSizeLTE/2 are not together in the source-file
+Warning:    Earlier definition at stream:28
+Warning:    Current predicate: factClassSizeGTE/2
+Warning:    Use :- discontiguous factClassSizeLTE/2. to suppress this message
+Warning: stream:36:
+Warning:    Clauses of findint/2 are not together in the source-file
+Warning:    Earlier definition at stream:31
+Warning:    Current predicate: factNOTDeletingDestructor/1
+Warning:    Use :- discontiguous findint/2. to suppress this message
+Warning: stream:37:
+Warning:    Clauses of factMethod/1 are not together in the source-file
+Warning:    Earlier definition at stream:32
+Warning:    Current predicate: findint/2
+Warning:    Use :- discontiguous factMethod/1. to suppress this message
+Warning: stream:38:
+Warning:    Clauses of factConstructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:33
+Warning:    Current predicate: factMethod/1
+Warning:    Use :- discontiguous factConstructor/1. to suppress this message
+Warning: stream:39:
+Warning:    Clauses of factNOTRealDestructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:34
+Warning:    Current predicate: factConstructor/1
+Warning:    Use :- discontiguous factNOTRealDestructor/1. to suppress this message
+Warning: stream:40:
+Warning:    Clauses of factNOTDeletingDestructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:35
+Warning:    Current predicate: factNOTRealDestructor/1
+Warning:    Use :- discontiguous factNOTDeletingDestructor/1. to suppress this message
+Warning: stream:50:
+Warning:    Singleton variables: [M]
+RESULT TRUE sound NOTMergeClassesJ NOTMergeClassesJ(class(0),class(1))
+RESULT TRUE sound NOTMergeClassesG NOTMergeClassesG(class(0),class(1))
+RESULT TRUE complete NOTMergeClassesJ NOTMergeClassesJ(class(0),class(1))
+RESULT FALSE complete NOTMergeClassesJ NOTMergeClassesJ(class(1),class(0))
+RESULT FALSE complete NOTMergeClassesC NOTMergeClassesC(class(0),class(1))
+RESULT FALSE complete NOTMergeClassesC NOTMergeClassesC(class(1),class(0))
+RESULT FALSE complete NOTMergeClassesE NOTMergeClassesE(class(0),class(1))
+RESULT FALSE complete NOTMergeClassesE NOTMergeClassesE(class(1),class(0))
+RESULT FALSE complete NOTMergeClassesF NOTMergeClassesF(class(0),class(1))
+RESULT FALSE complete NOTMergeClassesF NOTMergeClassesF(class(1),class(0))
+RESULT TRUE complete NOTMergeClassesG NOTMergeClassesG(class(0),class(1))
+RESULT FALSE complete NOTMergeClassesG NOTMergeClassesG(class(1),class(0))
+RESULT FALSE complete NOTMergeClassesI NOTMergeClassesI(class(0),class(1))
+RESULT FALSE complete NOTMergeClassesI NOTMergeClassesI(class(1),class(0))
+RESULT FALSE complete NOTMergeClassesK NOTMergeClassesK(class(0),class(1))
+RESULT FALSE complete NOTMergeClassesK NOTMergeClassesK(class(1),class(0))
+RESULT FALSE complete NOTMergeClassesL NOTMergeClassesL(class(0),class(1))
+RESULT FALSE complete NOTMergeClassesL NOTMergeClassesL(class(1),class(0))
+RESULT FALSE complete NOTMergeClassesM NOTMergeClassesM(class(0),class(1))
+RESULT FALSE complete NOTMergeClassesM NOTMergeClassesM(class(1),class(0))
+RESULT FALSE complete NOTMergeClassesO NOTMergeClassesO(class(0),class(1))
+RESULT FALSE complete NOTMergeClassesO NOTMergeClassesO(class(1),class(0))
+RESULT FALSE complete NOTMergeClassesP NOTMergeClassesP(class(0),class(1))
+RESULT FALSE complete NOTMergeClassesP NOTMergeClassesP(class(1),class(0))
+RESULT FALSE complete NOTMergeClassesQ NOTMergeClassesQ(class(0),class(1))
+RESULT FALSE complete NOTMergeClassesQ NOTMergeClassesQ(class(1),class(0))
+RESULT FALSE complete NOTMergeClassesR NOTMergeClassesR(class(0),class(1))
+RESULT FALSE complete NOTMergeClassesR NOTMergeClassesR(class(1),class(0))
+Success: check_NOTMergeClassesJ_sound, check_NOTMergeClassesC_sound, check_NOTMergeClassesE_sound, check_NOTMergeClassesF_sound, check_NOTMergeClassesG_sound, check_NOTMergeClassesI_sound, check_NOTMergeClassesK_sound, check_NOTMergeClassesL_sound, check_NOTMergeClassesM_sound, check_NOTMergeClassesO_sound, check_NOTMergeClassesP_sound, check_NOTMergeClassesQ_sound, check_NOTMergeClassesR_sound, check_NOTMergeClassesJ_complete, check_NOTMergeClassesC_complete, check_NOTMergeClassesE_complete, check_NOTMergeClassesF_complete, check_NOTMergeClassesG_complete, check_NOTMergeClassesI_complete, check_NOTMergeClassesK_complete, check_NOTMergeClassesL_complete, check_NOTMergeClassesM_complete, check_NOTMergeClassesO_complete, check_NOTMergeClassesP_complete, check_NOTMergeClassesQ_complete, check_NOTMergeClassesR_complete
+Warning: stream:29:
+Warning:    Clauses of factClassSizeGTE/2 are not together in the source-file
+Warning:    Earlier definition at stream:27
+Warning:    Current predicate: factClassSizeLTE/2
+Warning:    Use :- discontiguous factClassSizeGTE/2. to suppress this message
+Warning: stream:30:
+Warning:    Clauses of factClassSizeLTE/2 are not together in the source-file
+Warning:    Earlier definition at stream:28
+Warning:    Current predicate: factClassSizeGTE/2
+Warning:    Use :- discontiguous factClassSizeLTE/2. to suppress this message
+Warning: stream:36:
+Warning:    Clauses of findint/2 are not together in the source-file
+Warning:    Earlier definition at stream:31
+Warning:    Current predicate: factNOTDeletingDestructor/1
+Warning:    Use :- discontiguous findint/2. to suppress this message
+Warning: stream:37:
+Warning:    Clauses of factMethod/1 are not together in the source-file
+Warning:    Earlier definition at stream:32
+Warning:    Current predicate: findint/2
+Warning:    Use :- discontiguous factMethod/1. to suppress this message
+Warning: stream:38:
+Warning:    Clauses of factConstructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:33
+Warning:    Current predicate: factMethod/1
+Warning:    Use :- discontiguous factConstructor/1. to suppress this message
+Warning: stream:39:
+Warning:    Clauses of factNOTRealDestructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:34
+Warning:    Current predicate: factConstructor/1
+Warning:    Use :- discontiguous factNOTRealDestructor/1. to suppress this message
+Warning: stream:40:
+Warning:    Clauses of factNOTDeletingDestructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:35
+Warning:    Current predicate: factNOTRealDestructor/1
+Warning:    Use :- discontiguous factNOTDeletingDestructor/1. to suppress this message
+Warning: stream:50:
+Warning:    Singleton variables: [M]
+Success: check_DerivedClassB_sound, check_DerivedClassC_sound, check_DerivedClassD_sound, check_DerivedClassE_sound, check_DerivedClassF_sound, check_DerivedClassB_complete, check_DerivedClassC_complete, check_DerivedClassD_complete, check_DerivedClassE_complete, check_DerivedClassF_complete
+Warning: stream:29:
+Warning:    Clauses of factClassSizeGTE/2 are not together in the source-file
+Warning:    Earlier definition at stream:27
+Warning:    Current predicate: factClassSizeLTE/2
+Warning:    Use :- discontiguous factClassSizeGTE/2. to suppress this message
+Warning: stream:30:
+Warning:    Clauses of factClassSizeLTE/2 are not together in the source-file
+Warning:    Earlier definition at stream:28
+Warning:    Current predicate: factClassSizeGTE/2
+Warning:    Use :- discontiguous factClassSizeLTE/2. to suppress this message
+Warning: stream:36:
+Warning:    Clauses of findint/2 are not together in the source-file
+Warning:    Earlier definition at stream:31
+Warning:    Current predicate: factNOTDeletingDestructor/1
+Warning:    Use :- discontiguous findint/2. to suppress this message
+Warning: stream:37:
+Warning:    Clauses of factMethod/1 are not together in the source-file
+Warning:    Earlier definition at stream:32
+Warning:    Current predicate: findint/2
+Warning:    Use :- discontiguous factMethod/1. to suppress this message
+Warning: stream:38:
+Warning:    Clauses of factConstructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:33
+Warning:    Current predicate: factMethod/1
+Warning:    Use :- discontiguous factConstructor/1. to suppress this message
+Warning: stream:39:
+Warning:    Clauses of factNOTRealDestructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:34
+Warning:    Current predicate: factConstructor/1
+Warning:    Use :- discontiguous factNOTRealDestructor/1. to suppress this message
+Warning: stream:40:
+Warning:    Clauses of factNOTDeletingDestructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:35
+Warning:    Current predicate: factNOTRealDestructor/1
+Warning:    Use :- discontiguous factNOTDeletingDestructor/1. to suppress this message
+Warning: stream:50:
+Warning:    Singleton variables: [M]
+RESULT TRUE sound NOTDerivedClass NOTDerivedClass(class(1),class(0),0)
+Success: check_NOTDerivedClass_sound.
+Warning: stream:29:
+Warning:    Clauses of factClassSizeGTE/2 are not together in the source-file
+Warning:    Earlier definition at stream:27
+Warning:    Current predicate: factClassSizeLTE/2
+Warning:    Use :- discontiguous factClassSizeGTE/2. to suppress this message
+Warning: stream:30:
+Warning:    Clauses of factClassSizeLTE/2 are not together in the source-file
+Warning:    Earlier definition at stream:28
+Warning:    Current predicate: factClassSizeGTE/2
+Warning:    Use :- discontiguous factClassSizeLTE/2. to suppress this message
+Warning: stream:36:
+Warning:    Clauses of findint/2 are not together in the source-file
+Warning:    Earlier definition at stream:31
+Warning:    Current predicate: factNOTDeletingDestructor/1
+Warning:    Use :- discontiguous findint/2. to suppress this message
+Warning: stream:37:
+Warning:    Clauses of factMethod/1 are not together in the source-file
+Warning:    Earlier definition at stream:32
+Warning:    Current predicate: findint/2
+Warning:    Use :- discontiguous factMethod/1. to suppress this message
+Warning: stream:38:
+Warning:    Clauses of factConstructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:33
+Warning:    Current predicate: factMethod/1
+Warning:    Use :- discontiguous factConstructor/1. to suppress this message
+Warning: stream:39:
+Warning:    Clauses of factNOTRealDestructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:34
+Warning:    Current predicate: factConstructor/1
+Warning:    Use :- discontiguous factNOTRealDestructor/1. to suppress this message
+Warning: stream:40:
+Warning:    Clauses of factNOTDeletingDestructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:35
+Warning:    Current predicate: factNOTRealDestructor/1
+Warning:    Use :- discontiguous factNOTDeletingDestructor/1. to suppress this message
+Warning: stream:50:
+Warning:    Singleton variables: [M]
+RESULT TRUE sound EmbeddedObjectB EmbeddedObjectB(class(1),class(0),0)
+RESULT TRUE sound EmbeddedObjectC EmbeddedObjectC(class(1),class(0),0)
+RESULT TRUE complete EmbeddedObjectB EmbeddedObjectB(class(1),class(0),0)
+RESULT TRUE complete EmbeddedObjectC EmbeddedObjectC(class(1),class(0),0)
+RESULT FALSE complete EmbeddedObjectD EmbeddedObjectD(class(1),class(0),0)
+Success: check_EmbeddedObjectB_sound, check_EmbeddedObjectC_sound, check_EmbeddedObjectD_sound, check_EmbeddedObjectB_complete, check_EmbeddedObjectC_complete, check_EmbeddedObjectD_complete
+Warning: stream:29:
+Warning:    Clauses of factClassSizeGTE/2 are not together in the source-file
+Warning:    Earlier definition at stream:27
+Warning:    Current predicate: factClassSizeLTE/2
+Warning:    Use :- discontiguous factClassSizeGTE/2. to suppress this message
+Warning: stream:30:
+Warning:    Clauses of factClassSizeLTE/2 are not together in the source-file
+Warning:    Earlier definition at stream:28
+Warning:    Current predicate: factClassSizeGTE/2
+Warning:    Use :- discontiguous factClassSizeLTE/2. to suppress this message
+Warning: stream:36:
+Warning:    Clauses of findint/2 are not together in the source-file
+Warning:    Earlier definition at stream:31
+Warning:    Current predicate: factNOTDeletingDestructor/1
+Warning:    Use :- discontiguous findint/2. to suppress this message
+Warning: stream:37:
+Warning:    Clauses of factMethod/1 are not together in the source-file
+Warning:    Earlier definition at stream:32
+Warning:    Current predicate: findint/2
+Warning:    Use :- discontiguous factMethod/1. to suppress this message
+Warning: stream:38:
+Warning:    Clauses of factConstructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:33
+Warning:    Current predicate: factMethod/1
+Warning:    Use :- discontiguous factConstructor/1. to suppress this message
+Warning: stream:39:
+Warning:    Clauses of factNOTRealDestructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:34
+Warning:    Current predicate: factConstructor/1
+Warning:    Use :- discontiguous factNOTRealDestructor/1. to suppress this message
+Warning: stream:40:
+Warning:    Clauses of factNOTDeletingDestructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:35
+Warning:    Current predicate: factNOTRealDestructor/1
+Warning:    Use :- discontiguous factNOTDeletingDestructor/1. to suppress this message
+Warning: stream:50:
+Warning:    Singleton variables: [M]
+RESULT TRUE sound ObjectInObjectC ObjectInObjectC(class(1),class(0),0)
+RESULT FALSE complete ObjectInObjectB ObjectInObjectB(class(1),class(0),0)
+RESULT TRUE complete ObjectInObjectC ObjectInObjectC(class(1),class(0),0)
+RESULT FALSE complete ObjectInObjectD ObjectInObjectD(class(1),class(0),0)
+RESULT FALSE complete ObjectInObjectE ObjectInObjectE(class(1),class(0),0)
+RESULT FALSE complete ObjectInObjectF ObjectInObjectF(class(1),class(0),0)
+Success: check_ObjectInObjectB_sound, check_ObjectInObjectC_sound, check_ObjectInObjectD_sound, check_ObjectInObjectE_sound, check_ObjectInObjectF_sound, check_ObjectInObjectB_complete, check_ObjectInObjectC_complete, check_ObjectInObjectD_complete, check_ObjectInObjectE_complete, check_ObjectInObjectF_complete
+Warning: stream:29:
+Warning:    Clauses of factClassSizeGTE/2 are not together in the source-file
+Warning:    Earlier definition at stream:27
+Warning:    Current predicate: factClassSizeLTE/2
+Warning:    Use :- discontiguous factClassSizeGTE/2. to suppress this message
+Warning: stream:30:
+Warning:    Clauses of factClassSizeLTE/2 are not together in the source-file
+Warning:    Earlier definition at stream:28
+Warning:    Current predicate: factClassSizeGTE/2
+Warning:    Use :- discontiguous factClassSizeLTE/2. to suppress this message
+Warning: stream:36:
+Warning:    Clauses of findint/2 are not together in the source-file
+Warning:    Earlier definition at stream:31
+Warning:    Current predicate: factNOTDeletingDestructor/1
+Warning:    Use :- discontiguous findint/2. to suppress this message
+Warning: stream:37:
+Warning:    Clauses of factMethod/1 are not together in the source-file
+Warning:    Earlier definition at stream:32
+Warning:    Current predicate: findint/2
+Warning:    Use :- discontiguous factMethod/1. to suppress this message
+Warning: stream:38:
+Warning:    Clauses of factConstructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:33
+Warning:    Current predicate: factMethod/1
+Warning:    Use :- discontiguous factConstructor/1. to suppress this message
+Warning: stream:39:
+Warning:    Clauses of factNOTRealDestructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:34
+Warning:    Current predicate: factConstructor/1
+Warning:    Use :- discontiguous factNOTRealDestructor/1. to suppress this message
+Warning: stream:40:
+Warning:    Clauses of factNOTDeletingDestructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:35
+Warning:    Current predicate: factNOTRealDestructor/1
+Warning:    Use :- discontiguous factNOTDeletingDestructor/1. to suppress this message
+Warning: stream:50:
+Warning:    Singleton variables: [M]
+RESULT FALSE sound ClassCallsMethodC ClassCallsMethodC(class(1),function(0))
+RESULT FALSE complete ClassCallsMethodB ClassCallsMethodB(class(0),function(0))
+RESULT FALSE complete ClassCallsMethodB ClassCallsMethodB(class(1),function(1))
+RESULT FALSE complete ClassCallsMethodC ClassCallsMethodC(class(0),function(0))
+RESULT FALSE complete ClassCallsMethodC ClassCallsMethodC(class(1),function(1))
+Success: check_ClassCallsMethodB_sound, check_ClassCallsMethodC_sound, check_ClassCallsMethodB_complete, check_ClassCallsMethodC_complete
+Warning: stream:29:
+Warning:    Clauses of factClassSizeGTE/2 are not together in the source-file
+Warning:    Earlier definition at stream:27
+Warning:    Current predicate: factClassSizeLTE/2
+Warning:    Use :- discontiguous factClassSizeGTE/2. to suppress this message
+Warning: stream:30:
+Warning:    Clauses of factClassSizeLTE/2 are not together in the source-file
+Warning:    Earlier definition at stream:28
+Warning:    Current predicate: factClassSizeGTE/2
+Warning:    Use :- discontiguous factClassSizeLTE/2. to suppress this message
+Warning: stream:36:
+Warning:    Clauses of findint/2 are not together in the source-file
+Warning:    Earlier definition at stream:31
+Warning:    Current predicate: factNOTDeletingDestructor/1
+Warning:    Use :- discontiguous findint/2. to suppress this message
+Warning: stream:37:
+Warning:    Clauses of factMethod/1 are not together in the source-file
+Warning:    Earlier definition at stream:32
+Warning:    Current predicate: findint/2
+Warning:    Use :- discontiguous factMethod/1. to suppress this message
+Warning: stream:38:
+Warning:    Clauses of factConstructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:33
+Warning:    Current predicate: factMethod/1
+Warning:    Use :- discontiguous factConstructor/1. to suppress this message
+Warning: stream:39:
+Warning:    Clauses of factNOTRealDestructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:34
+Warning:    Current predicate: factConstructor/1
+Warning:    Use :- discontiguous factNOTRealDestructor/1. to suppress this message
+Warning: stream:40:
+Warning:    Clauses of factNOTDeletingDestructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:35
+Warning:    Current predicate: factNOTRealDestructor/1
+Warning:    Use :- discontiguous factNOTDeletingDestructor/1. to suppress this message
+Warning: stream:50:
+Warning:    Singleton variables: [M]
+RESULT TRUE sound ClassSizeGTE ClassSizeGTE(class(1),0,0)
+RESULT TRUE sound ClassSizeGTE ClassSizeGTE(class(0),0,0)
+RESULT TRUE sound ClassSizeLTE ClassSizeLTE(class(1),268435455,0)
+RESULT TRUE sound ClassSizeLTE ClassSizeLTE(class(1),0,0)
+RESULT TRUE sound ClassSizeLTE ClassSizeLTE(class(0),268435455,0)
+RESULT TRUE sound ClassSizeLTE ClassSizeLTE(class(0),0,0)
+RESULT TRUE sound constructor constructor(function(1))
+RESULT TRUE sound constructor constructor(function(0))
+RESULT TRUE complete constructor constructor(function(0))
+RESULT TRUE complete constructor constructor(function(1))
+RESULT TRUE sound method method(function(1))
+RESULT TRUE sound method method(function(0))
+RESULT TRUE complete method method(function(0))
+RESULT TRUE complete method method(function(1))
+Success: check_VFTableSizeGTE_sound, check_VFTableSizeLTE_sound, check_ClassSizeGTE_sound, check_ClassSizeLTE_sound, check_realDestructor_sound, check_realDestructor_complete, check_vftable_belongs_sound, check_vftable_belongs_complete, check_NOTConstructor_sound, check_NOTConstructor_complete, check_constructor_sound, check_constructor_complete, check_method_sound, check_method_complete
