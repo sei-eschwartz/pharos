@@ -1369,7 +1369,6 @@ reasonVFTableSizeLTE(VFTable, Size) :-
 
 % VFTable size for inherited vftables
 reasonVFTableSizeLTE(VFTable, Size) :-
-    % In this rule we're only considering base classes that are NOT at offset zero.
     factDerivedClass(DerivedClass, BaseClass, Offset),
     % Pair the derived table at that offset with the base table at offset zero, and constrain
     % the base table to >= the derived table.
@@ -2404,8 +2403,16 @@ reasonClassCallsMethod_B(Class1, Method2) :-
 % PAPER: Call-3
 reasonClassCallsMethod_C(Class1, Method2) :-
     validMethodCallAtOffset(_Insn, Method1, Method2, 0),
+
     iso_dif(Method1, Method2),
     find(Method1, Class1),
+
+    % ejs 8/18/22 We need to make sure that there isn't a (possibly nested) embedded class at
+    % offset 0.  We don't have a great way to do that yet.  But if there are no objects at all,
+    % then there can't be an embedded object.
+    not(reasonClassAtOffset(Class1, 0, _InnerClass)),
+
+
     % Don't propose assignments we already know.
     find(Method2, Class2),
     iso_dif(Class1, Class2),
