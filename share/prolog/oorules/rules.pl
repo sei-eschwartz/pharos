@@ -318,6 +318,11 @@ reasonNOTConstructor_F(Method) :-
 reasonNOTConstructor_G(Method) :-
     % There's another method that calls this method on the same object pointer.
     validMethodCallAtOffset(_, Caller, Method, 0),
+    % ejs 8/29/22 We need to make sure that Method is not an empty base class.  It could be
+    % that an empty base class AND the class owning the vftable are at offset 0 which makes
+    % this rule incorrectly decide that the empty base class' constructor is not a constructor.
+    find(Method, Class),
+    notEmptyClass(Class),
     % The caller is known to be a constructor or destructor.
     (factConstructor(Caller); factRealDestructor(Caller)),
     % The caller is already known to have a VFTable write.
