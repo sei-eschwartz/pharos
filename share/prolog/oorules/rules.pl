@@ -180,8 +180,8 @@ reasonMethodSet(Set) :-
 
 % Because it is already known to be a constructor.
 % PAPER: Not relevant
-reasonConstructor(Method) :-
-    factConstructor(Method).
+%reasonConstructor(Method) :-
+%    factConstructor(Method).
 
 % Because it is known to be a constructor or destructor and we've eliminited the other
 % possibilities.
