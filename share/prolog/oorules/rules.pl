@@ -1892,12 +1892,17 @@ reasonDerivedClass_E(DerivedClass, BaseClass, Offset) :-
 reasonDerivedClass_F(DerivedClass, BaseClass, Offset) :-
     factObjectInObject(DerivedClass, BaseClass, Offset),
     % There's an entry in some VBTable somehere (only unified by Offset so far).
-    factVBTableEntry(VBTableAddress, _TableObjectOffset, Offset),
+    factVBTableEntry(VBTableAddress, _TableObjectOffset, OffsetFromVBPtr),
     % And that VBTable is installed into an object in some Method.
-    factVBTableWrite(_Insn, Method, _VBTableOffset, VBTableAddress),
+    factVBTableWrite(_Insn, Method, VBPtrOffset, VBTableAddress),
     % Finally, check that the method is assigned to the Derived class.
     % This is the unification that makes the VBTableEntry relevant.
     find(Method, DerivedClass),
+
+    % ejs 8/13/22 The offsets in a vbtable are offsets from the location of the vbptr, not from
+    % the beginning of the class.  Sometimes the vbptr is at offset zero, but not always.
+    Offset is OffsetFromVBPtr + VBPtrOffset,
+
     % Debugging
     logtraceln('~@~Q.', [not(factDerivedClass(DerivedClass, BaseClass, Offset)),
                          reasonDerivedClass_F(DerivedClass, BaseClass, Offset,
