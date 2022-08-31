@@ -2353,15 +2353,21 @@ reasonClassCallsMethod_C(Class1, Method2) :-
     iso_dif(Method1, Method2),
     find(Method1, Class1),
 
-    % ejs 8/18/22 We need to make sure that there isn't a (possibly nested) embedded class at
-    % offset 0.  We don't have a great way to do that yet.  But if there are no objects at all,
-    % then there can't be an embedded object.
-    not(reasonClassAtOffset(Class1, Offset, _InnerClass)),
-
-
     % Don't propose assignments we already know.
     find(Method2, Class2),
     iso_dif(Class1, Class2),
+
+    % ejs 8/31/22 So this rule is not as simple as it seems.  Because Method2 could live on an
+    % embedded object.  To make matters worse, there could be a more complicated chain like
+    % inheritance and embedding that we don't see because of inlining. For example, we might
+    % have C0 --inherits--> Middle --embeds--> C1.
+
+    % So what we really want to know is, for all objects that start at Offset, do they all come
+    % from inheritance?
+
+    forall(reasonClassAtOffset(Class1, Offset, _, Seq),
+           sequenceAreAllDerived(Seq)),
+
     % Debugging
     logtraceln('~@~Q.', [not(factClassCallsMethod(Class1, Method2)),
                          reasonClassCallsMethod_C(Method1, Class1, Method2)]).
