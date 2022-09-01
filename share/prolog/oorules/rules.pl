@@ -2803,7 +2803,7 @@ reasonMergeClasses_H(DerivedClass, MethodClass) :-
     factVFTableEntry(DerivedVFTable, VOffset, Method),
     not(purecall(Method)),
     not(factReusedImplementation(Method)),
-    VOffset > BaseSize,
+    VOffset + 1 > BaseSize,
     find(Method, MethodClass),
     iso_dif(DerivedClass, MethodClass),
     % Debugging
