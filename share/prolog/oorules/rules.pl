@@ -1610,12 +1610,13 @@ thisPtrAdjustment(M, 0) :-
            % The entry has been disproved
            factNOTVFTableEntry(Addr, Offset, Entry)).
 
-thisPtrAdjust(M, InputOffset, OutputOffset) :-
-    thisPtrAdjustment(M, Adjust),
-    OutputOffset is InputOffset + Adjust.
-
 % XXX: Implement computation of thisptr adjustment if we know where a virtual function was
 % originally defined.  How do we know we have recovered the whole inheritance hierarchy?  RTTI?
+
+thisPtrAdjust(M, InputOffset, OutputOffset) :-
+    thisPtrAdjustment(M, Adjust),
+    OutputOffset is InputOffset - Adjust.
+
 
 % If a method installs a vftable at two different offsets, it must be embedded or inherited.
 reasonObjectInObject_F(OuterClass, InnerClass, Offset) :-
