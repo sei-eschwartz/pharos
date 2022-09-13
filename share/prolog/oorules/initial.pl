@@ -170,22 +170,30 @@ validMethodCallAtOffset(Insn, Caller, Callee, Offset) :-
     Offset < 0x100000.
 
 % Replaces the old-style fact named funcOffset.
-:- table methodCallAtOffset/4 as opaque.
+:- table methodCallAtOffset/4 as incremental.
 
 methodCallAtOffset(Insn, Caller, Callee, Offset) :-
     funcParameter(Caller, ecx, CallerThisPtr),
     callParameter(Insn, Caller, ecx, CalleeThisPtr),
-    thisPtrOffset(CallerThisPtr, Offset, CalleeThisPtr),
+    thisPtrOffset(CallerThisPtr, OrigOffset, CalleeThisPtr),
     callTarget(Insn, Caller, Thunk),
     dethunk(Thunk, Callee),
+    thisPtrAdjustment(Caller, CallerAdjust),
+    thisPtrAdjustment(Callee, CalleeAdjust),
+    % Offset = (CalleeThisPtr + CalleeAdjust) - (CallerThisptr + CallerAdjust)
+    % = OrigOffset + (CalleeAdjust - CallerAdjust)
+    Offset is OrigOffset + (CalleeAdjust - CallerAdjust),
     %loginfoln('~Q.', methodCallAtOffset(Insn, Caller, Callee, Offset)),
     true.
 
-methodCallAtOffset(Insn, Caller, Callee, 0) :-
+methodCallAtOffset(Insn, Caller, Callee, Offset) :-
     funcParameter(Caller, ecx, ThisPtr),
     callParameter(Insn, Caller, ecx, ThisPtr),
     callTarget(Insn, Caller, Thunk),
     dethunk(Thunk, Callee),
+    thisPtrAdjustment(Caller, CallerAdjust),
+    thisPtrAdjustment(Callee, CalleeAdjust),
+    Offset is CalleeAdjust - CallerAdjust,
     %loginfoln('~Q.', methodCallAtOffset(Insn, Caller, Callee, 0)),
     true.
 
