@@ -1660,6 +1660,10 @@ thisPtrAdjustment(M, 0) :-
            % The entry has been disproved
            factNOTVFTableEntry(Addr, Offset, Entry)).
 
+thisPtrAdjust(M, InputOffset, OutputOffset) :-
+    thisPtrAdjustment(M, Adjust),
+    OutputOffset is InputOffset + Adjust.
+
 % XXX: Implement computation of thisptr adjustment if we know where a virtual function was
 % originally defined.  How do we know we have recovered the whole inheritance hierarchy?  RTTI?
 
@@ -1667,8 +1671,7 @@ thisPtrAdjustment(M, 0) :-
 reasonObjectInObject_F(OuterClass, InnerClass, Offset) :-
     factVFTableWrite(_Insn1, Method, OffsetOrig, VFTable),
 
-    thisPtrAdjustment(Method, Adjust),
-    Offset is OffsetOrig + Adjust,
+    thisPtrAdjust(Method, OffsetOrig, Offset),
 
     % ejs 8/13/22 This rule should not apply if we already know about a chain of inheritance or
     % embedding that explains the vftable write.  On the other hand, this fix is not completely
