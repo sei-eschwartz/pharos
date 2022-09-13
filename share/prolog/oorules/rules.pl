@@ -807,8 +807,15 @@ certainConstructorOrDestructorInheritanceSpecialCase(Method, Type) :-
 
     (   CallAddr < WriteAddr
     ->  Type=constructor
-    ;   Type=destructor).
+    ;   Type=destructor),
 
+    % ejs 9/13/22 There is a relatively complicated case involving virtual inheritance in which
+    % we incorrectly decide that a vbase destructor is a constructor.  So we'll add a very
+    % cheap hack for now to make sure that Method is not a vbase destructor.  See C1::`vbase
+    % destructor` in https://godbolt.org/z/x8zh1WPMG.
+    (  Type=constructor
+    -> methodIsNotVBaseDestructor(Method)
+    ;  true).
 
 certainConstructorOrDestructorSet(Set) :-
     setof(Method, certainConstructorOrDestructor(Method), Set).
