@@ -39,7 +39,8 @@ findVFTable(V, R) :-
 
 findVFTable(VFTable, Offset, Class) :-
     findVFTable(VFTable, Class),
-    factVFTableWrite(_Insn, Method, Offset, VFTable),
+    factVFTableWrite(_Insn, Method, OffsetOrig, VFTable),
+    thisPtrAdjust(Method, OffsetOrig, Offset),
     find(Method, Class).
 
 findMethod(M, R) :-
