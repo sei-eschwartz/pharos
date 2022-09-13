@@ -799,16 +799,26 @@ certainConstructorOrDestructorInheritanceSpecialCase(Method, Type) :-
     % installation, we'll also check that it installs some tables.
     certainConstructorOrDestructor(Callee),
 
+    find(Method, MethodClass),
+    find(Callee, CalleeClass),
+
+    % ejs 9/13/22 There is a relatively complicated case involving virtual inheritance in which
+    % we incorrectly decide that a vbase destructor is a constructor.  We'll make sure that
+    % Callee is on a different class to avoid this situation.  See C1::`vbase destructor` in
+    % https://godbolt.org/z/x8zh1WPMG.
+    iso_dif(MethodClass, CalleeClass),
+
     (   CallAddr < WriteAddr
     ->  Type=constructor
     ;   Type=destructor),
 
     % ejs 9/13/22 There is a relatively complicated case involving virtual inheritance in which
     % we incorrectly decide that a vbase destructor is a constructor.  So we'll add a very
-    % cheap hack for now to make sure that Method is not a vbase destructor.  See C1::`vbase
-    % destructor` in https://godbolt.org/z/x8zh1WPMG.
+    % cheap hack for now to make sure that either (1) Method can not be a vbase destructor, or
+    % (2) VFTable is known to be on Method's class.  See C1::`vbase destructor` in
+    % https://godbolt.org/z/x8zh1WPMG.
     (  Type=constructor
-    -> methodIsNotVBaseDestructor(Method)
+    -> (methodIsNotVBaseDestructor(Method); find(VFTable, Class), find(Method, Class))
     ;  true).
 
 certainConstructorOrDestructorSet(Set) :-
