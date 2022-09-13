@@ -484,11 +484,27 @@ reasonNOTRealDestructor_E(Method) :-
                          reasonNOTRealDestructor_E(Method, RealDestructor)]).
 
 
-% Because a method on a class cannot destruct itself (unless it's a deleting destructor).
+% ejs 9/13/22 See note in NOTRealDestructor_F.  This is a very bad stop-gap for determining
+% that a method can't be a vbase destructor.  We should do something better.
+methodIsNotVBaseDestructor(M) :-
+    find(M, Class),
+    factClassHasNoBase(M).
+
+% Because a method on a class cannot destruct itself (unless it's a deleting destructor or
+% vbase destructor).
 reasonNOTRealDestructor_F(Method) :-
     validMethodCallAtOffset(_Insn, Caller, Method, 0),
     factMethod(Method),
     find(Method, Class),
+
+    % ejs 9/13/22 In addition to a deleting destructor, another method on the class that may
+    % call the method is a vbase destructor.  We currently don't have a good way to distinguish
+    % vbase destructors from real destructors, or a way to know that a class does NOT have any
+    % virtual bases.  So for now we'll use a very rough approximation which is that if there
+    % are no bases, then there can't be any virtual bases, and hence there can be no vbase
+    % destructor.
+    methodIsNotVBaseDestructor(Method),
+
     find(Caller, Class),
     iso_dif(Method, Caller),
     factNOTDeletingDestructor(Caller),
