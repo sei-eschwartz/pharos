@@ -1593,9 +1593,24 @@ reasonObjectInObject_E(OuterClass, InnerClass, Offset) :-
     logtraceln('~@~Q.', [not(factObjectInObject(OuterClass, InnerClass, Offset)),
                          reasonObjectInObject_E(OuterClass, InnerClass, Offset)]).
 
+% If M is known to not be in any vftables, then it isn't virtual, and can't have a thisptr
+% adjustment.
+thisPtrAdjustment(M, 0) :-
+    factMethod(M),
+    % For every possible VFTable entry that thunks to M
+    forall((possibleVFTableEntry(Addr, Offset, Entry), dethunk(Entry, M)),
+           % The entry has been disproved
+           factNOTVFTableEntry(Addr, Offset, Entry)).
+
+% XXX: Implement computation of thisptr adjustment if we know where a virtual function was
+% originally defined.  How do we know we have recovered the whole inheritance hierarchy?  RTTI?
+
 % If a method installs a vftable at two different offsets, it must be embedded or inherited.
 reasonObjectInObject_F(OuterClass, InnerClass, Offset) :-
-    factVFTableWrite(_Insn1, Method, Offset, VFTable),
+    factVFTableWrite(_Insn1, Method, OffsetOrig, VFTable),
+
+    thisPtrAdjustment(Method, Adjust),
+    Offset is OffsetOrig + Adjust,
 
     % ejs 8/13/22 This rule should not apply if we already know about a chain of inheritance or
     % embedding that explains the vftable write.  On the other hand, this fix is not completely
