@@ -517,9 +517,12 @@ reasonNOTRealDestructor_F(Method) :-
     % Debugging
     logtraceln('~Q.', reasonNOTRealDestructor_F(Caller, Method)).
 
+% ejs 9/14/22 Default destructors do not install vftables, so this rule is not sound.
+
 % A correlary to reasonNOTConstructor_G (requiring VFTable writes if others have them).
 % PAPER: ??? NEW!
 reasonNOTRealDestructor_G(Method) :-
+    paperUnsoundRuleDisabled,
     % There's another method that calls this method on the same object pointer.
     validMethodCallAtOffset(_, Caller, Method, 0),
     % The caller is known to be a constructor or destructor.

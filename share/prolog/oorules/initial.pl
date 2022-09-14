@@ -3,6 +3,9 @@
 % Forward reasoning from given facts.
 % ============================================================================================
 
+% This rule is unsound and disabled, but we need to have the rule "available" for testing.
+paperUnsoundRuleDisabled :- fail.
+
 % This is to disable changes that we know are sound, but that cause problems in
 % practice.
 paperSoundnessProblem(G) :-
