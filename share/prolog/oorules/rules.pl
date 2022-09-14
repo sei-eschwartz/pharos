@@ -249,7 +249,7 @@ reasonConstructorSet(Set) :-
 :- table reasonNOTConstructor_D/1 as incremental.
 %:- table reasonNOTConstructor_E/1 as incremental.
 :- table reasonNOTConstructor_F/1 as incremental.
-:- table reasonNOTConstructor_G/1 as incremental.
+%:- table reasonNOTConstructor_G/1 as incremental.
 :- table reasonNOTConstructor_H/1 as incremental.
 :- table reasonNOTConstructor_I/1 as incremental.
 :- table reasonNOTConstructor_J/1 as incremental.
@@ -261,7 +261,7 @@ reasonNOTConstructor(Method) :-
         reasonNOTConstructor_D(Method),
         %reasonNOTConstructor_E(Method),
         reasonNOTConstructor_F(Method),
-        reasonNOTConstructor_G(Method),
+        %reasonNOTConstructor_G(Method),
         reasonNOTConstructor_H(Method),
         reasonNOTConstructor_I(Method),
         reasonNOTConstructor_J(Method)
@@ -511,23 +511,25 @@ reasonNOTRealDestructor_F(Method) :-
     % Debugging
     logtraceln('~Q.', reasonNOTRealDestructor_F(Caller, Method)).
 
+% ejs 9/14/22 Default destructors do not install vftables, so this rule is not sound.
+
 % A correlary to reasonNOTConstructor_G (requiring VFTable writes if others have them).
 % PAPER: ??? NEW!
-reasonNOTRealDestructor_G(Method) :-
-    % There's another method that calls this method on the same object pointer.
-    validMethodCallAtOffset(_, Caller, Method, 0),
-    % The caller is known to be a constructor or destructor.
-    (factConstructor(Caller); factRealDestructor(Caller)),
-    % The caller is already known to have a VFTable write.
-    factVFTableWrite(_Insn1, Caller, 0, _VFTable1),
-    % But this method doesn't have the required write.
-    not(possibleVFTableWrite(_Insn2, Method, _ThisPtr, 0, _VFTable2)),
-    % Since we don't have visibility into VFTable writes from imported constructors and
-    % destructors this rule does not apply to imported methods.
-    not(symbolClass(Method, _, _, _)),
-    % Debugging
-    logtraceln('~@~Q.', [not(factNOTRealDestructor(Method)),
-                         reasonNOTRealDestructor_G(Caller, Method)]).
+%% reasonNOTRealDestructor_G(Method) :-
+%%     % There's another method that calls this method on the same object pointer.
+%%     validMethodCallAtOffset(_, Caller, Method, 0),
+%%     % The caller is known to be a constructor or destructor.
+%%     (factConstructor(Caller); factRealDestructor(Caller)),
+%%     % The caller is already known to have a VFTable write.
+%%     factVFTableWrite(_Insn1, Caller, 0, _VFTable1),
+%%     % But this method doesn't have the required write.
+%%     not(possibleVFTableWrite(_Insn2, Method, _ThisPtr, 0, _VFTable2)),
+%%     % Since we don't have visibility into VFTable writes from imported constructors and
+%%     % destructors this rule does not apply to imported methods.
+%%     not(symbolClass(Method, _, _, _)),
+%%     % Debugging
+%%     logtraceln('~@~Q.', [not(factNOTRealDestructor(Method)),
+%%                          reasonNOTRealDestructor_G(Caller, Method)]).
 
 % Real destructors cannot delete themselves.  This rule should help distinguish between real
 % destructors and deleting destructors.
