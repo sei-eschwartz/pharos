@@ -1656,7 +1656,7 @@ reasonObjectInObject_E(OuterClass, InnerClass, Offset) :-
 % If M is known to not be in any vftables, then it isn't virtual, and can't have a thisptr
 % adjustment.
 thisPtrAdjustment(M, 0) :-
-    factMethod(M),
+    %factMethod(M),
     % For every possible VFTable entry that thunks to M
     forall((possibleVFTableEntry(Addr, Offset, Entry), dethunk(Entry, M)),
            % The entry has been disproved
