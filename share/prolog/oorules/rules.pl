@@ -430,7 +430,7 @@ reasonRealDestructorSet(Set) :-
 :- table reasonNOTRealDestructor_G/1 as incremental.
 :- table reasonNOTRealDestructor_H/1 as incremental.
 :- table reasonNOTRealDestructor_I/1 as incremental.
-:- table reasonNOTRealDestructor_J/1 as incremental.
+%:- table reasonNOTRealDestructor_J/1 as incremental.
 
 reasonNOTRealDestructor(Method) :-
     %logwarnln('Recomputing reasonNOTRealDestructor...'),
@@ -441,8 +441,8 @@ reasonNOTRealDestructor(Method) :-
         reasonNOTRealDestructor_F(Method),
         reasonNOTRealDestructor_G(Method),
         reasonNOTRealDestructor_H(Method),
-        reasonNOTRealDestructor_I(Method),
-        reasonNOTRealDestructor_J(Method)
+        reasonNOTRealDestructor_I(Method)
+        %reasonNOTRealDestructor_J(Method)
       ]).
 
 % Because it is a constructor.
@@ -580,14 +580,17 @@ reasonNOTRealDestructor_I(Method) :-
     logtraceln('~@~Q.', [not(factNOTRealDestructor(Method)),
                          reasonNOTRealDestructor_I(NumParams, Params, Method)]).
 
+% ejs 9/15/22: This rule was based on a misunderstanding of thisptr adjustments.  Virtual
+% destructors can have thisptr adjustments, making this rule just incorrect.
+
 % ejs 1/08/21: I believe that Offset can not be negative for a constructor or destructor
 % because it is not possible to override them.  Even though destructors can be virtual and
 % overridden in a sense, you can not override the destructor of a specific base clas
-reasonNOTRealDestructor_J(Method) :-
-    validMethodCallAtOffset(_Insn, Method, OtherMethod, NegativeOffset),
-    NegativeOffset < 0,
-    logtraceln('~@~Q.', [not(factNOTConstructor(Method)),
-                         reasonNOTRealDestructor_J(Method, OtherMethod, NegativeOffset)]).
+%% reasonNOTRealDestructor_J(Method) :-
+%%     methodCallAtOffset_preadjust(_Insn, Method, OtherMethod, NegativeOffset),
+%%     NegativeOffset < 0,
+%%     logtraceln('~@~Q.', [not(factNOTConstructor(Method)),
+%%                          reasonNOTRealDestructor_J(Method, OtherMethod, NegativeOffset)]).
 
 reasonNOTRealDestructorSet(Set) :-
     setof(Method, reasonNOTRealDestructor(Method), Set).
