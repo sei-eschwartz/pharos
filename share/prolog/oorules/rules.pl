@@ -370,7 +370,8 @@ reasonNOTConstructor_I(Method) :-
 % because it is not possible to override them.  Even though destructors can be virtual and
 % overridden in a sense, you can not override the destructor of a specific base clas
 reasonNOTConstructor_J(Method) :-
-    validMethodCallAtOffset(_Insn, Method, OtherMethod, NegativeOffset),
+    % ejs 9/14/22 This rule actually wants to know the offset BEFORE thisptr adjustments.
+    methodCallAtOffset_preadjust(_Insn, Method, OtherMethod, NegativeOffset),
     NegativeOffset < 0,
     logtraceln('~@~Q.', [not(factNOTConstructor(Method)),
                          reasonNOTConstructor_J(Method, OtherMethod, NegativeOffset)]).
