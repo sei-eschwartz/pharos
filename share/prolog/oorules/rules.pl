@@ -489,7 +489,7 @@ reasonNOTRealDestructor_E(Method) :-
 % that a method can't be a vbase destructor.  We should do something better.
 methodIsNotVBaseDestructor(M) :-
     find(M, Class),
-    factClassHasNoBase(M).
+    factClassHasNoBase(Class).
 
 % Because a method on a class cannot destruct itself (unless it's a deleting destructor or
 % vbase destructor).
