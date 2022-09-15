@@ -203,30 +203,30 @@ validMethodCallAtOffset(Insn, Caller, Callee, Offset) :-
 % Replaces the old-style fact named funcOffset.
 :- table methodCallAtOffset/4 as incremental.
 
-methodCallAtOffset(Insn, Caller, Callee, Offset) :-
+methodCallAtOffset_preadjust(Insn, Caller, Callee, Offset) :-
     funcParameter(Caller, ecx, CallerThisPtr),
     callParameter(Insn, Caller, ecx, CalleeThisPtr),
-    thisPtrOffset(CallerThisPtr, OrigOffset, CalleeThisPtr),
+    thisPtrOffset(CallerThisPtr, Offset, CalleeThisPtr),
     callTarget(Insn, Caller, Thunk),
     dethunk(Thunk, Callee),
-    thisPtrAdjustment(Caller, CallerAdjust),
-    thisPtrAdjustment(Callee, CalleeAdjust),
-    % Offset = (CalleeThisPtr + CalleeAdjust) - (CallerThisptr + CallerAdjust)
-    % = OrigOffset + (CalleeAdjust - CallerAdjust)
-    Offset is OrigOffset + (CalleeAdjust - CallerAdjust),
     %loginfoln('~Q.', methodCallAtOffset(Insn, Caller, Callee, Offset)),
     true.
 
-methodCallAtOffset(Insn, Caller, Callee, Offset) :-
+methodCallAtOffset_preadjust(Insn, Caller, Callee, 0) :-
     funcParameter(Caller, ecx, ThisPtr),
     callParameter(Insn, Caller, ecx, ThisPtr),
     callTarget(Insn, Caller, Thunk),
     dethunk(Thunk, Callee),
-    thisPtrAdjustment(Caller, CallerAdjust),
-    thisPtrAdjustment(Callee, CalleeAdjust),
-    Offset is CalleeAdjust - CallerAdjust,
     %loginfoln('~Q.', methodCallAtOffset(Insn, Caller, Callee, 0)),
     true.
+
+    % Offset = (CalleeThisPtr + CalleeAdjust) - (CallerThisptr + CallerAdjust)
+    % = OrigOffset + (CalleeAdjust - CallerAdjust)
+methodCallAtOffset(Insn, Caller, Callee, AdjustedOffset) :-
+    methodCallAtOffset_preadjust(Insn, Caller, Callee, OrigOffset),
+    thisPtrAdjustment(Caller, CallerAdjust),
+    thisPtrAdjustment(Callee, CalleeAdjust),
+    AdjustedOffset is OrigOffset + (CalleeAdjust - CallerAdjust).
 
 % Replaces an old-style fact of the same name.
 :- table thisPtrUsage/4 as opaque.
