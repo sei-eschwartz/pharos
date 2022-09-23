@@ -97,6 +97,10 @@
 % dyanmically asserted facts must be rewritten whenever a class identifier for a specific class
 % changes.  See fixupClasses() in this file for the details of the rewriting.
 
+% For model-based testing, it is helpful to define this as dynamic.  When testing MergeClasses
+% rules, we actually remove the classArgs entries for NOTMergeClasses because they are computed
+% automatically and don't need to be rewritten.
+:- dynamic classArgs/2.
 classArgs(factEmbeddedObject/3, 1).
 classArgs(factEmbeddedObject/3, 2).
 classArgs(factObjectInObject/3, 1).
