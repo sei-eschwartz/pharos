@@ -249,7 +249,7 @@ reasonConstructorSet(Set) :-
 :- table reasonNOTConstructor_D/1 as incremental.
 %:- table reasonNOTConstructor_E/1 as incremental.
 :- table reasonNOTConstructor_F/1 as incremental.
-%:- table reasonNOTConstructor_G/1 as incremental.
+:- table reasonNOTConstructor_G/1 as incremental.
 :- table reasonNOTConstructor_H/1 as incremental.
 :- table reasonNOTConstructor_I/1 as incremental.
 :- table reasonNOTConstructor_J/1 as incremental.
@@ -261,7 +261,7 @@ reasonNOTConstructor(Method) :-
         reasonNOTConstructor_D(Method),
         %reasonNOTConstructor_E(Method),
         reasonNOTConstructor_F(Method),
-        %reasonNOTConstructor_G(Method),
+        reasonNOTConstructor_G(Method),
         reasonNOTConstructor_H(Method),
         reasonNOTConstructor_I(Method),
         reasonNOTConstructor_J(Method)
@@ -427,7 +427,7 @@ reasonRealDestructorSet(Set) :-
 :- table reasonNOTRealDestructor_D/1 as incremental.
 :- table reasonNOTRealDestructor_E/1 as incremental.
 :- table reasonNOTRealDestructor_F/1 as incremental.
-:- table reasonNOTRealDestructor_G/1 as incremental.
+%:- table reasonNOTRealDestructor_G/1 as incremental.
 :- table reasonNOTRealDestructor_H/1 as incremental.
 :- table reasonNOTRealDestructor_I/1 as incremental.
 %:- table reasonNOTRealDestructor_J/1 as incremental.
@@ -439,7 +439,7 @@ reasonNOTRealDestructor(Method) :-
         reasonNOTRealDestructor_D(Method),
         reasonNOTRealDestructor_E(Method),
         reasonNOTRealDestructor_F(Method),
-        reasonNOTRealDestructor_G(Method),
+        %reasonNOTRealDestructor_G(Method),
         reasonNOTRealDestructor_H(Method),
         reasonNOTRealDestructor_I(Method)
         %reasonNOTRealDestructor_J(Method)
