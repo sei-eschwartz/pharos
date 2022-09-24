@@ -1658,13 +1658,19 @@ reasonObjectInObject_E(OuterClass, InnerClass, Offset) :-
                          reasonObjectInObject_E(OuterClass, InnerClass, Offset)]).
 
 % If M is known to not be in any vftables, then it isn't virtual, and can't have a thisptr
-% adjustment.
+% adjustment.  (Unless it is a deleting destructor.)
 thisPtrAdjustment(M, 0) :-
     %factMethod(M),
     % For every possible VFTable entry that thunks to M
     forall((possibleVFTableEntry(Addr, Offset, Entry), dethunk(Entry, M)),
            % The entry has been disproved
-           factNOTVFTableEntry(Addr, Offset, Entry)).
+           factNOTVFTableEntry(Addr, Offset, Entry)),
+
+    % ejs 9/23/22 Well, this is almost right.  Except that in MSVC, deleting destructors have
+    % the same thisptr adjustment as their real destructors.  And, of course, deleting
+    % destructors never appear in vftables, which breaks the above test.  So we'll add another
+    % clause that M can't be a deleting destructor.
+    factNOTDeletingDestructor(M).
 
 % XXX: Implement computation of thisptr adjustment if we know where a virtual function was
 % originally defined.  How do we know we have recovered the whole inheritance hierarchy?  RTTI?
