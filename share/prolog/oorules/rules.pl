@@ -1612,6 +1612,13 @@ reasonObjectInObject_E(OuterClass, InnerClass, Offset) :-
     logtraceln('~@~Q.', [not(factObjectInObject(OuterClass, InnerClass, Offset)),
                          reasonObjectInObject_E(OuterClass, InnerClass, Offset)]).
 
+thisPtrAdjustment(M, _) :-
+    var(M), !, throw(system_error(thisPtrAdjustment)).
+
+% Constructors don't have thisptr adjustments
+thisPtrAdjustment(M, 0) :-
+    factConstructor(M).
+
 % If M is known to not be in any vftables, then it isn't virtual, and can't have a thisptr
 % adjustment.  (Unless it is a deleting destructor.)
 thisPtrAdjustment(M, 0) :-
