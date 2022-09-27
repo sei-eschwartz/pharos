@@ -1628,14 +1628,21 @@ reasonObjectInObject_E(OuterClass, InnerClass, Offset) :-
     % We previously used a not(ReasonClassRelationship()) clause to prevent creating
     % ObjectInObject facts for child to grand-parent relationships, expecially in the
     % std::exception classes, but that has ordering problems because this rule triggers before
-    % we've assigned the constructors to the correct classes (a clas merge).  This stricter
+    % we've assigned the constructors to the correct classes (a class merge).  This stricter
     % requirement that there NOT be an existing ObjectInObject and the same offset is a better
     % solution.  Without this constraint, this rule instead becomes a stealth class merge
     % because of logic that occurs later saying that two objects at the same offset must be the
     % same class.  And there doesn't appear be any downside either since there's already an
     % ObjectInObject at the appropriate offset, and we can reach the right conclusions through
     % those later class merges.
-    not(factObjectInObject(OuterClass, _, Offset)),
+
+    % ejs 9/27/22 Previously, we checked the OuterClass for an object starting at Offset.  But
+    % this is insufficient because we really want to know if an INNER class starts at offset.
+    % For example, we could embed an object at offset 0, which in turn embeds an object at
+    % Offset, and the old check would not catch this.  So we instead use the newer
+    % reasonClassAtOffset facility.
+
+    not(reasonClassAtOffset(OuterClass, Offset, _SomeInnerClass)),
 
     factConstructor(InnerConstructor),
     iso_dif(InnerConstructor, OuterConstructor),
