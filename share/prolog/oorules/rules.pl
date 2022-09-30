@@ -3285,18 +3285,29 @@ reasonNOTMergeClasses_M(_,_,_,_,_) :- throw(system_error(reasonNOTMergeClasses_M
 % ED_PAPER_INTERESTING
 % Cory notes that this doesn't fire in the ooex test suite.   Is it implied by _N?
 reasonNOTMergeClasses_O(Class1Sorted, Class2Sorted) :-
-    % There's a class where we know the maximum size.
-    factClassSizeLTE(Class1, Size1),
-    % That calls a method (not really needed but avoids worthless conclusions?)
-    factClassCallsMethod(Class1, Method),
-    find(Method, Class2),
-    iso_dif(Class1, Class2),
+
+    % A method accesses a member
+    validMethodMemberAccess(_Insn, MemberMethod, MemberOffset, MemberSize),
+
+    find(MemberMethod, MemberClass),
+
+    % MemberClass is at least MinSize big
+    MinSize is MemberSize + MemberOffset,
+
+    % MemberClass calls a method on SmallClass. This is just to avoid making tons of facts
+    factClassCallsMethod(MemberClass, CalledMethod),
+    find(CalledMethod, CalledClass),
+    iso_dif(MemberClass, CalledClass),
+
+    % And we know thet max. size of CalledClass
+    factClassSizeLTE(CalledClass, CalledClassSize),
+
+    % CalledClass is too small to be the same class as MemberClass
+    MinSize > CalledClassSize,
+
     % Handle symmetry
-    sort_tuple((Class1, Class2), (Class1Sorted, Class2Sorted)),
-    % The method accesses a member too large for the class.
-    validMethodMemberAccess(_Insn, Method, MemberOffset, MemberSize),
-    Size2 is MemberSize + MemberOffset,
-    Size2 > Size1,
+    sort_tuple((MemberClass, CalledClass), (Class1Sorted, Class2Sorted)),
+
     % Debugging
     logtraceln('~@~Q.', [not(dynFactNOTMergeClasses(Class1Sorted, Class2Sorted)),
                          reasonNOTMergeClasses_O(Size1, Size2, Class1Sorted, Class2Sorted)]).
