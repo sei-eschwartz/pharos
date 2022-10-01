@@ -6,7 +6,7 @@
 :- use_module(library(lists), [append/3, nth1/4, list_to_set/2]).
 
 sort_tuple((A,B), (C,D)) :-
-    (A < B -> (C=A, D=B); (C=B, D=A)).
+    (A @< B -> (C=A, D=B); (C=B, D=A)).
 
 osetof(A, B, C) :-
     bagof(A, B, Cp),
