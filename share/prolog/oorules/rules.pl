@@ -33,11 +33,11 @@ reasonMethod(Method) :-
         reasonMethod_G(Method),
         reasonMethod_H(Method),
         reasonMethod_I(Method),
-        reasonMethod_J(Method),
-        reasonMethod_K(Method),
-        reasonMethod_L(Method),
-        reasonMethod_M(Method),
-        reasonMethod_N(Method)
+        reasonMethod_J(Method)
+        %reasonMethod_K(Method),
+        %reasonMethod_L(Method),
+        %reasonMethod_M(Method),
+        %reasonMethod_N(Method)
       %        reasonMethod_O(Method),
       %        reasonMethod_P(Method)
       ]).
@@ -94,77 +94,77 @@ reasonMethod_J(Method) :-
     factClassCallsMethod(_Class, Method).
 
 % Because the thisptr is known to be an object pointer.
-reasonMethod_K(Method) :-
-    thisPtrUsage(_Insn1, Func, ThisPtr, Method1),
-    factMethod(Method1),
-    thisPtrUsage(_Insn2, Func, ThisPtr, Method).
+%% reasonMethod_K(Method) :-
+%%     thisPtrUsage(_Insn1, Func, ThisPtr, Method1),
+%%     factMethod(Method1),
+%%     thisPtrUsage(_Insn2, Func, ThisPtr, Method).
 
 % Because the thisptr is known to be an object pointer.
-reasonMethod_L(Method) :-
-    factMethod(Caller),
-    % Intentionally NOT a validMethodCallAtOffset!
-    methodCallAtOffset(_Insn1, Caller, Method, 0),
-    % Require that the Method also read/use the value.
-    funcParameter(Method, ecx, _SymbolicValue),
-    logtraceln('~@~Q.', [not(factMethod(Method)), reasonMethod_L(Method)]).
+%% reasonMethod_L(Method) :-
+%%     factMethod(Caller),
+%%     % Intentionally NOT a validMethodCallAtOffset!
+%%     methodCallAtOffset(_Insn1, Caller, Method, 0),
+%%     % Require that the Method also read/use the value.
+%%     funcParameter(Method, ecx, _SymbolicValue),
+%%     logtraceln('~@~Q.', [not(factMethod(Method)), reasonMethod_L(Method)]).
 
-% Because direct data flow from new() makes the function a method.
-reasonMethod_M(Method) :-
-    thisPtrAllocation(_Insn1, Func, ThisPtr, Type, _Size),
-    % ejs 6/7/22: Originally the Type of allocation was unconstrained here, but
-    % we generally only output heap and global allocations.  As we start to
-    % output more stack allocations due to bug fixes, we should exclude them
-    % here.  The comment on this rule implies that it should only apply to new,
-    % but if we exclude global allocations, the test suite changes.  So for now
-    % I am including global allocations as well.
-    member(Type, [type_Heap, type_Global]),
-    thisPtrUsage(_Insn2, Func, ThisPtr, Method),
-    % Require that the Method also read/use the value.
-    funcParameter(Method, ecx, _SymbolicValue),
-    logtraceln('~@~Q.', [not(factMethod(Method)), reasonMethod_M(Method)]).
+%% % Because direct data flow from new() makes the function a method.
+%% reasonMethod_M(Method) :-
+%%     thisPtrAllocation(_Insn1, Func, ThisPtr, Type, _Size),
+%%     % ejs 6/7/22: Originally the Type of allocation was unconstrained here, but
+%%     % we generally only output heap and global allocations.  As we start to
+%%     % output more stack allocations due to bug fixes, we should exclude them
+%%     % here.  The comment on this rule implies that it should only apply to new,
+%%     % but if we exclude global allocations, the test suite changes.  So for now
+%%     % I am including global allocations as well.
+%%     member(Type, [type_Heap, type_Global]),
+%%     thisPtrUsage(_Insn2, Func, ThisPtr, Method),
+%%     % Require that the Method also read/use the value.
+%%     funcParameter(Method, ecx, _SymbolicValue),
+%%     logtraceln('~@~Q.', [not(factMethod(Method)), reasonMethod_M(Method)]).
 
-% Because the thisptr is known to be an object pointer.
-reasonMethod_N(Func) :-
-    thisPtrUsage(_Insn1, Func, ThisPtr, Method),
-    factMethod(Method),
-    % This rule needs to permit invalid calling conventions for many correct results in Lite
-    % oo, poly, and ooex7 test cases.
-    (callingConvention(Func, '__thiscall'); callingConvention(Func, 'invalid')),
-    funcParameter(Func, ecx, ThisPtr),
-    logtraceln('~@~Q.', [not(factMethod(Method)), reasonMethod_N(Func)]).
+%% % Because the thisptr is known to be an object pointer.
+%% reasonMethod_N(Func) :-
+%%     thisPtrUsage(_Insn1, Func, ThisPtr, Method),
+%%     factMethod(Method),
+%%     % This rule needs to permit invalid calling conventions for many correct results in Lite
+%%     % oo, poly, and ooex7 test cases.
+%%     (callingConvention(Func, '__thiscall'); callingConvention(Func, 'invalid')),
+%%     funcParameter(Func, ecx, ThisPtr),
+%%     logtraceln('~@~Q.', [not(factMethod(Method)), reasonMethod_N(Func)]).
 
 % Because a known OO __thiscall method passes the this-pointer as parameter zero to a cdecl
 % method, making the method in question a __cdecl OO method.  This happens sometimes when the
 % method uses the varargs calling convention for example.
-reasonMethod_O(Method) :-
-    % There's a method that we know is an OO method.
-    factMethod(Proven),
-    % We already know that Proven is a this call method...
-    callingConvention(Proven, '__thiscall'),
-    funcParameter(Proven, ecx, ThisPtr),
-    % The ThisPtr is passed to another method in a call
-    callParameter(Insn, Proven, 0, ThisPtr),
-    % That Method is us.
-    callTarget(Insn, Proven, Target),
-    dethunk(Target, Method),
-    % And we're __cdecl.
-    callingConvention(Method, '__cdecl'),
-    logtraceln('~@~Q.', [not(factMethod(Method)), reasonMethod_O(Method)]).
+%% reasonMethod_O(Method) :-
+%%     % There's a method that we know is an OO method.
+%%     factMethod(Proven),
+%%     % We already know that Proven is a this call method...
+%%     callingConvention(Proven, '__thiscall'),
+%%     funcParameter(Proven, ecx, ThisPtr),
+%%     % The ThisPtr is passed to another method in a call
+%%     callParameter(Insn, Proven, 0, ThisPtr),
+%%     % That Method is us.
+%%     callTarget(Insn, Proven, Target),
+%%     dethunk(Target, Method),
+%%     % And we're __cdecl.
+%%     callingConvention(Method, '__cdecl'),
+%%     logtraceln('~@~Q.', [not(factMethod(Method)), reasonMethod_O(Method)]).
 
-% Because the same this-pointer is passed from a known __cdecl OO method to another __cdecl
-% method (as the first parameter) in the same function.
-reasonMethod_P(Method) :-
-    % A ThisPtr is passed to a known method.
-    callParameter(Insn1, Func, 0, ThisPtr),
-    callTarget(Insn1, Func, Target1),
-    dethunk(Target1, Proven),
-    factMethod(Proven),
-    % Then the same this-pointer is passed to another method.
-    callParameter(Insn2, Func, 0, ThisPtr),
-    callTarget(Insn2, Func, Target2),
-    dethunk(Target2, Method),
-    callingConvention(Method, '__cdecl'),
-    logtraceln('~@~Q.', [not(factMethod(Method)), reasonMethod_P(Method)]).
+%% % Because the same this-pointer is passed from a known __cdecl OO method to another __cdecl
+%% % method (as the first parameter) in the same function.
+%% reasonMethod_P(Method) :-
+%%     % A ThisPtr is passed to a known method.
+%%     callParameter(Insn1, Func, 0, ThisPtr),
+%%     callTarget(Insn1, Func, Target1),
+%%     dethunk(Target1, Proven),
+%%     factMethod(Proven),
+%%     % Then the same this-pointer is passed to another method.
+%%     callParameter(Insn2, Func, 0, ThisPtr),
+%%     callTarget(Insn2, Func, Target2),
+%%     dethunk(Target2, Method),
+%%     callingConvention(Method, '__cdecl'),
+%%     logtraceln('~@~Q.', [not(factMethod(Method)), reasonMethod_P(Method)]).
 
 %reasonMethod_Q(Method) :-
 % Does this rule remove the need for dethunk in other reasonMethod.
