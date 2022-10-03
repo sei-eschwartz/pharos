@@ -366,6 +366,74 @@ tryDerivedClass(DerivedClass, BaseClass, Offset) :-
 % Try guessing that an address is really method.
 % --------------------------------------------------------------------------------------------
 
+% K, L, M, N
+
+guessMethodK(Method) :-
+    thisPtrUsage(_Insn1, Func, ThisPtr, Method1),
+    factMethod(Method1),
+    thisPtrUsage(_Insn2, Func, ThisPtr, Method).
+
+guessMethod(Out) :-
+    reportFirstSeen('guessMethod'),
+    osetof(Method,
+           guessMethodK(Method),
+           MethodSet),
+    logtraceln('Proposing ~Q.', factMethod_K(MethodSet)),
+    Out = tryBinarySearch(tryMethod, tryNOTMethod, MethodSet).
+
+% Because the thisptr is known to be an object pointer.
+guessMethodL(Method) :-
+    factMethod(Caller),
+    % Intentionally NOT a validMethodCallAtOffset!
+    methodCallAtOffset(_Insn1, Caller, Method, 0),
+    % Require that the Method also read/use the value.
+    funcParameter(Method, ecx, _SymbolicValue).
+
+guessMethod(Out) :-
+    osetof(Method,
+           guessMethodL(Method),
+           MethodSet),
+    logtraceln('Proposing ~Q.', factMethod_L(MethodSet)),
+    Out = tryBinarySearch(tryMethod, tryNOTMethod, MethodSet).
+
+% Because direct data flow from new() makes the function a method.
+guessMethodM(Method) :-
+    thisPtrAllocation(_Insn1, Func, ThisPtr, Type, _Size),
+    % ejs 6/7/22: Originally the Type of allocation was unconstrained here, but
+    % we generally only output heap and global allocations.  As we start to
+    % output more stack allocations due to bug fixes, we should exclude them
+    % here.  The comment on this rule implies that it should only apply to new,
+    % but if we exclude global allocations, the test suite changes.  So for now
+    % I am including global allocations as well.
+    member(Type, [type_Heap, type_Global]),
+    thisPtrUsage(_Insn2, Func, ThisPtr, Method),
+    % Require that the Method also read/use the value.
+    funcParameter(Method, ecx, _SymbolicValue).
+
+guessMethod(Out) :-
+    osetof(Method,
+           guessMethodM(Method),
+           MethodSet),
+    logtraceln('Proposing ~Q.', factMethod_M(MethodSet)),
+    Out = tryBinarySearch(tryMethod, tryNOTMethod, MethodSet).
+
+% Because the thisptr is known to be an object pointer.
+guessMethodN(Func) :-
+    thisPtrUsage(_Insn1, Func, ThisPtr, Method),
+    factMethod(Method),
+    % This rule needs to permit invalid calling conventions for many correct results in Lite
+    % oo, poly, and ooex7 test cases.
+    (callingConvention(Func, '__thiscall'); callingConvention(Func, 'invalid')),
+    funcParameter(Func, ecx, ThisPtr).
+
+guessMethod(Out) :-
+    osetof(Method,
+           guessMethodN(Method),
+           MethodSet),
+    logtraceln('Proposing ~Q.', factMethod_N(MethodSet)),
+    Out = tryBinarySearch(tryMethod, tryNOTMethod, MethodSet).
+
+
 % This guess was: callingConvention(Method, '__thiscall'), methodMemberAccess(_I, M, O, _S)...
 %
 % But changing it to require validMethodMemberAccess is complete nonense, because we're now
@@ -390,7 +458,6 @@ guessMethodA(Method) :-
     Offset < 100.
 
 guessMethod(Out) :-
-    reportFirstSeen('guessMethod'),
     osetof(Method,
            guessMethodA(Method),
            MethodSet),
