@@ -322,7 +322,7 @@ reasonNOTConstructor_G(Method) :-
     % that an empty base class AND the class owning the vftable are at offset 0 which makes
     % this rule incorrectly decide that the empty base class' constructor is not a constructor.
     find(Method, Class),
-    factClassSizeGTE(Class, S), S >= 1,
+    notEmptyClass(Class),
     % The caller is known to be a constructor or destructor.
     (factConstructor(Caller); factRealDestructor(Caller)),
     % The caller is already known to have a VFTable write.
