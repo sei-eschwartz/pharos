@@ -998,6 +998,9 @@ reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
     % arbitrary method that installs it.
     not(factVFTableOverwrite(Method, VFTable, _OverwriteVFTable, Offset)),
 
+    % VFTableBelongs attempt 1: The VFTable is not at the start of a directly embedded object
+    not(factEmbeddedObject(Class, _Embed, Offset)),
+
     % Constructors may inline embedded constructors.  If non-offset
     % zero, we must make sure that there is an inherited class at this
     % offset.
@@ -1068,6 +1071,9 @@ reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
     % be trivially true, and without this clause, the vftable will simply belong to an
     % arbitrary method that installs it.
     not(factVFTableOverwrite(Method, VFTable, _OverwriteVFTable, Offset)),
+
+    % VFTableBelongs attempt 1: The VFTable is not at the start of a directly embedded object
+    not(factEmbeddedObject(Class, _Embed, Offset)),
 
     % Constructors may inline embedded constructors.  If non-offset
     % zero, we must make sure that there is an inherited class at this
