@@ -1073,7 +1073,11 @@ reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
     not(factVFTableOverwrite(Method, VFTable, _OverwriteVFTable, Offset)),
 
     % VFTableBelongs attempt 1: The VFTable is not at the start of a directly embedded object
-    not(factEmbeddedObject(Class, _Embed, Offset)),
+    %not(factEmbeddedObject(Class, _Embed, Offset)),
+
+    % VFTableBelongs attempt 2: The VFTable is not at the start of an indirectly embedded object
+    forall(reasonClassAtOffset(Class, Offset, _InnerClass, L),
+           sequenceAreAllDerived(L)),
 
     % Constructors may inline embedded constructors.  If non-offset
     % zero, we must make sure that there is an inherited class at this
