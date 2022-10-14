@@ -998,8 +998,9 @@ reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
     % arbitrary method that installs it.
     not(factVFTableOverwrite(Method, VFTable, _OverwriteVFTable, Offset)),
 
-    % VFTableBelongs attempt 1: The VFTable is not at the start of a directly embedded object
-    not(factEmbeddedObject(Class, _Embed, Offset)),
+    % VFTableBelongs attempt 2: The VFTable is not at the start of an indirectly embedded object
+    forall(reasonClassAtOffset(Class, Offset, _InnerClass, L),
+           sequenceAreAllDerived(L)),
 
     % VFTables from a base class can be reused in a derived class.  If this happens, we know
     % that the VFTable does not belong to the derived class.
@@ -1067,8 +1068,9 @@ reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
     % arbitrary method that installs it.
     not(factVFTableOverwrite(Method, VFTable, _OverwriteVFTable, Offset)),
 
-    % VFTableBelongs attempt 1: The VFTable is not at the start of a directly embedded object
-    not(factEmbeddedObject(Class, _Embed, Offset)),
+    % VFTableBelongs attempt 2: The VFTable is not at the start of an indirectly embedded object
+    forall(reasonClassAtOffset(Class, Offset, _InnerClass, L),
+           sequenceAreAllDerived(L)),
 
     % VFTables from a base class can be reused in a derived class.  If this happens, we know
     % that the VFTable does not belong to the derived class.
