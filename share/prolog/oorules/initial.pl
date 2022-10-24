@@ -15,6 +15,29 @@ possibleVFTableWrite(Insn, Function, ThisPtr, Offset, VFTable) :-
 possibleVBTableWrite(Insn, Function, ThisPtr, Offset, VBTable) :-
   possibleVBTableWrite(Insn, Function, ThisPtr, Offset, _ExpandedThisPtr, VBTable).
 
+% --------------------------------------------------------------------------------------------
+% Condition analysis
+
+:- table unconditional/1 as opaque.
+
+% No predecessors
+unconditional([]).
+
+% Predecessor but with true
+unconditional([Condition|_]) :-
+    thisPtrDefinition(Condition, 1, _, _).
+
+% Recurse
+unconditional([_|ConditionList]) :-
+  unconditional(ConditionList).
+
+% This can eventually compare the condition to the function's arguments, but for
+% now we'll just see if there is a condition.
+initVBasesCondition(Function, ConditionList) :-
+  not(unconditional(ConditionList)).
+
+% --------------------------------------------------------------------------------------------
+
 :- table possibleConstructor/1 as opaque.
 
 possibleConstructor(M) :-
