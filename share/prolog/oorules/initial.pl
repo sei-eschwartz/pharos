@@ -23,6 +23,36 @@ possibleVBTableWrite(Insn, Function, ThisPtr, Offset, VBTable) :-
 % If we use factDerivedClass/3, we don't care about whether it's virtual or not.
 factDerivedClass(A,B,C) :- factDerivedClass(A,B,C,_).
 
+% --------------------------------------------------------------------------------------------
+% Condition analysis
+
+:- table unconditional/1 as opaque.
+
+unconditional_single(Condition) :-
+    thisPtrDefinition(Condition, 1, _, _).
+
+% Predecessor but with true
+unconditional_list([Condition|_]) :-
+    unconditional_single(Condition).
+
+% Recurse
+unconditional_list([_|ConditionList]) :-
+  unconditional_list(ConditionList).
+
+% No predecessors
+unconditional([]).
+
+% There is an unconditional (true) condition
+unconditional(L) :- unconditional_list(L).
+
+
+% This can eventually compare the condition to the function's arguments, but for
+% now we'll just see if there is a condition.
+initVBasesCondition(Function, ConditionList) :-
+  not(unconditional(ConditionList)).
+
+% --------------------------------------------------------------------------------------------
+
 :- table possibleConstructor/1 as opaque.
 
 possibleConstructor(M) :-
