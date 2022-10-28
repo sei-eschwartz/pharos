@@ -33,7 +33,7 @@ reasonMethod(Method) :-
         reasonMethod_G(Method),
         reasonMethod_H(Method),
         reasonMethod_I(Method),
-        reasonMethod_J(Method),
+        reasonMethod_J(Method)
         %reasonMethod_K(Method),
         %reasonMethod_L(Method),
         %reasonMethod_M(Method),
