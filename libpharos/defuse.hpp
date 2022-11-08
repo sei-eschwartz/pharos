@@ -253,7 +253,6 @@ class DUAnalysis {
   // void add_edge_conditions();
   LimitCode loop_over_cfg();
   bool process_block_with_limit(CFGVertex vertex);
-  SymbolicStatePtr merge_predecessors(CFGVertex vertex);
   SymbolicStatePtr merge_predecessors_with_conditions(CFGVertex vertex);
   bool check_for_eax_read(SgAsmX86Instruction* call_insn);
   LimitCode evaluate_bblock(SgAsmBlock* bblock);
