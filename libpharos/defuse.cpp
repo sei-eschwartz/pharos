@@ -1785,7 +1785,7 @@ DUAnalysis::debug_state_replaced(UNUSED const rose_addr_t baddr) const
 
 SymbolicValuePtr
 DUAnalysis::get_address_condition(const BlockAnalysis& pred_analysis,
-                                  SgAsmBlock* pblock, const rose_addr_t bb_addr)
+                                  SgAsmBlock* pblock, const rose_addr_t bb_addr) const
 {
   using namespace Rose::BinaryAnalysis;
   static auto nullnode = TreeNodePtr();
