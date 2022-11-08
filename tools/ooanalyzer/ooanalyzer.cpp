@@ -86,6 +86,7 @@ static int ooanalyzer_main(int argc, char **argv)
   ProgOptDesc digod = digger_options();
   ProgOptDesc csod = cert_standard_options();
   digod.add(csod);
+
   ProgOptVarMap vm = parse_cert_options(argc, argv, digod);
 
   OINFO << "OOAnalyzer version " << VERSION << "." << LEND;
