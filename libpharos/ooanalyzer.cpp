@@ -632,10 +632,22 @@ void OOAnalyzer::find_vtable_installations(FunctionDescriptor const & fd) {
 
         // Is this address a virtual base table (or a virtual function table)?
         bool base_table = (vbtables.find(taddr) != vbtables.end());
+        TreeNodePtr entry_condition;
+
+        // Record the entry condition
+        const auto block = fd.ds.get_block(insn->get_address());
+        if (block) {
+          const auto block_addr = block->address();
+          const auto block_analysis = p->get_usedef().get_block_analysis();
+          if (block_analysis.count(block_addr)) {
+            const auto block_data = block_analysis.at(block_addr);
+            entry_condition = block_data.entry_condition->get_expression();
+          }
+        }
 
         // It look like we're going to have a valid virtual table.
         VirtualTableInstallationPtr install = std::make_shared<VirtualTableInstallation>(
-          insn, &fd, taddr, vp, offset, tn_expanded, base_table);
+          insn, &fd, taddr, vp, offset, tn_expanded, entry_condition, base_table);
         //VirtualTableInstallation* install = NULL;
         //install = new VirtualTableInstallation(insn, taddr, vp, offset);
 
