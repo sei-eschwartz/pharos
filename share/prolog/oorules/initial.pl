@@ -12,11 +12,11 @@ notEmptyClass(Class) :-
 :- table possibleVFTableWrite/5 as opaque.
 :- table possibleVBTableWrite/5 as opaque.
 
-% For now, ignore the ExpandedThisPtr argument.
+% For now, ignore the ExpandedThisPtr and Condition argument.
 possibleVFTableWrite(Insn, Function, ThisPtr, Offset, VFTable) :-
-  possibleVFTableWrite(Insn, Function, ThisPtr, Offset, _ExpandedThisPtr, VFTable).
+  possibleVFTableWrite(Insn, Function, ThisPtr, Offset, _ExpandedThisPtr, _Condition, VFTable).
 possibleVBTableWrite(Insn, Function, ThisPtr, Offset, VBTable) :-
-  possibleVBTableWrite(Insn, Function, ThisPtr, Offset, _ExpandedThisPtr, VBTable).
+  possibleVBTableWrite(Insn, Function, ThisPtr, Offset, _ExpandedThisPtr, _Condition, VBTable).
 
 % --------------------------------------------------------------------------------------------
 % Condition analysis
