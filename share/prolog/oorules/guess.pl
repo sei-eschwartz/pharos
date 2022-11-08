@@ -371,7 +371,9 @@ tryDerivedClass(DerivedClass, BaseClass, Offset) :-
 guessMethodK(Method) :-
     thisPtrUsage(_Insn1, Func, ThisPtr, Method1),
     factMethod(Method1),
-    thisPtrUsage(_Insn2, Func, ThisPtr, Method).
+    thisPtrUsage(_Insn2, Func, ThisPtr, Method),
+    doNotGuessHelper(factMethod(Method),
+                     factNOTMethod(Method)).
 
 guessMethod(Out) :-
     reportFirstSeen('guessMethod'),
@@ -387,7 +389,9 @@ guessMethodL(Method) :-
     % Intentionally NOT a validMethodCallAtOffset!
     methodCallAtOffset(_Insn1, Caller, Method, 0),
     % Require that the Method also read/use the value.
-    funcParameter(Method, ecx, _SymbolicValue).
+    funcParameter(Method, ecx, _SymbolicValue),
+    doNotGuessHelper(factMethod(Method),
+                     factNOTMethod(Method)).
 
 guessMethod(Out) :-
     osetof(Method,
@@ -408,7 +412,9 @@ guessMethodM(Method) :-
     member(Type, [type_Heap, type_Global]),
     thisPtrUsage(_Insn2, Func, ThisPtr, Method),
     % Require that the Method also read/use the value.
-    funcParameter(Method, ecx, _SymbolicValue).
+    funcParameter(Method, ecx, _SymbolicValue),
+    doNotGuessHelper(factMethod(Method),
+                     factNOTMethod(Method)).
 
 guessMethod(Out) :-
     osetof(Method,
@@ -420,6 +426,8 @@ guessMethod(Out) :-
 % Because the thisptr is known to be an object pointer.
 guessMethodN(Func) :-
     thisPtrUsage(_Insn1, Func, ThisPtr, Method),
+    doNotGuessHelper(factMethod(Method),
+                    factNOTMethod(Method)),
     factMethod(Method),
     % This rule needs to permit invalid calling conventions for many correct results in Lite
     % oo, poly, and ooex7 test cases.
