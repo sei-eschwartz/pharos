@@ -138,23 +138,25 @@ initialFact(methodMemberAccess/4).
 %
 initialFact(possibleVirtualFunctionCall/5).
 
-% possibleVFTableWrite(Insn, Function, ThisPtr, Offset, ExpandedThisPtr, VFTable).
+% possibleVFTableWrite(Insn, Function, ThisPtr, Offset, ExpandedThisPtr, Condition, VFTable).
 %
 % Instruction Insn in Function writes a possible virtual function table pointer (VFTable) at
 % Offset into the object represented by ThisPtr for the Method.
 %
-% The ExpandedThisPtr is a thisptr hash that has a corresponding thisPtrDefinition fact.
+% The ExpandedThisPtr is a symbolic expression hash that has a corresponding thisPtrDefinition fact.
 %
-initialFact(possibleVFTableWrite/6).
+% Condition is a symbolic expression hash that has a corresponding thisPtrDefinition fact.
+initialFact(possibleVFTableWrite/7).
 
-% possibleVBTableWrite(Insn, Function, ThisPtr, Offset, ExpandedThisPtr, VBTable).
+% possibleVBTableWrite(Insn, Function, ThisPtr, Offset, ExpandedThisPtr, Condition, VBTable).
 %
 % Instruction Insn in Function writes a possible virtual base table pointer (VBTable) at Offset
 % into the object represent by ThisPtr for the Method.
 %
-% The ExpandedThisPtr is a thisptr hash that has a corresponding thisPtrDefinition fact.
+% The ExpandedThisPtr is a symbolic expression hash that has a corresponding thisPtrDefinition fact.
 %
-initialFact(possibleVBTableWrite/6).
+% Condition is a symbolic expression hash that has a corresponding thisPtrDefinition fact.
+initialFact(possibleVBTableWrite/7).
 
 % initialMemory(Address, Value).
 %
