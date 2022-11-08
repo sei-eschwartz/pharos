@@ -475,7 +475,7 @@ reasonNOTRealDestructor_E(Method) :-
     % ejs 8/17/22 Because vbase destructors can be identical to real destructors, we treat them
     % both as real destructors.  This rule should thus only apply when there are virtual bases,
     % since that means vbase destructors are possible.
-    not(factDerivedClass(Class, _, _, true)),
+    classHasNoVBase(Class),
 
     % Therefore every other method on the class is NOT a real destructor
     findMethod(Method, Class),
@@ -487,9 +487,15 @@ reasonNOTRealDestructor_E(Method) :-
 
 % ejs 9/13/22 See note in NOTRealDestructor_F.  This is a very bad stop-gap for determining
 % that a method can't be a vbase destructor.  We should do something better.
+classHasNoVBase(Class) :-
+    factClassHasNoBase(Class).
+
+classHasNoVBase(Class) :-
+    not(factDerivedClass(Class, _, _, true)).
+
 methodIsNotVBaseDestructor(M) :-
     find(M, Class),
-    factClassHasNoBase(Class).
+    classHasNoVBase(Class).
 
 % Because a method on a class cannot destruct itself (unless it's a deleting destructor or
 % vbase destructor).
