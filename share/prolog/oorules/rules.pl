@@ -1085,7 +1085,8 @@ reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
          % using the vbtable.  Thus right now we can't detect the overwrite.  This constraint
          % detects whether the vftable write we are looking at is in the initVBases=1 branch
          % and if so excludes it.
-         not(possibleVFTableWrite(Insn, Method, _Ptr, Offset, 1, VFTable)),
+         not(((possibleVFTableWrite(Insn, Method, _, Offset, _, Condition, VFTable)),
+              initVBasesCondition(Method, Condition))),
 
          factConstructor(Method),
          Rule=constructor);
@@ -1164,7 +1165,8 @@ reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
          % using the vbtable.  Thus right now we can't detect the overwrite.  This constraint
          % detects whether the vftable write we are looking at is in the initVBases=1 branch
          % and if so excludes it.
-         not(possibleVFTableWrite(Insn, Method, _Ptr, Offset, 1, VFTable)),
+         not(((possibleVFTableWrite(Insn, Method, _, Offset, _, Condition, VFTable)),
+              initVBasesCondition(Method, Condition))),
 
          factConstructor(Method),
          Rule=constructor);
