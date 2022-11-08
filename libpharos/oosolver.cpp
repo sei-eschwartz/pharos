@@ -321,9 +321,19 @@ OOSolver::add_vftable_facts(const OOAnalyzer& ooa)
     if (vti->base_table) fact_name = "possibleVBTableWrite";
 
     // Only export VTableWrites with non-negative offsets to reduce false positives?
+    // ejs: We should really export them all.  Negative offsets can legitimately happen.
     if (vti->offset >= 0) {
+
+      std::vector<std::string> entry_condition_hashes;
+
+      for (const auto &cond : vti->entry_conditions) {
+        const auto entry_condition_term = "sv_" + std::to_string(cond->hash());
+        entry_condition_hashes.push_back(entry_condition_term);
+        expanded_thisptrs.insert(ExpandedTreeNodePtr{cond, vti->insn->get_address(), vti->fd->get_address()});
+      }
+
       session->add_fact(fact_name, vti->insn->get_address(), vti->fd->get_address(),
-                        thisptr_term, vti->offset, expanded_thisptr_term, vti->table_address);
+                        thisptr_term, vti->offset, expanded_thisptr_term, entry_condition_hashes, vti->table_address);
 
       // Add the ptr so we make a thisPtrDefinition
       expanded_thisptrs.insert(ExpandedTreeNodePtr{vti->expanded_ptr, vti->insn->get_address(), vti->fd->get_address()});
@@ -850,8 +860,8 @@ OOSolver::dump_facts_private()
   exported += session->print_predicate(facts_file, "insnCallsNew", 3);
   exported += session->print_predicate(facts_file, "purecall", 1);
   exported += session->print_predicate(facts_file, "methodMemberAccess", 4);
-  exported += session->print_predicate(facts_file, "possibleVFTableWrite", 6);
-  exported += session->print_predicate(facts_file, "possibleVBTableWrite", 6);
+  exported += session->print_predicate(facts_file, "possibleVFTableWrite", 7);
+  exported += session->print_predicate(facts_file, "possibleVBTableWrite", 7);
   exported += session->print_predicate(facts_file, "initialMemory", 2);
   exported += session->print_predicate(facts_file, "rTTICompleteObjectLocator", 6);
   exported += session->print_predicate(facts_file, "rTTITypeDescriptor", 4);
