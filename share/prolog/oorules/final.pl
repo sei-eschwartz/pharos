@@ -248,7 +248,11 @@ finalEmbeddedObject(OuterClass, Offset, EmbeddedClass, likely) :-
 % a virtual function table, the VFTable field will contain the derived class instance of that
 % virtual function table.
 finalInheritance(DerivedClassID, BaseClassID, ObjectOffset, VFTableOrNull, false) :-
-    factDerivedClass(DerivedClass, BaseClass, ObjectOffset),
+    factDerivedClass(DerivedClass, BaseClass, ObjectOffset, Type),
+
+    % This is a work-around for having multiple types of inheritance at once
+    % (e.g., unknown and nonvirtual)
+    not((factDerivedClass(DerivedClass, BaseClass, ObjectOffset, OtherType), OtherType @> Type)),
 
     % The following line stops us from reporting inheritances from A to C if there is also a
     % relation from A to B and B to C.  We have this because virtual inheritance is known to
