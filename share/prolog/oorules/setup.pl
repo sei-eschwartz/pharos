@@ -72,7 +72,8 @@
 :- dynamic factNOTVBTableEntry/3 as incremental.
 
 :- dynamic factObjectInObject/3 as incremental.
-:- dynamic factDerivedClass/3 as incremental.
+
+:- dynamic factDerivedClass/4 as incremental.
 :- dynamic factNOTDerivedClass/3 as incremental.
 :- dynamic factEmbeddedObject/3 as incremental.
 :- dynamic factNOTEmbeddedObject/3 as incremental.
@@ -104,8 +105,8 @@ classArgs(factEmbeddedObject/3, 1).
 classArgs(factEmbeddedObject/3, 2).
 classArgs(factObjectInObject/3, 1).
 classArgs(factObjectInObject/3, 2).
-classArgs(factDerivedClass/3, 1).
-classArgs(factDerivedClass/3, 2).
+classArgs(factDerivedClass/4, 1).
+classArgs(factDerivedClass/4, 2).
 classArgs(factNOTDerivedClass/3, 1).
 classArgs(factNOTDerivedClass/3, 2).
 classArgs(factClassHasNoBase/1, 1).

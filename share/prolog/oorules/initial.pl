@@ -20,6 +20,9 @@ possibleVFTableWrite(Insn, Function, ThisPtr, Offset, VFTable) :-
 possibleVBTableWrite(Insn, Function, ThisPtr, Offset, VBTable) :-
   possibleVBTableWrite(Insn, Function, ThisPtr, Offset, _ExpandedThisPtr, _Condition, VBTable).
 
+% If we use factDerivedClass/3, we don't care about whether it's virtual or not.
+factDerivedClass(A,B,C) :- factDerivedClass(A,B,C,_).
+
 :- table possibleConstructor/1 as opaque.
 
 possibleConstructor(M) :-

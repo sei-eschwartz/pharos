@@ -1659,29 +1659,29 @@ reasonNOTEmbeddedObject(Class, EmbeddedClass, Offset) :-
 
 % --------------------------------------------------------------------------------------------
 % Derived class is certain to derived from the base class at the specified offset.
-:- table reasonDerivedClass/3 as incremental.
+:- table reasonDerivedClass/4 as incremental.
 
-:- table reasonDerivedClass_A/3 as incremental.
-:- table reasonDerivedClass_B/3 as incremental.
-:- table reasonDerivedClass_C/3 as incremental.
-:- table reasonDerivedClass_D/3 as incremental.
-:- table reasonDerivedClass_E/3 as incremental.
-:- table reasonDerivedClass_F/3 as incremental.
+:- table reasonDerivedClass_A/4 as incremental.
+:- table reasonDerivedClass_B/4 as incremental.
+:- table reasonDerivedClass_C/4 as incremental.
+:- table reasonDerivedClass_D/4 as incremental.
+:- table reasonDerivedClass_E/4 as incremental.
+:- table reasonDerivedClass_F/4 as incremental.
 
-reasonDerivedClass(DerivedClass, BaseClass, ObjectOffset) :-
+reasonDerivedClass(DerivedClass, BaseClass, ObjectOffset, Type) :-
     %logwarnln('Recomputing reasonDerivedClass...'),
-    or([reasonDerivedClass_A(DerivedClass, BaseClass, ObjectOffset),
-        reasonDerivedClass_B(DerivedClass, BaseClass, ObjectOffset),
-        reasonDerivedClass_C(DerivedClass, BaseClass, ObjectOffset),
-        reasonDerivedClass_D(DerivedClass, BaseClass, ObjectOffset),
-        reasonDerivedClass_E(DerivedClass, BaseClass, ObjectOffset),
-        reasonDerivedClass_F(DerivedClass, BaseClass, ObjectOffset)
+    or([reasonDerivedClass_A(DerivedClass, BaseClass, ObjectOffset, Type),
+        reasonDerivedClass_B(DerivedClass, BaseClass, ObjectOffset, Type),
+        reasonDerivedClass_C(DerivedClass, BaseClass, ObjectOffset, Type),
+        reasonDerivedClass_D(DerivedClass, BaseClass, ObjectOffset, Type),
+        reasonDerivedClass_E(DerivedClass, BaseClass, ObjectOffset, Type),
+        reasonDerivedClass_F(DerivedClass, BaseClass, ObjectOffset, Type)
       ]).
 
 % Because it is already known to be true.
 % PAPER: NA
-reasonDerivedClass_A(DerivedClass, BaseClass, ObjectOffset) :-
-    factDerivedClass(DerivedClass, BaseClass, ObjectOffset).
+reasonDerivedClass_A(DerivedClass, BaseClass, ObjectOffset, Type) :-
+    factDerivedClass(DerivedClass, BaseClass, ObjectOffset, Type).
 
 % Because the derived class constructor calls the base class constructor, and both constructors
 % install VFTables into the same location.  The VFTable overwrite contraint is required because
@@ -1691,7 +1691,7 @@ reasonDerivedClass_A(DerivedClass, BaseClass, ObjectOffset) :-
 
 % PAPER: Relate-3
 % ED_PAPER_INTERESTING
-reasonDerivedClass_B(DerivedClass, BaseClass, ObjectOffset) :-
+reasonDerivedClass_B(DerivedClass, BaseClass, ObjectOffset, unknown) :-
 
     % ejs 10/9/20 In ooex_2010/Lite/ooex7.exe and possibly others, we are seeing RTTI tell us
     % that std::length_error inherits from std::logic_error.  But we see that std::length_error
@@ -1811,7 +1811,7 @@ reasonDerivedClass_B(DerivedClass, BaseClass, ObjectOffset) :-
 % invisible derived class relationship in between the derived class and the base class.  This
 % was observed by David in ooex10 and ooex11 test cases.
 % PAPER: Logic
-reasonDerivedClass_C(DerivedClass, BaseClass, Offset) :-
+reasonDerivedClass_C(DerivedClass, BaseClass, Offset, unknown) :-
     factObjectInObject(DerivedClass, BaseClass, Offset),
     factNOTEmbeddedObject(DerivedClass, BaseClass, Offset),
     % Debugging
@@ -1819,7 +1819,7 @@ reasonDerivedClass_C(DerivedClass, BaseClass, Offset) :-
                          reasonDerivedClass_C(DerivedClass, BaseClass, Offset)]).
 
 % Because RTTI tells us so for a non-virtual base class.
-reasonDerivedClass_D(DerivedClass, BaseClass, Offset) :-
+reasonDerivedClass_D(DerivedClass, BaseClass, Offset, nonvirtual) :-
     rTTIEnabled,
     rTTIValid,
     rTTIInheritsFrom(DerivedTDA, BaseTDA, _Attributes, Offset, 0xffffffff, 0),
@@ -1832,7 +1832,7 @@ reasonDerivedClass_D(DerivedClass, BaseClass, Offset) :-
                                               BaseClass, Offset)]).
 
 % Because RTTI tells us so for a virtual base class.
-reasonDerivedClass_E(DerivedClass, BaseClass, Offset) :-
+reasonDerivedClass_E(DerivedClass, BaseClass, Offset, virtual) :-
     rTTIEnabled,
     rTTIValid,
     rTTIInheritsFrom(DerivedTDA, BaseTDA, _Attributes, M, P, V),
@@ -1850,7 +1850,7 @@ reasonDerivedClass_E(DerivedClass, BaseClass, Offset) :-
                                               DerivedClass, BaseClass, Offset)]).
 
 % An easier to understand version of E that builds on concluded VBTable facts instead of RTTI.
-reasonDerivedClass_F(DerivedClass, BaseClass, Offset) :-
+reasonDerivedClass_F(DerivedClass, BaseClass, Offset, virtual) :-
     factObjectInObject(DerivedClass, BaseClass, Offset),
     % There's an entry in some VBTable somehere (only unified by Offset so far).
     factVBTableEntry(VBTableAddress, _TableObjectOffset, Offset),
