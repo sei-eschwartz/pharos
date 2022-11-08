@@ -1813,67 +1813,6 @@ DUAnalysis::get_address_condition(const BlockAnalysis& pred_analysis,
   // return final_condition;
 }
 
-// Merge all predecessor block's output states into a single state that becomes the input state
-// for the next this block.
-// Merge all predecessor block's output states into a single state that becomes the input state
-// for the next this block.
-SymbolicStatePtr
-DUAnalysis::merge_predecessors(CFGVertex vertex)
-{
-  // The merged state that we return.
-  SymbolicStatePtr cstate;
-
-  SymbolicRiscOperatorsPtr rops = SymbolicRiscOperators::promote(dispatcher->operators());
-
-  SgAsmBlock *bblock = get(boost::vertex_name, cfg, vertex);
-  assert(bblock!=NULL);
-  rose_addr_t baddr = bblock->get_address();
-
-  // The loop to merge predecessors.
-  size_t merge_cnt = 0;
-  size_t edge_cnt = 0;
-  const BlockAnalysis & analysis = blocks.at(baddr);
-  ResourceLimit merge_limit;
-  for (SgAsmBlock *pblock : cfg_in_bblocks(cfg, vertex)) {
-    rose_addr_t paddr = pblock->get_address();
-    DSTREAM << "Merging states for predecessor " << addr_str(paddr)
-            << " into block " << addr_str(baddr) << LEND;
-
-    const BlockAnalysis & pred_analysis = blocks.at(paddr);
-    if (pred_analysis.output_state) {
-      merge_cnt++;
-      debug_state_merge(cstate, "STATE BEFORE MERGE");
-      debug_state_merge(pred_analysis.output_state, "STATE BEING MERGED");
-      if (cstate) {
-        assert(edge_cnt > 0);
-        cstate->merge(pred_analysis.output_state, rops.get(),
-                      analysis.conditions[edge_cnt - 1]);
-      }
-      else {
-        cstate = pred_analysis.output_state->sclone();
-      }
-      debug_state_merge(cstate, "STATE AFTER MERGE");
-    }
-
-    ++edge_cnt;
-  }
-
-  DSTREAM << "Merging " << merge_cnt << " predecessors for block " << addr_str(baddr)
-          << " in function " << current_function->address_string()
-          << " (loop #" << func_limit.get_counter() << ") took "
-          << merge_limit.get_relative_clock().count() << " seconds." << LEND;
-
-  if (!cstate) {
-    if (bblock != current_function->get_entry_block()) {
-      GERROR << "Block " << addr_str(baddr) << " has no predecessors." << LEND;
-    }
-    // This is apparently not the same as input_state. :-(
-    return initial_state;
-  }
-
-  return cstate;
-}
-
 // Merge the predecessor block's output state while *preserving* condtions. The other merge
 // predecessory routine uses fresh expressions for condtions rather than accumulating
 // conditions during analysis. This is performant and suitable for certain types of analysis,
@@ -1917,27 +1856,33 @@ DUAnalysis::merge_predecessors_with_conditions(CFGVertex vertex)
       // This is a predecessor condition that must be conjoined with
       SymbolicValuePtr prev_cond = pred_analysis.entry_condition;
       SymbolicValuePtr addr_cond = get_address_condition(pred_analysis, pblock, baddr);
-      SymbolicValuePtr merge_cond =
-        SymbolicValue::treenode_instance(
-          SymbolicExpr::makeAnd(addr_cond->get_expression(),
-                                prev_cond->get_expression()));
+
+      TreeNodePtr merge_cond = addr_cond->get_expression();
+      // By default, the condition will be whatever branch guard comes from the
+      // predecessor.  If propagate_conditions is enabled, this will be
+      // conjoined with the predecessor's entry condition.
+      if (propagate_conditions) {
+        merge_cond = SymbolicExpr::makeAnd(merge_cond,
+                                          prev_cond->get_expression());
+      }
+
       DSTREAM << "Merged condition addr=" << addr_str(baddr)
               << " cond=" << *merge_cond << LEND;
 
       if (cstate) {
         // There is a state, so it must be disjoined with the previous state
         entry_cond_tnp =
-          SymbolicExpr::makeOr(merge_cond->get_expression(), entry_cond_tnp);
+          SymbolicExpr::makeOr(merge_cond, entry_cond_tnp);
 
         SymbolicValuePtr inverted_merge_cond = SymbolicValue::treenode_instance(
-          SymbolicExpr::makeInvert(merge_cond->get_expression()));
+          SymbolicExpr::makeInvert(merge_cond));
 
         cstate->merge(pred_analysis.output_state, rops.get(), inverted_merge_cond);
       }
       else {
         // First time through the loop the complete condition is the merge condition; on
         // subsequent iterations it will be disjoined
-        entry_cond_tnp = merge_cond->get_expression();
+        entry_cond_tnp = merge_cond;
         cstate = pred_analysis.output_state->sclone();
       }
       debug_state_merge(cstate, "STATE AFTER MERGE");
@@ -1988,16 +1933,9 @@ DUAnalysis::process_block_with_limit(CFGVertex vertex)
   // vertices, with special consideration for the function entry block.
   SymbolicRiscOperatorsPtr rops = SymbolicRiscOperators::promote(dispatcher->operators());
 
-  // There is now a setting to determine whether the conditions computed for basic blocks are
-  // preserved and propogated when merging predecessors. Real conditions are needed for certain
-  // classes of analysis, such as path finding where program state
-  SymbolicStatePtr cstate = nullptr;
-  if (propagate_conditions) {
-    cstate = merge_predecessors_with_conditions(vertex);
-  }
-  else {
-    cstate = merge_predecessors(vertex);
-  }
+  // We now always using merge_predecessors_with_conditions, but there is a flag
+  // that determines whether the conditions from predecessors are used or not.
+  SymbolicStatePtr cstate = merge_predecessors_with_conditions(vertex);
   analysis.input_state = cstate->sclone();
   rops->currentState(cstate);
 
