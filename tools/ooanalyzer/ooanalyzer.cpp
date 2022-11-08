@@ -87,15 +87,7 @@ static int ooanalyzer_main(int argc, char **argv)
   ProgOptDesc csod = cert_standard_options();
   digod.add(csod);
 
-  // OOAnalyzer needs --propagate-conditions, so this will add that to the
-  // arguments
-  std::vector<char *> new_argv (argv + 0, argv + argc);
-  // Yes, we shouldn't cast a string literal to a non-const char pointer here.
-  // But argv strings really are const, but for historical reasons aren't
-  // labeled as such.
-  new_argv.push_back((char*) "--propagate-conditions");
-
-  ProgOptVarMap vm = parse_cert_options(new_argv.size(), new_argv.data(), digod);
+  ProgOptVarMap vm = parse_cert_options(argc, argv, digod);
 
   OINFO << "OOAnalyzer version " << VERSION << "." << LEND;
 
