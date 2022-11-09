@@ -23,13 +23,21 @@ possibleVBTableWrite(Insn, Function, ThisPtr, Offset, VBTable) :-
 
 :- table unconditional/1 as opaque.
 
-unconditional(Condition) :-
-  thisPtrDefinition(Condition, 1, _, _).
+% No predecessors
+unconditional([]).
+
+% Predecessor but with true
+unconditional([Condition|_]) :-
+    thisPtrDefinition(Condition, 1, _, _).
+
+% Recurse
+unconditional([_|ConditionList]) :-
+  unconditional(ConditionList).
 
 % This can eventually compare the condition to the function's arguments, but for
 % now we'll just see if there is a condition.
-initVBasesCondition(Function, Condition) :-
-  not(unconditional(Condition)).
+initVBasesCondition(Function, ConditionList) :-
+  not(unconditional(ConditionList)).
 
 % --------------------------------------------------------------------------------------------
 
