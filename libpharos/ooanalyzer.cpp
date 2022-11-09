@@ -559,6 +559,7 @@ void OOAnalyzer::record_this_ptrs_for_calls(FunctionDescriptor* fd) {
 
 void OOAnalyzer::find_vtable_installations(FunctionDescriptor const & fd) {
   const PDG* p = fd.get_pdg();
+  const auto cfg = fd.get_pharos_cfg();
   if (p == NULL) return;
 
   GDEBUG << "Analyzing vtables for " << fd.address_string() << LEND;
@@ -632,22 +633,32 @@ void OOAnalyzer::find_vtable_installations(FunctionDescriptor const & fd) {
 
         // Is this address a virtual base table (or a virtual function table)?
         bool base_table = (vbtables.find(taddr) != vbtables.end());
-        TreeNodePtr entry_condition;
 
-        // Record the entry condition
+        // In a sane world, we'd use path conditions.  But that code is horrible
+        // and broken so I'm not going to do that.
+        std::vector<TreeNodePtr> entry_conditions;
+
+        // Record the entry conditions
         const auto block = fd.ds.get_block(insn->get_address());
         if (block) {
           const auto block_addr = block->address();
           const auto block_analysis = p->get_usedef().get_block_analysis();
           if (block_analysis.count(block_addr)) {
-            const auto block_data = block_analysis.at(block_addr);
-            entry_condition = block_data.entry_condition->get_expression();
+            const auto &vertex = block_analysis.at(block_addr).vertex;
+
+            for (SgAsmBlock *pblock : cfg_in_bblocks(cfg, vertex)) {
+              if (block_analysis.count(pblock->get_address())) {
+                const auto &pred_analysis = block_analysis.at(pblock->get_address());
+                SymbolicValuePtr addr_cond = p->get_usedef().get_address_condition(pred_analysis, pblock, block_addr);
+                entry_conditions.push_back(addr_cond->get_expression());
+              }
+            }
           }
         }
 
         // It look like we're going to have a valid virtual table.
         VirtualTableInstallationPtr install = std::make_shared<VirtualTableInstallation>(
-          insn, &fd, taddr, vp, offset, tn_expanded, entry_condition, base_table);
+          insn, &fd, taddr, vp, offset, tn_expanded, entry_conditions, base_table);
         //VirtualTableInstallation* install = NULL;
         //install = new VirtualTableInstallation(insn, taddr, vp, offset);
 

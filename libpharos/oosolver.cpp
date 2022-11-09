@@ -324,14 +324,16 @@ OOSolver::add_vftable_facts(const OOAnalyzer& ooa)
     // ejs: We should really export them all.  Negative offsets can legitimately happen.
     if (vti->offset >= 0) {
 
-      std::string entry_condition_term = "invalid";
-      if (vti->entry_condition) {
-        entry_condition_term = "sv_" + std::to_string(vti->entry_condition->hash());
-        expanded_thisptrs.insert(ExpandedTreeNodePtr{vti->entry_condition, vti->insn->get_address(), vti->fd->get_address()});
+      std::vector<std::string> entry_condition_hashes;
+
+      for (const auto &cond : vti->entry_conditions) {
+        const auto entry_condition_term = "sv_" + std::to_string(cond->hash());
+        entry_condition_hashes.push_back(entry_condition_term);
+        expanded_thisptrs.insert(ExpandedTreeNodePtr{cond, vti->insn->get_address(), vti->fd->get_address()});
       }
 
       session->add_fact(fact_name, vti->insn->get_address(), vti->fd->get_address(),
-                        thisptr_term, vti->offset, expanded_thisptr_term, entry_condition_term, vti->table_address);
+                        thisptr_term, vti->offset, expanded_thisptr_term, entry_condition_hashes, vti->table_address);
 
       // Add the ptr so we make a thisPtrDefinition
       expanded_thisptrs.insert(ExpandedTreeNodePtr{vti->expanded_ptr, vti->insn->get_address(), vti->fd->get_address()});

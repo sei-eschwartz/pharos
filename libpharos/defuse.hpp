@@ -242,10 +242,6 @@ class DUAnalysis {
   // Private methods.
   // ==================================================================================
 
-  SymbolicValuePtr
-  get_address_condition(const BlockAnalysis& pred_analysis,
-                        SgAsmBlock* pblock, const rose_addr_t bb_addr);
-
   // Create BlockAnalysis objects for each basic block in the function.
   void create_blocks();
 
@@ -290,6 +286,11 @@ class DUAnalysis {
   DescriptorSet& ds;
 
   const BlockAnalysisMap& get_block_analysis() const;
+
+  // Ed needs access to this for ooanalyzer
+  SymbolicValuePtr
+  get_address_condition(const BlockAnalysis& pred_analysis,
+                        SgAsmBlock* pblock, const rose_addr_t bb_addr) const;
 
   const std::map<TreeNode*, TreeNodePtr>& get_unique_treenodes() const { return unique_treenodes_; }
 
