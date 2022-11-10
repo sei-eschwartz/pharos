@@ -18,6 +18,10 @@ possibleVFTableWrite(Insn, Function, ThisPtr, Offset, VFTable) :-
 possibleVBTableWrite(Insn, Function, ThisPtr, Offset, VBTable) :-
   possibleVBTableWrite(Insn, Function, ThisPtr, Offset, _ExpandedThisPtr, _Condition, VBTable).
 
+% We don't produce these yet!
+% XXX: How can we prevent this from breaking the model compiler?
+factDerivedClass(A,B,C,_) :- factDerivedClass(A,B,C).
+
 % --------------------------------------------------------------------------------------------
 % Condition analysis
 
