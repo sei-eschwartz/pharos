@@ -537,6 +537,9 @@ guess :-
               % definitely better here than later.
               guessVFTableEntry(Out);
 
+              % Guess thisptr adjustments
+              guessThisptrAdjustment(Out);
+
               % Perhaps both of these should be guessed at once?  They're so closely related
               % that we might get better results from requiring both or none...  But how to do
               % that?  These area guessed before constructors in particular because the prevent
@@ -592,11 +595,9 @@ guess :-
               % class that we have not identified a base class for.
               guessCommitClassHasNoBase(Out);
 
-              % Guess thisptr adjustments
-              guessThisptrAdjustment(Out);
-
               % Same thing for Derived classes
               guessCommitClassHasNoDerived(Out)
+
 
              )),
 
