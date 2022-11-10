@@ -70,6 +70,10 @@
 :- dynamic factObjectInObject/3 as incremental.
 :- dynamic factDerivedClass/3 as incremental.
 :- dynamic factNOTDerivedClass/3 as incremental.
+
+:- dynamic factThisPtrAdjustment/2 as incremental.
+:- dynamic factNOTThisPtrAdjustment/2 as incremental.
+
 :- dynamic factEmbeddedObject/3 as incremental.
 :- dynamic factNOTEmbeddedObject/3 as incremental.
 :- dynamic factClassSizeGTE/2 as incremental.
@@ -528,6 +532,9 @@ guess :-
               % definitely better here than later.
               guessVFTableEntry(Out);
 
+              % Guess thisptr adjustments
+              guessThisptrAdjustment(Out);
+
               % Perhaps both of these should be guessed at once?  They're so closely related
               % that we might get better results from requiring both or none...  But how to do
               % that?  These area guessed before constructors in particular because the prevent
@@ -582,8 +589,10 @@ guess :-
               % As the very last guess, explicitly guess factClassHasNoBase(Class) for any
               % class that we have not identified a base class for.
               guessCommitClassHasNoBase(Out);
+
               % Same thing for Derived classes
               guessCommitClassHasNoDerived(Out)
+
 
              )),
 
