@@ -1626,6 +1626,9 @@ reasonObjectInObject_E(OuterClass, InnerClass, Offset) :-
 thisPtrAdjustment(M, _) :-
     var(M), !, throw(system_error(thisPtrAdjustment)).
 
+% We made a guess
+thisPtrAdjustment(M, O) :- factThisPtrAdjustment(M, O).
+
 % Constructors don't have thisptr adjustments
 thisPtrAdjustment(M, 0) :-
     factConstructor(M).
