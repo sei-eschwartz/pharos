@@ -1739,6 +1739,33 @@ likelyDeletingDestructor(DeletingDestructor, RealDestructor) :-
     not(factNOTRealDestructor(RealDestructor)),
     true.
 
+tryOrNOTThisptrAdjustment(Method, O) :-
+    countGuess,
+    tryThisptrAdjustment(Method, O);
+    tryNOTThisptrAdjustment(Method, O);
+    logwarnln('Something is wrong upstream: ~Q.', invalidThisptrAdjustment(Method, O)),
+    fail.
+
+tryThisptrAdjustment(Method, O) :-
+    F = factThisPtrAdjustment(Method, O),
+    loginfoln('Guessing ~Q.', F),
+    try_assert(F).
+
+tryNOTThisptrAdjustment(Method, O) :-
+    F = factNOTThisPtrAdjustment(Method, O),
+    loginfoln('Guessing ~Q.', F),
+    try_assert(F).
+
+% Just guess that the thisptr adjustment is zero.  This is not alway true, of
+% course, but we essentially had this assumption before.
+guessThisptrAdjustment(Out) :-
+    factMethod(M),
+    not(thisPtrAdjustment(M, _)),
+    O = 0,
+    doNotGuessHelper(factThisPtrAdjustment(M, O),
+                     factNOTThisPtrAdjustment(M, O)),
+    Out = tryOrNOTThisptrAdjustment(M, O).
+
 %% Local Variables:
 %% mode: prolog
 %% End:

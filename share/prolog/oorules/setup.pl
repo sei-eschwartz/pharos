@@ -76,6 +76,9 @@
 :- dynamic factDerivedClass/4 as incremental.
 :- dynamic factNOTDerivedClass/4 as incremental.
 
+:- dynamic factThisPtrAdjustment/2 as incremental.
+:- dynamic factNOTThisPtrAdjustment/2 as incremental.
+
 :- dynamic factEmbeddedObject/3 as incremental.
 :- dynamic factNOTEmbeddedObject/3 as incremental.
 :- dynamic factClassSizeGTE/2 as incremental.
@@ -588,6 +591,10 @@ guess :-
               % As the very last guess, explicitly guess factClassHasNoBase(Class) for any
               % class that we have not identified a base class for.
               guessCommitClassHasNoBase(Out);
+
+              % Guess thisptr adjustments
+              guessThisptrAdjustment(Out);
+
               % Same thing for Derived classes
               guessCommitClassHasNoDerived(Out)
 
