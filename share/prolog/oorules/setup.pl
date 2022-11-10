@@ -70,7 +70,7 @@
 :- dynamic factObjectInObject/3 as incremental.
 
 :- dynamic factDerivedClass/4 as incremental.
-:- dynamic factNOTDerivedClass/4 as incremental.
+:- dynamic factNOTDerivedClass/3 as incremental.
 
 :- dynamic factThisPtrAdjustment/2 as incremental.
 :- dynamic factNOTThisPtrAdjustment/2 as incremental.
@@ -109,8 +109,8 @@ classArgs(factEmbeddedObject/3, 1).
 classArgs(factEmbeddedObject/3, 2).
 classArgs(factObjectInObject/3, 1).
 classArgs(factObjectInObject/3, 2).
-classArgs(factDerivedClass/3, 1).
-classArgs(factDerivedClass/3, 2).
+classArgs(factDerivedClass/4, 1).
+classArgs(factDerivedClass/4, 2).
 classArgs(factNOTDerivedClass/3, 1).
 classArgs(factNOTDerivedClass/3, 2).
 classArgs(factClassHasNoBase/1, 1).
