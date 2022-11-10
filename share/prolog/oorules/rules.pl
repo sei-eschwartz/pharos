@@ -1638,7 +1638,7 @@ thisPtrAdjustment(M, 0) :-
     % the same thisptr adjustment as their real destructors.  And, of course, deleting
     % destructors never appear in vftables, which breaks the above test.  So we'll add another
     % clause that M can't be a deleting destructor.
-    (factNOTDeletingDestructor(M)
+    ((factNOTDeletingDestructor(M) ; not(insnCallsDelete(_, M, _)))
      -> true
      ;
      % We could be a deleting destructor.  Shoot.  Well, if our real destructor
