@@ -176,13 +176,13 @@ concludeObjectInObject(Out) :-
 
 concludeDerivedClass(Out) :-
     reportFirstSeen('concludeDerivedClass'),
-    setof((DerivedClass, BaseClass, ObjectOffset),
-          (reasonDerivedClass(DerivedClass, BaseClass, ObjectOffset),
+    setof((DerivedClass, BaseClass, ObjectOffset, Type),
+          (reasonDerivedClass(DerivedClass, BaseClass, ObjectOffset, Type),
            iso_dif(DerivedClass, BaseClass),
-           not(factDerivedClass(DerivedClass, BaseClass, ObjectOffset)),
-           not(factNOTDerivedClass(DerivedClass, BaseClass, ObjectOffset)),
+           not(factDerivedClass(DerivedClass, BaseClass, ObjectOffset, Type)),
+           not(factNOTDerivedClass(DerivedClass, BaseClass, ObjectOffset, Type)),
            loginfoln('Concluding ~Q.',
-                     factDerivedClass(DerivedClass, BaseClass, ObjectOffset))),
+                     factDerivedClass(DerivedClass, BaseClass, ObjectOffset, Type))),
           TupleSets),
     maplist(try_assert_builder(factDerivedClass), TupleSets, ActionSets),
     Out = all(ActionSets).
