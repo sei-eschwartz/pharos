@@ -180,7 +180,7 @@ concludeDerivedClass(Out) :-
           (reasonDerivedClass(DerivedClass, BaseClass, ObjectOffset, Type),
            iso_dif(DerivedClass, BaseClass),
            not(factDerivedClass(DerivedClass, BaseClass, ObjectOffset, Type)),
-           not(factNOTDerivedClass(DerivedClass, BaseClass, ObjectOffset, Type)),
+           not(factNOTDerivedClass(DerivedClass, BaseClass, ObjectOffset)),
            loginfoln('Concluding ~Q.',
                      factDerivedClass(DerivedClass, BaseClass, ObjectOffset, Type))),
           TupleSets),
