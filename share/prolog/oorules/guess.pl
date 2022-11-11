@@ -426,8 +426,8 @@ guessMethod(Out) :-
 % Because the thisptr is known to be an object pointer.
 guessMethodN(Func) :-
     thisPtrUsage(_Insn1, Func, ThisPtr, Method),
-    doNotGuessHelper(factMethod(Method),
-                    factNOTMethod(Method)),
+    doNotGuessHelper(factMethod(Func),
+                    factNOTMethod(Func)),
     factMethod(Method),
     % This rule needs to permit invalid calling conventions for many correct results in Lite
     % oo, poly, and ooex7 test cases.
