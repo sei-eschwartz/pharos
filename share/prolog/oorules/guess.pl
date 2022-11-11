@@ -343,7 +343,7 @@ tryEmbeddedObject(OuterClass, InnerClass, Offset) :-
 tryDerivedClass((DerivedClass, BaseClass, Offset)) :- tryDerivedClass(DerivedClass, BaseClass, Offset).
 tryDerivedClass(DerivedClass, BaseClass, Offset) :-
     countGuess,
-    loginfoln('Guessing ~Q.', factDerivedClass(DerivedClass, BaseClass, Offset)),
+    loginfoln('Guessing ~Q.', factDerivedClass(DerivedClass, BaseClass, Offset, unknown)),
     try_assert(factDerivedClass(DerivedClass, BaseClass, Offset, unknown)),
     try_assert(guessedDerivedClass(DerivedClass, BaseClass, Offset)).
 
