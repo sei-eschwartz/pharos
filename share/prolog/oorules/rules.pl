@@ -2470,8 +2470,10 @@ reasonClassCallsMethod_C(Class1, Method2) :-
     % So what we really want to know is, for all objects that start at Offset, do they all come
     % from inheritance?
 
-    forall(reasonClassAtOffset(Class1, Offset, _, Seq),
-           sequenceAreAllDerived(Seq)),
+    negation_helper(forall(reasonClassAtOffset(Class1, Offset, _, Seq),
+                    sequenceAreAllDerived(Seq))),
+
+    logtraceln('~Q.', [reasonClassCallsMethod_C(Method1, Class1, Method2)]),
 
     % Debugging
     logtraceln('~@~Q.', [not(factClassCallsMethod(Class1, Method2)),

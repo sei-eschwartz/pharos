@@ -592,7 +592,10 @@ guess :-
               guessCommitClassHasNoBase(Out);
 
               % Same thing for Derived classes
-              guessCommitClassHasNoDerived(Out)
+              guessCommitClassHasNoDerived(Out);
+
+              % Commit to a negation
+              guessNegation(Out)
 
 
              )),
