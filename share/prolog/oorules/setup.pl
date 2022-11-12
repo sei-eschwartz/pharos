@@ -6,6 +6,10 @@
 % Options.
 % ============================================================================================
 
+% This should be set when doing a model compiler test.  The only change is that
+% it will enable paperSoundnessProblem/1 clauses.
+:- dynamic modelCompiler/0 as opaque.
+
 :- dynamic logTrace/0 as opaque.
 
 % A dynamically asserted option controlling whether guessing is enabled.
