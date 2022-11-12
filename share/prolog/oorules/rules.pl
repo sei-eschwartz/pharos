@@ -2453,6 +2453,8 @@ reasonClassCallsMethod_B(Class1, Method2) :-
 % correct, this rule will be correct as well.
 % PAPER: Call-3
 reasonClassCallsMethod_C(Class1, Method2) :-
+
+    paperSoundnessProblem(Offset=0),
     validMethodCallAtOffset(_Insn, Method1, Method2, Offset),
 
     iso_dif(Method1, Method2),
@@ -3101,6 +3103,7 @@ reasonNOTMergeClasses_E(Class1, Class2) :-
 % PAPER: Merging-7
 % ED_PAPER_INTERESTING
 reasonNOTMergeClasses_E(Class1, Class2, Insn1, Method1, 0, VFTable1) :-
+    paperSoundnessProblem(fail),
     % Two VFTables are written into the zero object offset in two different methods.  The
     % sterotypical case is of course two compeltely unrelated classes.  This rule applies
     % equally to constructors and destructors.  There were problems in Lite/oo with 0x402766 (a

@@ -3,6 +3,11 @@
 % Forward reasoning from given facts.
 % ============================================================================================
 
+% This is to disable changes that we know are sound, but that cause problems in
+% practice.
+paperSoundnessProblem(G) :-
+    not(modelCompiler) -> G; true.
+
 notEmptyClass(Class) :-
     factClassSizeGTE(Class, Size), Size > 0.
 
