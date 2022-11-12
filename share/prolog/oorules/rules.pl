@@ -351,7 +351,7 @@ reasonNOTConstructor_H(Method) :-
     % supposed to be installed on a virtual base so we don't see it.  This line is sufficient
     % to fix the model compiler because we have perfect knowledge of virtual bases, but it's
     % probably not conservative enough in practice.
-    not(factDerivedClass(Class, VirtualBase, _, true)),
+    negation_helper(not(factDerivedClass(Class, VirtualBase, _, true))),
 
     % Since we don't have visibility into VFTable writes from imported constructors and
     % destructors this rule does not apply to imported methods.
@@ -492,7 +492,7 @@ classHasNoVBase(Class) :-
 
 classHasNoVBase(Class) :-
     % XXX This is bad!
-    not(factDerivedClass(Class, _, _, true)).
+    negation_helper(not(factDerivedClass(Class, _, _, true))).
 
 methodIsNotVBaseDestructor(M) :-
     find(M, Class),
@@ -796,7 +796,7 @@ certainConstructorOrDestructorInheritanceSpecialCase(Method, Type) :-
     % There is some offset for which there is a single vftable write and a thiscall to the same
     % offset
     factVFTableWrite(WriteAddr, Method, Offset, VFTable),
-    not((factVFTableWrite(_, Method, Offset, VFTable2), iso_dif(VFTable, VFTable2))),
+    negation_helper(not((factVFTableWrite(_, Method, Offset, VFTable2), iso_dif(VFTable, VFTable2)))),
     methodCallAtOffset(CallAddr, Method, Callee, Offset),
 
     % ejs 1/08/21: I believe that Offset can not be negative for a constructor or destructor
@@ -1051,7 +1051,7 @@ reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
     % directly instantiated, because the "no other class trying to install this vftable" will
     % be trivially true, and without this clause, the vftable will simply belong to an
     % arbitrary method that installs it.
-    not(factVFTableOverwrite(Method, VFTable, _OverwriteVFTable, Offset)),
+    negation_helper(not(factVFTableOverwrite(Method, VFTable, _OverwriteVFTable, Offset))),
 
     % VFTableBelongs attempt 2: The VFTable is not at the start of an indirectly embedded object
     forall(reasonClassAtOffset(Class, Offset, _InnerClass, L),
@@ -1131,7 +1131,7 @@ reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
     % directly instantiated, because the "no other class trying to install this vftable" will
     % be trivially true, and without this clause, the vftable will simply belong to an
     % arbitrary method that installs it.
-    not(factVFTableOverwrite(Method, VFTable, _OverwriteVFTable, Offset)),
+    negation_helper(not(factVFTableOverwrite(Method, VFTable, _OverwriteVFTable, Offset))),
 
     % VFTableBelongs attempt 2: The VFTable is not at the start of an indirectly embedded object
     forall(reasonClassAtOffset(Class, Offset, _InnerClass, L),
@@ -1555,7 +1555,7 @@ reasonObjectInObject_D(OuterClass, InnerClass, Offset) :-
 
     % Prevent grand ancestors from being decalred object in object.  See commentary below.
     % It's unclear of this constraint is really required in cases where Offset is non-zero.
-    not(reasonClassRelationship(OuterClass, InnerClass)),
+    negation_helper(not(reasonClassRelationship(OuterClass, InnerClass))),
 
     % Debugging
     logtraceln('~@~Q.', [not(factObjectInObject(OuterClass, InnerClass, Offset)),
@@ -1593,7 +1593,7 @@ reasonObjectInObject_E(OuterClass, InnerClass, Offset) :-
     % Offset, and the old check would not catch this.  So we instead use the newer
     % reasonClassAtOffset facility.
 
-    not(reasonClassAtOffset(OuterClass, Offset, _SomeInnerClass)),
+    negation_helper(not(reasonClassAtOffset(OuterClass, Offset, _SomeInnerClass))),
 
     factConstructor(InnerConstructor),
     iso_dif(InnerConstructor, OuterConstructor),
@@ -1668,7 +1668,7 @@ reasonObjectInObject_F(OuterClass, InnerClass, Offset) :-
     % embedding that explains the vftable write.  On the other hand, this fix is not completely
     % satisfactory because in practice we might not know about the chain early enough.  Maybe
     % this should be a guessing rule?
-    not(reasonClassAtOffset(OuterClass, Offset, _KnownInnerClass)),
+    negation_helper(not(reasonClassAtOffset(OuterClass, Offset, _KnownInnerClass))),
 
     find(Method, OuterClass),
     find(VFTable, InnerClass),
@@ -1745,7 +1745,7 @@ reasonEmbeddedObject_C(Class, EmbeddedClass, Offset) :-
 % better due to testing explicitly true facts rather than using "not()".
 reasonEmbeddedObject_D(Class, EmbeddedClass, Offset) :-
     factObjectInObject(Class, EmbeddedClass, Offset),
-    not(factDerivedClass(Class, EmbeddedClass, Offset)),
+    negation_helper(not(factDerivedClass(Class, EmbeddedClass, Offset))),
     iso_dif(Offset, 0),
     factEmbeddedObject(Class, _, LowerOffset),
     LowerOffset < Offset.
@@ -1846,11 +1846,11 @@ reasonDerivedClass_B(DerivedClass, BaseClass, ObjectOffset, unknown) :-
     factVFTableWrite(_Insn1, DerivedConstructor, ObjectOffset, DerivedVFTable),
 
     % No one overwrites the vftable
-    not(factVFTableOverwrite(DerivedConstructor, DerivedVFTable, _OverwrittenDerivedVFTable, ObjectOffset)),
+    negation_helper(not(factVFTableOverwrite(DerivedConstructor, DerivedVFTable, _OverwrittenDerivedVFTable, ObjectOffset))),
 
     ((factVFTableWrite(_Insn2, BaseConstructor, 0, BaseVFTable),
       % No one overwrites the vftable
-      not(factVFTableOverwrite(BaseConstructor, BaseVFTable, _OverwrittenBaseVFTable, 0)),
+      negation_helper(not(factVFTableOverwrite(BaseConstructor, BaseVFTable, _OverwrittenBaseVFTable, 0))),
       % And the vtables values written were different
       iso_dif(DerivedVFTable, BaseVFTable));
      % Right now we assume that if a class inherits from an imported class, the base class is
@@ -1865,7 +1865,7 @@ reasonDerivedClass_B(DerivedClass, BaseClass, ObjectOffset, unknown) :-
     find(BaseConstructor, BaseClass),
 
     % There's not already a relationship.  (Prevent grand ancestors)
-    not(reasonClassRelationship(DerivedClass, BaseClass)),
+    negation_helper(not(reasonClassRelationship(DerivedClass, BaseClass))),
 
     % Debugging
     logtraceln('~@DEBUG Derived VFTable: ~Q~n Base VFTable: ~Q~n Derived Constructor: ~Q~n Base Constructor: ~Q',

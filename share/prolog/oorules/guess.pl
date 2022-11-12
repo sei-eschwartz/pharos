@@ -776,13 +776,13 @@ guessNOTConstructor(Out) :-
 guessClassHasNoDerivedA(Class) :-
     factConstructor(Constructor),
 
-    not((
+    negation_helper(not((
                factConstructor(OtherConstructor),
                validMethodCallAtOffset(_Insn, OtherConstructor, Constructor, _AnyOffset)
-       )),
+       ))),
 
     find(Constructor, Class),
-    not(factDerivedClass(_DerivedClass, Class, _SomeOffset)),
+    negation_helper(not(factDerivedClass(_DerivedClass, Class, _SomeOffset))),
     doNotGuessHelper(factClassHasNoDerived(Class),
                      factClassHasUnknownDerived(Class)).
 
@@ -811,13 +811,13 @@ guessClassHasNoBaseB(Class) :-
     factConstructor(Constructor),
 
     factVFTableWrite(_Insn1, Constructor, 0, VFTable),
-    not((
+    negation_helper(not((
                factVFTableWrite(_Insn2, Constructor, _Offset1, OtherVFTable),
                iso_dif(VFTable, OtherVFTable)
-       )),
+       ))),
 
     find(Constructor, Class),
-    not(factDerivedClass(Class, _BaseClass, _Offset2)),
+    negation_helper(not(factDerivedClass(Class, _BaseClass, _Offset2))),
     doNotGuessHelper(factClassHasNoBase(Class),
                      factClassHasUnknownBase(Class)).
 
@@ -933,7 +933,7 @@ guessLateMergeClassesF1(Class, Method) :-
 
     % If a method is in the vftable of a derived and base class, we should give priority to the
     % base class.
-    not(factDerivedClass(Class, _BaseClass, _Offset)).
+    negation_helper(not(factDerivedClass(Class, _BaseClass, _Offset))).
 
 guessLateMergeClasses(Out) :-
     reportFirstSeen('guessLateMergeClassesF1'),
