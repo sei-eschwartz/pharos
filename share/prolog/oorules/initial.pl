@@ -3,6 +3,11 @@
 % Forward reasoning from given facts.
 % ============================================================================================
 
+% This is to disable changes that we know are sound, but that cause problems in
+% practice.
+paperSoundnessProblem(G) :-
+    not(modelCompiler) -> G; true.
+
 % --------------------------------------------------------------------------------------------
 % Convert some new style facts to old style facts.
 
