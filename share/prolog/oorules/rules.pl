@@ -1271,6 +1271,8 @@ reasonNOTVFTableEntry_C(VFTable, Offset, Entry) :-
 reasonNOTVFTableEntry_D(VFTable, Offset, Entry) :-
     factVFTable(VFTable),
     possibleVFTableEntry(VFTable, Offset, Entry),
+    % The model compiler doesn't use an address here, so this rule causes an error.
+    integer(VFTable),
     ComputedAddress is VFTable + Offset,
     rTTICompleteObjectLocator(ComputedAddress, _Address, _TDAddress, _CHDAddress, _O1, _O2).
 
@@ -2625,7 +2627,7 @@ reasonReusedImplementation_A(Method, Class1, VFTable1) :-
 
     % Conditions: This rule is optimized for Method or VFTable1 to be bound
     (integer(Method);
-     integer(VFTable1)),
+     ground(VFTable1)),
     !,
 
     %possiblyReused(Method),
@@ -2647,7 +2649,7 @@ reasonReusedImplementation_A(Method, Class1, VFTable1) :-
 reasonReusedImplementation_A(Method, Class1, VFTable1) :-
 
     % Conditions: This rule is optimized for Class1 to be bound
-    integer(Class1),
+    ground(Class1),
     !,
 
     find(VFTable1, Class1),
