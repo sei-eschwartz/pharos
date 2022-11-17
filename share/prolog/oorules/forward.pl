@@ -47,7 +47,7 @@
 % --------------------------------------------------------------------------------------------
 % Make a singleton class for any method in Set.
 makeObjects(Set) :-
-    maplist(make, Set).
+    maplist(makeIfNecessary, Set).
 
 % This predicate is called to retract subsumed facts
 class_size_remove_redundant(factClassSizeGTE(Class, Size)) :-
