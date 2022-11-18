@@ -267,10 +267,15 @@ insanityConstructorAndDeletingDestructor(Out) :-
 :- table insanityTwoRealDestructorsOnClass/1 as incremental.
 insanityTwoRealDestructorsOnClass(Out) :-
     factRealDestructor(Destructor1),
+    find(Destructor1, Class),
+
+    % NEW
+    % VBase destructors can be identical to real destructors.
+    % classHasNoVBase(Class),
+
+    find(Destructor2, Class),
     factRealDestructor(Destructor2),
     iso_dif(Destructor1, Destructor2),
-    find(Destructor1, Class),
-    find(Destructor2, Class),
 
     Out = (
         logwarnln('Consistency checks failed.'),
