@@ -863,6 +863,25 @@ guessClassHasNoBaseSpecial(Class) :-
     % Class does not have any base classes
     not(factDerivedClass(Class, _Base, _Offset)),
 
+    % ejs 11/18/22 A problem in ha_example.dll is that ha_example::~ha_example
+    % is a singleton that installs handler::vftable, but we never connect
+    % ~ha_example to the rest of the class because it is never called.  But
+    % because it installs a vftable on another class, it must be on that class,
+    % inherit from that class, or embed that class.
+
+    not((
+        % There is not a Method on Class that installs a VFTable on another class
+        find(Method, Class),
+        factVFTableWrite(_Insn, Method, Offset, VFTable),
+        find(VFTable, Class2), iso_dif(Class, Class2),
+
+        % We could check to see if the VFTable installation is explained by an
+        % embedded relationship here... but for now we won't.
+        true,
+
+        logtraceln('guessClassHasNoBaseSpecial: Not guessing factHasNoBase(~Q) because of unexplained installation of VFTable ~Q on class ~Q.', [Class, VFTable, Class2])
+    )),
+
     % XXX: If we're at the end of reasoning and there is an unknown base, is that OK?  Should
     % we leave it as is?  Try really hard to make a guess?  Or treat it as a failure?
     doNotGuessHelper(factClassHasNoBase(Class),
