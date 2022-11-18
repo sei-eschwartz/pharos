@@ -1503,6 +1503,29 @@ guessRealDestructor(Out) :-
 
     Out = tryOrNOTRealDestructor(Method).
 
+% Another weird situation we've seen is when a destructor is called by a
+% function unwindlet.  Pharos does not understand the control flow of
+% unwindlets, so the function unwindlets themselves appear uncalled.
+guessRealDestructor(Out) :-
+    % It might be a destructor
+    possibleDestructor(Method),
+
+    doNotGuessHelper(factRealDestructor(Method),
+                     factNOTRealDestructor(Method)),
+
+    % It's called by a function
+    once((callTarget(_Insn, Func, Thunk),
+          dethunk(Thunk, Method))),
+
+    % And no one calls or thunks to Func.
+    not(callTarget(_, _, Func)),
+    not(thunk(_,Func)),
+
+    logtraceln('Proposing ~Q because it looks like a destructor called by a function unwindlet', [factRealDestructor(Method)]),
+
+    Out = tryOrNOTRealDestructor(Method).
+
+
 %% tryOrNOTRealDestructor(Method) :-
 %%     likelyDeletingDestructor(DeletingDestructor, Method),
 %%     % Require that we've already confirmed the deleting destructor.
