@@ -1617,6 +1617,7 @@ reasonObjectInObject_E(OuterClass, InnerClass, Offset) :-
     logtraceln('~@~Q.', [not(factObjectInObject(OuterClass, InnerClass, Offset)),
                          reasonObjectInObject_E(OuterClass, InnerClass, Offset)]).
 
+:- table thisPtrAdjustment/2 as incremental.
 thisPtrAdjustment(M, _) :-
     var(M), !, throw(system_error(thisPtrAdjustment)).
 
