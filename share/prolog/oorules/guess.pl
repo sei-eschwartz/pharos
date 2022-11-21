@@ -1500,6 +1500,11 @@ guessRealDestructor(Out) :-
 
     Out = tryOrNOTRealDestructor(Method).
 
+:- table guessHelper/3 as opaque.
+guessHelper(Func, Thunk, Method) :-
+    once((callTarget(_Insn, Func, Thunk),
+          dethunk(Thunk, Method))).
+
 % Another weird situation we've seen is when a destructor is called by a
 % function unwindlet.  Pharos does not understand the control flow of
 % unwindlets, so the function unwindlets themselves appear uncalled.
@@ -1511,8 +1516,7 @@ guessRealDestructor(Out) :-
                      factNOTRealDestructor(Method)),
 
     % It's called by a function
-    once((callTarget(_Insn, Func, Thunk),
-          dethunk(Thunk, Method))),
+    guessHelper(Func, Thunk, Method),
 
     % And no one calls or thunks to Func.
     not(callTarget(_, _, Func)),
