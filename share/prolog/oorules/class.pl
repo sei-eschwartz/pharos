@@ -28,7 +28,7 @@ union(M1, M2) :-
 makeIfNecessary(M) :-
     findint(M, _S) -> true;
     (make(M),
-     logerror('Error: Unknown method '), logerrorln(M)).
+     logtraceln('New singleton ~Q', [M])).
 
 find(M, R) :-
     findint(M, R).
