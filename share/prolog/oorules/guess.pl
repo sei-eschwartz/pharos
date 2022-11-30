@@ -1509,6 +1509,10 @@ guessHelper(Func, Thunk, Method) :-
 % function unwindlet.  Pharos does not understand the control flow of
 % unwindlets, so the function unwindlets themselves appear uncalled.
 guessRealDestructor(Out) :-
+    % For unknown reasons, this guessing rule hurts accuracy on the paper test suite so we are
+    % disabling it.
+    fail,
+
     % It might be a destructor
     possibleDestructor(Method),
 
