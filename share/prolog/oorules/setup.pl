@@ -598,8 +598,8 @@ guess :-
               % Same thing for Derived classes
               guessCommitClassHasNoDerived(Out);
 
-              % Commit to a negation
-              guessNegation(Out)
+              % Commit to a delayed clause
+              guessDelay(Out)
 
 
              )),
