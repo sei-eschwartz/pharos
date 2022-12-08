@@ -23,6 +23,8 @@
 
 delay(G) :- delay_helper(G, 0, false).
 
+delay(G, P) :- delay_helper(G, P, false).
+
 delay_and_commit(G) :- delay_and_commit(G, 0).
 
 delay_and_commit(G, P) :- delay_helper(G, P, true).
@@ -33,8 +35,11 @@ delay_helper(G, _, _) :-
 % We've already delayed for G
 delay_helper(G, _, _) :-
     delay_goal(G, _),
-    logtraceln('Already delayed ~Q', G),
-    !.
+    !,
+    % Verify G is still true!,
+    once(call(G)),
+    %logtraceln('Already delayed ~Q and verified it is still true', G),
+    true.
 
 % G results in a sanity failure
 delay_helper(G, _, _) :-
