@@ -1205,6 +1205,7 @@ guessMergeClassesC1(DerivedClass, CalledClass) :-
     not(purecall(CalledMethod)), % Never merge purecall methods into classes.
     factDerivedClass(DerivedClass, BaseClass, Offset),
     find(CalledMethod, CalledClass),
+    iso_dif(DerivedClass, CalledClass),
 
     % The called method does NOT install any vftables that are on the base class.
     negation_helper(not((
