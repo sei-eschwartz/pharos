@@ -779,10 +779,10 @@ guessClassHasNoDerivedA(Class) :-
     delay(not((
                factConstructor(OtherConstructor),
                validMethodCallAtOffset(_Insn, OtherConstructor, Constructor, _AnyOffset)
-       ))),
+       )), late_guessClassHasNoDerivedA(Constructor)),
 
     find(Constructor, Class),
-    delay(not(factDerivedClass(_DerivedClass, Class, _SomeOffset))),
+    delay(not(factDerivedClass(_DerivedClass, Class, _SomeOffset)), late_guessClassHasNoDerivedA(Constructor)),
     doNotGuessHelper(factClassHasNoDerived(Class),
                      factClassHasUnknownDerived(Class)).
 
@@ -814,10 +814,10 @@ guessClassHasNoBaseB(Class) :-
     delay(not((
                factVFTableWrite(_Insn2, Constructor, _Offset1, OtherVFTable),
                iso_dif(VFTable, OtherVFTable)
-       ))),
+       )), guessClassHasNoBaseB(Constructor)),
 
     find(Constructor, Class),
-    delay(not(factDerivedClass(Class, _BaseClass, _Offset2))),
+    delay(not(factDerivedClass(Class, _BaseClass, _Offset2)), guessClassHasNoBaseB(Constructor)),
     doNotGuessHelper(factClassHasNoBase(Class),
                      factClassHasUnknownBase(Class)).
 
@@ -862,7 +862,7 @@ guessClassHasNoBaseSpecial(Class) :-
 
     % Class does not have any base classes
     % -10: Very low priority negation!
-    delay(not(factDerivedClass(Class, _Base, _Offset)), -10),
+    delay(not(factDerivedClass(Class, _Base, _Offset)), superlate_guessClassHasNoBaseSpecial(Class)),
 
     % ejs 11/18/22 A problem in ha_example.dll is that ha_example::~ha_example
     % is a singleton that installs handler::vftable, but we never connect
@@ -904,7 +904,7 @@ guessClassHasNoDerivedSpecial(Class) :-
     find(_, Class),
 
     % Class does not have any derived classes
-    delay(not(factDerivedClass(_DerivedClass, Class, _Offset))),
+    delay(not(factDerivedClass(_DerivedClass, Class, _Offset)), late_guessClassHasNoDerivedSpecial(Class)),
 
     % XXX: If we're at the end of reasoning and there is an unknown derived class, is that OK?
     % Should we leave it as is?  Try really hard to make a guess?  Or treat it as a failure?
@@ -943,9 +943,12 @@ guessLateMergeClassesF2(Class, Method) :-
 
     % One of the methods is in a class all by itself right now.
     % XXX: Is this monotonic?
-    delay(is_singleton(Method)),
+    delay(is_singleton(Method), guessMergeClasses_LateF2(Method)),
 
     findVFTable(VFTable, Class),
+
+    % A hack to delay this a bunch
+    delay_guess(guessMergeClasses_LateF2(Method, Class)),
 
     checkMergeClasses(Class, Method).
 
@@ -954,7 +957,7 @@ guessLateMergeClassesF1(Class, Method) :-
 
     % If a method is in the vftable of a derived and base class, we should give priority to the
     % base class.
-    delay(not(factDerivedClass(Class, _BaseClass, _Offset))).
+    delay(not(factDerivedClass(Class, _BaseClass, _Offset)), guessMergeClasses_LateF1(Class)).
 
 guessLateMergeClasses(Out) :-
     reportFirstSeen('guessLateMergeClassesF1'),
@@ -998,6 +1001,9 @@ guessLateMergeClasses_G1(Class1, Class2) :-
     (factConstructor(Method); (find(Ctor, Class1), factConstructor(Ctor)) -> true),
 
     find(Method, Class2),
+
+
+    delay_guess(guessMergeClasses_LateG1(Class1, Class2)),
     checkMergeClasses(Class1, Class2),
     logtraceln('Proposing ~Q.', factLateMergeClasses_G1(Class1, Class2, Method)).
 
@@ -1025,6 +1031,7 @@ guessLateMergeClasses_G2(Class1, Class2) :-
     % Same reasoning as in guessMergeClasses_B...
     not(symbolProperty(Method, virtual)),
     find(Method, Class2),
+    delay_guess(guessMergeClasses_LateG2(Class1, Class2)),
     checkMergeClasses(Class1, Class2),
     logtraceln('Proposing ~Q.', factLateMergeClasses_G2(Class1, Class2)).
 
@@ -1177,6 +1184,7 @@ guessMergeClassesB(Class1, Class2) :-
     forall(factMethodInVFTable(OtherVFTable, _Offset, Method1),
            findVFTable(OtherVFTable, Class2)),
 
+    delay_guess(guessMergeClassesB(Class1, Class2)),
     checkMergeClasses(Class1, Class2),
     logtraceln('Proposing ~Q.', factMergeClasses_B(Method1, VFTable, Class1, Class2)).
 
@@ -1211,7 +1219,7 @@ guessMergeClassesC1(DerivedClass, CalledClass) :-
     delay(not((
                find(BaseVFTable, BaseClass),
                factVFTableWrite(_Insn, CalledMethod, Offset, BaseVFTable)
-       ))),
+       )), guessMergeClassesC1(DerivedClass, CalledClass)),
     % There does NOT exist a distinct class that also calls the called method.  If this
     % happens, there is ambiguity about which derived class the CalledMethod should be placed
     % on, so it should probably go on the base.
@@ -1229,6 +1237,7 @@ guessMergeClassesC1(DerivedClass, CalledClass) :-
     % ordering dependency.  So we are leaving this rule here.
 
     checkMergeClasses(DerivedClass, CalledClass),
+
     logtraceln('Proposing ~Q.', factMergeClasses_C1(derived=DerivedClass,
                                                     calledclass=CalledClass,
                                                     calledmethod=CalledMethod,
@@ -1253,6 +1262,7 @@ guessMergeClassesC2(BaseClass, CalledClass) :-
     find(BaseVFTable, BaseClass),
     factVFTableWrite(_Insn, CalledMethod, Offset, BaseVFTable),
 
+    delay_guess(guessMergeClassesC2(BaseClass, CalledClass)),
     checkMergeClasses(BaseClass, CalledClass),
     logtraceln('Proposing ~Q.', factMergeClasses_C2(BaseClass, CalledClass, CalledMethod,
                                                    DerivedClass, Offset)).
@@ -1271,6 +1281,7 @@ guessMergeClassesC3(DerivedClass, CalledClass) :-
     not(purecall(CalledMethod)), % Never merge purecall methods into classes.
     factDerivedClass(DerivedClass, BaseClass, Offset),
     find(CalledMethod, CalledClass),
+    delay_guess(guessMergeClassesC3(DerivedClass, CalledClass)),
     checkMergeClasses(DerivedClass, CalledClass),
     logtraceln('Proposing ~Q.', factMergeClasses_C3(DerivedClass, CalledClass, CalledMethod,
                                                     BaseClass, Offset)).
@@ -1289,6 +1300,7 @@ guessMergeClassesC4(BaseClass, CalledClass) :-
     not(purecall(CalledMethod)), % Never merge purecall methods into classes.
     factDerivedClass(DerivedClass, BaseClass, Offset),
     find(CalledMethod, CalledClass),
+    delay_guess(guessMergeClassesC4(BaseClass, CalledClass)),
     checkMergeClasses(BaseClass, CalledClass),
     logtraceln('Proposing ~Q.', factMergeClasses_C4(BaseClass, CalledClass, CalledMethod,
                                                     DerivedClass, Offset)).
@@ -1367,7 +1379,7 @@ guessMergeClassesD(Class1, Class2) :-
     delay(not((
                reasonClassRelationship(Class1, Class2);
                reasonClassRelationship(Class2, Class1)
-       ))),
+       )), guessMergeClassesD(Class1, Class2)),
 
     checkMergeClasses(Class1, Class2),
 
@@ -1411,7 +1423,7 @@ guessMergeClassesG(Class1, Class2) :-
     setof(Class,
           Insn2^Offset2^Method2^(
               factVFTableWrite(Insn2, Method2, Offset2, VFTable),
-              delay(not(factVFTableOverwrite(Method2, _OtherVFTable, VFTable, Offset2))),
+              delay(not(factVFTableOverwrite(Method2, _OtherVFTable, VFTable, Offset2)), guessMergeClassesG(VFTable)),
               find(Method2, Class),
               iso_dif(Class1, Class)),
           ClassSet),
@@ -1421,6 +1433,7 @@ guessMergeClassesG(Class1, Class2) :-
 
     (ClassSet = [Class2]
      ->
+         delay_guess(guessMergeClassesG(Class1, Class2)),
          checkMergeClasses(Class1, Class2),
          logtraceln('guessMergeClassesG had one candidate class: ~Q.', [Class2]),
          logtraceln('Proposing ~Q.', factMergeClasses_G(Class1, Class2))
@@ -1462,8 +1475,8 @@ checkMergeClasses(Method1, Method2) :-
                      factNOTMergeClasses(Class2, Class1)),
     % XXX: Check factMergeClasses?
     % Now relationships between the classes are not allowed either.
-    delay(not(reasonClassRelationship(Class1, Class2))),
-    delay(not(reasonClassRelationship(Class2, Class1))).
+    delay(not(reasonClassRelationship(Class1, Class2)), checkMergeClasses(Class1, Class2)),
+    delay(not(reasonClassRelationship(Class2, Class1)), checkMergeClasses(Class1, Class2)).
 
 tryMergeClasses((Method1, Method2)) :- tryMergeClasses(Method1, Method2).
 % If we are merging classes that have already been merged, just ignore it.
@@ -1868,15 +1881,16 @@ guessDelay(Out) :-
 
     !,
 
-    setof(P, delay_queue(_, P, _), Pset),
-    max_list(Pset, Pmax),
+    setof(P, G^C^delay_queue(G, P, C), Pset),
+    min_member(Pmin, Pset),
 
-    % Sorting the queue takes a while.  We should really use a priority queue...
-    % but this hack works ok for now.
-    %member(Pmax, [0, -10, _]),
+    logtraceln('guessDelay: Priority ~Q selected from queue.', [Pmin]),
+    %logtraceln('guessDelay: Priority ~Q selected from ~Q', [Pmin, Pset]),
 
-    setof((G, Pmax, Commit),
-          delay_queue(G, Pmax, Commit),
+    %break,
+
+    setof((G, Pmin, Commit),
+          delay_queue(G, Pmin, Commit),
           Gset),
 
     Out = tryBinarySearch(tryDelay, tryNOTDelay, Gset).
