@@ -2406,10 +2406,15 @@ reasonClassRelatedMethod_B(Class1, Class2, Method1, Method2) :-
 
     % ejs 2/12/21 Adding a more conservative (but possibly unnecessary) check for ANY object at
     % offset 0 (instead of Class1).
-    delay_and_commit(not((find(Function, FunctionClass), factObjectInObject(FunctionClass, _InnerClass1, 0)))),
+
+    % We probably don't want to commit to these.  If we had to choose between
+    % getting a RelatedMethod wrong and an ObjectInObject, it's probably better
+    % to get the RelatedMethod wrong.
+
+    delay(not((find(Function, FunctionClass), factObjectInObject(FunctionClass, _InnerClass1, 0)))),
 
     % We also need to verify that Class2 has no object at 0.
-    delay_and_commit(not((factObjectInObject(Class2, _InnerClass2, 0)))),
+    delay(not((factObjectInObject(Class2, _InnerClass2, 0)))),
 
     % Functions that are methods can call base methods
 
