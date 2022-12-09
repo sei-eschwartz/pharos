@@ -2525,8 +2525,10 @@ reasonClassAtOffset_int(OuterClass, Offset, InnerClass, [Fact]) :-
 reasonClassAtOffset_int(OuterClass, Offset, InnerClass, L) :-
     ground(Offset),
     reasonClassAtOffset_int(OuterClass, MiddleOffset, MiddleClass, OL),
+
     % If Offset is bound, use it to bind InnerOffset.
     InnerOffset is Offset - MiddleOffset,
+    InnerOffset >= 0,
     reasonClassAtOffset_int(MiddleClass, InnerOffset, InnerClass, IL),
 
     (OuterClass = InnerClass
