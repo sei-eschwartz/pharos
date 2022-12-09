@@ -29,8 +29,22 @@ delay_and_commit(G) :- delay_and_commit(G, 0).
 
 delay_and_commit(G, P) :- delay_helper(G, P, true).
 
+% Turn terms into lists because they sort in a more convenient order.
+priority_helper(P, PL) :-
+    P =.. PL.
+
 delay_helper(G, _, _) :-
     var(G) -> throw_with_backtrace(user_error(delay_helper)).
+
+% Even if we've already delayed for P, if there is a higher priority guess in
+% the queue, we want to stall.  For example, even if we've already made a
+% guessMergeClassesB guess, if there is a pending guessMergeClassesA delay, we
+% want to handle that first to give A the opportunity to handle it.
+delay_helper(_, Pin, _) :-
+    priority_helper(Pin, P),
+    delay_queue(_, OldP, Commit), OldP @< P,
+    !,
+    fail.
 
 % We've already delayed for G
 delay_helper(G, _, _) :-
@@ -50,15 +64,22 @@ delay_helper(G, _, _) :-
     not(G), !, fail.
 
 % Queue G and fail.
-delay_helper(G, P, Commit) :-
+delay_helper(G, Pin, Commit) :-
     !,
-    (delay_queue(G, OldP, Commit), P >= OldP)
-    % There is a better or same priority queued element
-    -> fail
-    ; logdebugln('I am queueing delay ~Q', G),
-      assert(delay_queue(G, P, Commit)),
-      fail.
+    Pin =.. P,
+    logdebugln('I am queueing delay ~Q', G),
+    assert(delay_queue(G, P, Commit)),
+    fail.
 
+% This predicate is intended to be used in guessing rules to make sure that
+% higher priority guessing rules come first.  Example usage is
+% ensure_guess_order(guessMergeClassesA(C1,C2)).
+delay_guess(PriorityTerm) :-
+    not(ground(PriorityTerm)) -> throw(ensure_guess_order).
+
+delay_guess(PriorityTerm) :-
+    DummyGoal = (guessOrder(PriorityTerm)=guessOrder(PriorityTerm)),
+    delay(DummyGoal, PriorityTerm).
 
 sort_tuple((A,B), (C,D)) :-
     (A @< B -> (C=A, D=B); (C=B, D=A)).
