@@ -34,9 +34,9 @@ trigger_hook(factClassSizeGTE(A,B)) :-
     !,
     assertz(trigger_fact(factClassSizeGTE(A,B))).
 
-trigger_hook(factClassCallsMethod(A,B)) :-
+trigger_hook(factClassCallsMethod(A,B,C)) :-
     !,
-    assertz(trigger_fact(factClassCallsMethod(A,B))).
+    assertz(trigger_fact(factClassCallsMethod(A,B,C))).
 
 trigger_hook(factNOTMergeClasses(A,B)) :-
     !,
@@ -142,7 +142,7 @@ dispatchTrigger(factVFTableWrite(_Insn, DerivedConstructor, _Offset, DerivedVFTa
 % End HasUnknownBase_C rules
 
 % HasUnknownBase_E
-dispatchTrigger(factClassCallsMethod(Class, Method), Out) :-
+dispatchTrigger(factClassCallsMethod(Class, Method, _Offset), Out) :-
     setof(Class,
           MethodClass^(reasonClassHasUnknownBase_E(Class, Method, MethodClass),
            not(factClassHasUnknownBase(Class)),

@@ -91,7 +91,7 @@ reasonMethod_I(Method) :-
 
 % Because it's called on a class that's known to be a class.
 reasonMethod_J(Method) :-
-    factClassCallsMethod(_Class, Method).
+    factClassCallsMethod(_, Method, _).
 
 % Because the thisptr is known to be an object pointer.
 %% reasonMethod_K(Method) :-
@@ -2314,7 +2314,7 @@ reasonClassHasUnknownBase_D(Class) :-
 
 % Because the class shares a method that we know is not assigned to the class.
 reasonClassHasUnknownBase_E(Class, Method, MethodClass) :-
-    factClassCallsMethod(Class, Method),
+    factClassCallsMethod(Class, Method, _),
     find(Method, MethodClass),
     dynFactNOTMergeClasses(Class, MethodClass),
     % Debugging
@@ -2345,7 +2345,7 @@ reasonClassRelatedMethod(Class, Method) :-
 
 % ClassCallsMethod => ClassRelatedMethod
 reasonClassRelatedMethod_A(Class, Method) :-
-    factClassCallsMethod(Class, Method).
+    factClassCallsMethod(Class, Method, _).
 
 :- table thisPtrUsage/3 as opaque.
 thisPtrUsage(Function, ThisPtr, Method) :-
@@ -2419,26 +2419,26 @@ reasonClassRelatedMethod_C(InnerClass, InnerMethod) :-
     iso_dif(OuterClass, InnerClass),
     iso_dif(InnerClass, InnerMethod),
     % Debugging
-    logtraceln('~@~Q.', [not(factClassCallsMethod(InnerClass, InnerMethod)),
+    logtraceln('~@~Q.', [not(factClassRelatedMethod(InnerClass, InnerMethod)),
                          reasonClassRelatedMethod_C(OuterClass, OuterMethod,
                                                     InnerClass, InnerMethod)]).
 
 
 % classCallsMethod(Class, Method) means that Method can be called by a method on Class.  The
 % opposite is not necessarily true.
-:- table reasonClassCallsMethod/2 as incremental.
-:- table reasonClassCallsMethod_A/2 as incremental.
-:- table reasonClassCallsMethod_B/2 as incremental.
-:- table reasonClassCallsMethod_C/2 as incremental.
-:- table reasonClassCallsMethod_D/2 as incremental.
-:- table reasonClassCallsMethod_E/2 as incremental.
-:- table reasonClassCallsMethod_F/2 as incremental.
+:- table reasonClassCallsMethod/3 as incremental.
+:- table reasonClassCallsMethod_A/3 as incremental.
+:- table reasonClassCallsMethod_B/3 as incremental.
+:- table reasonClassCallsMethod_C/3 as incremental.
+:- table reasonClassCallsMethod_D/3 as incremental.
+:- table reasonClassCallsMethod_E/3 as incremental.
+:- table reasonClassCallsMethod_F/3 as incremental.
 
-reasonClassCallsMethod(Class, Method) :-
+reasonClassCallsMethod(Class, Method, Offset) :-
     %logwarnln('Recomputing reasonClassCallsMethod...'),
     or([%reasonClassCallsMethod_A(Class, Method),
-        reasonClassCallsMethod_B(Class, Method),
-        reasonClassCallsMethod_C(Class, Method)
+        reasonClassCallsMethod_B(Class, Method, Offset),
+        reasonClassCallsMethod_C(Class, Method, Offset)
         %reasonClassCallsMethod_D(Class, Method)
       %        reasonClassCallsMethod_E(Class, Method),
       %        reasonClassCallsMethod_F(Class, Method)
@@ -2447,7 +2447,7 @@ reasonClassCallsMethod(Class, Method) :-
 % Because the method appears in a vftable assigned in another method.  This rule is direction
 % safe because we know the class that "owns" the VFTable through findVFTable.
 % PAPER: Call-2
-reasonClassCallsMethod_B(Class1, Method2) :-
+reasonClassCallsMethod_B(Class1, Method2, unknown) :-
     findVFTable(VFTable, Class1),
     % And the method is in that virtual function table.
     factVFTableEntry(VFTable, _TableOffset, Entry2),
@@ -2458,14 +2458,14 @@ reasonClassCallsMethod_B(Class1, Method2) :-
     find(Method2, Class2),
     iso_dif(Class1, Class2),
     % Debugging
-    logtraceln('~@~Q.', [not(factClassCallsMethod(Class1, Method2)),
+    logtraceln('~@~Q.', [not(factClassCallsMethod(Class1, Method2, _)),
                          reasonClassCallsMethod_B(VFTable, Class1, Method2)]).
 
 % Because one method calls another method on the same this-pointer.  This rule is direction
 % safe because we know what class Method1 is associated with, and if that conclusion was
 % correct, this rule will be correct as well.
 % PAPER: Call-3
-reasonClassCallsMethod_C(Class1, Method2) :-
+reasonClassCallsMethod_C(Class1, Method2, Offset) :-
     paperSoundnessProblem(Offset=0),
     validMethodCallAtOffset(_Insn, Method1, Method2, Offset),
 
@@ -2488,8 +2488,8 @@ reasonClassCallsMethod_C(Class1, Method2) :-
            sequenceAreAllDerived(Seq)),
 
     % Debugging
-    logtraceln('~@~Q.', [not(factClassCallsMethod(Class1, Method2)),
-                         reasonClassCallsMethod_C(Method1, Class1, Method2)]).
+    logtraceln('~@~Q.', [not(factClassCallsMethod(Class1, Method2, Offset)),
+                         reasonClassCallsMethod_C(Method1, Class1, Method2, Offset)]).
 
 % This predicate is used to see if the object at the listed offset is a Class, and if so, which
 % one.  It's notable in that it is recursive however, so it can cover multiple levels.  It
@@ -2815,7 +2815,7 @@ reasonMergeClasses_B(BaseClass, MethodClass) :-
 % confusion about whether we already know whether it's embedded or
 % PAPER: Merging-2
 reasonMergeClasses_C(Class, ExistingClass) :-
-    factClassCallsMethod(Class, Method),
+    factClassCallsMethod(Class, Method, _Offset),
     not(purecall(Method)), % Never merge purecall methods into classes.
     % If we have no bases, it can't be on a base class.
     factClassHasNoBase(Class),
@@ -3094,8 +3094,8 @@ reasonNOTMergeClasses_A(Class1, Class2) :-
 % ED_PAPER_INTERESTING
 reasonNOTMergeClasses_C_asymmetric(DerivedClass, MethodClass) :-
     factDerivedClass(DerivedClass, BaseClass, _ObjectOffset),
-    factClassCallsMethod(DerivedClass, Method),
-    factClassCallsMethod(BaseClass, Method),
+    factClassCallsMethod(DerivedClass, Method, _),
+    factClassCallsMethod(BaseClass, Method, _),
     find(Method, MethodClass),
     iso_dif(DerivedClass, MethodClass),
 
@@ -3321,7 +3321,7 @@ reasonNOTMergeClasses_O(Class1Sorted, Class2Sorted) :-
     MinSize is MemberSize + MemberOffset,
 
     % MemberClass calls a method on SmallClass. This is just to avoid making tons of facts
-    factClassCallsMethod(MemberClass, CalledMethod),
+    factClassCallsMethod(MemberClass, CalledMethod, _),
     find(CalledMethod, CalledClass),
     iso_dif(MemberClass, CalledClass),
 
@@ -3397,7 +3397,7 @@ reasonNOTMergeClasses_Q(Class1Sorted, Class2Sorted, Method1, Method2) :-
 % the called method cannot be on the base class.
 reasonNOTMergeClasses_R(Class1Sorted, Class2Sorted) :-
     % A derived class calls a method
-    factClassCallsMethod(DerivedClass, CalledMethod),
+    factClassCallsMethod(DerivedClass, CalledMethod, _),
     not(purecall(CalledMethod)), % Never merge purecall methods into classes.
     factDerivedClass(DerivedClass, BaseClass, Offset),
     find(CalledMethod, CalledClass),
