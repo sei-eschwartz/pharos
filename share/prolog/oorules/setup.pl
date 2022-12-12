@@ -89,7 +89,7 @@
 :- dynamic factClassHasUnknownBase/1 as incremental.
 :- dynamic factClassHasUnknownDerived/1 as incremental.
 :- dynamic factNOTMergeClasses/2 as incremental.
-:- dynamic factClassCallsMethod/2 as incremental.
+:- dynamic factClassCallsMethod/3 as incremental.
 :- dynamic factClassRelatedMethod/2 as incremental.
 
 % This fact was a sub-computation of guessMergeClassesB that added a lot of overhead.  By
@@ -124,7 +124,7 @@ classArgs(factClassHasUnknownDerived/1, 1).
 classArgs(factNOTMergeClasses/2, 1).
 classArgs(factNOTMergeClasses/2, 2).
 classArgs(factClassRelatedMethod/2, 1).
-classArgs(factClassCallsMethod/2, 1).
+classArgs(factClassCallsMethod/3, 1).
 classArgs(factClassSizeGTE/2, 1).
 classArgs(factClassSizeLTE/2, 1).
 
@@ -181,7 +181,6 @@ classArgs(factClassSizeLTE/2, 1).
 :- dynamic guessedClassHasUnknownDerived/1 as incremental.
 :- dynamic guessedMergeClasses/2 as incremental.
 :- dynamic guessedNOTMergeClasses/2 as incremental.
-%:- dynamic factClassCallsMethod/2. % Only concluded.
 
 % ============================================================================================
 % Assorted declarations.

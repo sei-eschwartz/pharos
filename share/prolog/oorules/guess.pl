@@ -60,7 +60,7 @@ tryBinarySearchInt(PosPred, NegPred, L) :-
 
 tryBinarySearchInt(PosPred, NegPred, List) :-
     logtraceln('~@tryBinarySearch on ~Q: ~Q', [length(List, ListLen), PosPred, ListLen]),
-    logtraceln([List]),
+    %logtraceln([List]),
     % First try the positive guess on everything. If that fails, we want to retract all the
     % guesses and recurse on a subproblem.
     maplist(PosPred, List);
@@ -1209,7 +1209,8 @@ guessMergeClasses(Out) :-
 % classes that call the method, guess that the method is on the derived class.
 guessMergeClassesC1(DerivedClass, CalledClass) :-
     % A derived class calls a method
-    factClassCallsMethod(DerivedClass, CalledMethod),
+    % There is only ambiguity when Offset == 0
+    factClassCallsMethod(DerivedClass, CalledMethod, 0),
     not(purecall(CalledMethod)), % Never merge purecall methods into classes.
     factDerivedClass(DerivedClass, BaseClass, Offset),
     find(CalledMethod, CalledClass),
@@ -1253,7 +1254,7 @@ guessMergeClasses(Out) :-
 
 % If the called method installs a base VFTable, guess that the method belongs on the base class.
 guessMergeClassesC2(BaseClass, CalledClass) :-
-    factClassCallsMethod(DerivedClass, CalledMethod),
+    factClassCallsMethod(DerivedClass, CalledMethod, 0),
     not(purecall(CalledMethod)), % Never merge purecall methods into classes.
     factDerivedClass(DerivedClass, BaseClass, Offset),
     find(CalledMethod, CalledClass),
@@ -1277,7 +1278,7 @@ guessMergeClasses(Out) :-
 
 % If we haven't made a guess about the called method, guess that it is on the derived class.
 guessMergeClassesC3(DerivedClass, CalledClass) :-
-    factClassCallsMethod(DerivedClass, CalledMethod),
+    factClassCallsMethod(DerivedClass, CalledMethod, 0),
     not(purecall(CalledMethod)), % Never merge purecall methods into classes.
     factDerivedClass(DerivedClass, BaseClass, Offset),
     find(CalledMethod, CalledClass),
@@ -1296,7 +1297,7 @@ guessMergeClasses(Out) :-
 
 % If we still haven't made a guess about the called method, guess that it is on the base class.
 guessMergeClassesC4(BaseClass, CalledClass) :-
-    factClassCallsMethod(BaseClass, CalledMethod),
+    factClassCallsMethod(BaseClass, CalledMethod, _CallOffset),
     not(purecall(CalledMethod)), % Never merge purecall methods into classes.
     factDerivedClass(DerivedClass, BaseClass, Offset),
     find(CalledMethod, CalledClass),

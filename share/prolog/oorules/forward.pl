@@ -460,15 +460,15 @@ concludeClassRelatedMethod(Out) :-
 
 concludeClassCallsMethod(Out) :-
     reportFirstSeen('concludeClassCallsMethod'),
-    setof((Class, Method),
-          ExistingClass^(reasonClassCallsMethod(Class, Method),
+    setof((Class, Method, Offset),
+          ExistingClass^(reasonClassCallsMethod(Class, Method, Offset),
            iso_dif(Class, Method),
            find(Method, ExistingClass),
            iso_dif(Class, ExistingClass),
-           not(factClassCallsMethod(Class, Method)),
+           not(factClassCallsMethod(Class, Method, Offset)),
            %not(factNOTClassCallsMethod(Class, Method)),
            loginfoln('Concluding ~Q.',
-                     factClassCallsMethod(Class, Method))),
+                     factClassCallsMethod(Class, Method, Offset))),
           TupleSets),
     maplist(try_assert_builder(factClassCallsMethod), TupleSets, ActionSets),
     Out = all(ActionSets).
