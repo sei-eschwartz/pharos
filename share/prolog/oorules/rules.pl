@@ -351,7 +351,7 @@ reasonNOTConstructor_H(Method) :-
     % supposed to be installed on a virtual base so we don't see it.  This line is sufficient
     % to fix the model compiler because we have perfect knowledge of virtual bases, but it's
     % probably not conservative enough in practice.
-    not(factDerivedClass(Class, VirtualBase, _, virtual)),
+    not(factDerivedClass(Class, _VirtualBase, _, virtual)),
 
     % Since we don't have visibility into VFTable writes from imported constructors and
     % destructors this rule does not apply to imported methods.
@@ -3335,7 +3335,7 @@ reasonNOTMergeClasses_O(Class1Sorted, Class2Sorted) :-
 
     % Debugging
     logtraceln('~@~Q.', [not(dynFactNOTMergeClasses(Class1Sorted, Class2Sorted)),
-                         reasonNOTMergeClasses_O(Size1, Size2, Class1Sorted, Class2Sorted)]).
+                         reasonNOTMergeClasses_O(Class1Sorted, Class2Sorted, MemberSize, CalledClassSize)]).
 
 % Because we call a constructor or destructor on part of our object.
 % PAPER: ??? NEW!
