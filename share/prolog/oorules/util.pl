@@ -48,7 +48,7 @@ delay_helper(_, Pin, _) :-
 
 % We've already delayed for G
 delay_helper(G, _, _) :-
-    delay_goal(G, _),
+    (modelCompiler; delay_goal(G, _)),
     !,
     % Verify G is still true!,
     once(call(G)),
