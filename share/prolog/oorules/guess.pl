@@ -1045,6 +1045,41 @@ guessLateMergeClasses(Out) :-
     OneTuple=[(Class, Method)],
     Out = tryBinarySearch(tryMergeClasses, tryNOTMergeClasses, OneTuple, 1).
 
+% --------------------------------------------------------------------------------------------
+% Various rules for guessing related methods...
+% --------------------------------------------------------------------------------------------
+
+% ClassCallsMethod(C,M) and ClassRelatedMethod(C,M) both require knowing that M
+% is not on an embedded object.  But what if there is an embedded object?  If we
+% see a call, it could be a call to the outer or inner classes.  Here we'll just
+% guess that it's on the Outer class.  Otherwise this rule is just like
+% reasonClassRelatedMethod_B.
+
+guessClassRelatedMethod1(C1, M2, unknown) :-
+    reasonClassRelatedMethod_B(C1, C2, M1, M2, false),
+    % Only trigger the guess if the forward rule won't apply
+    not(forall(reasonClassAtOffset(C1, 0, _, Seq),
+               sequenceAreAllDerived(Seq))),
+    doNotGuessHelper(factClassRelatedMethod(C1, M2, unknown),
+                     factNOTClassRelatedMethod(C1, M2, unknown)).
+
+guessClassRelatedMethod(Out) :-
+    reportFirstSeen('guessClassRelatedMethod1'),
+    minof((Class, Method, Offset),
+          guessClassRelatedMethod1(Class, Method, Offset)),
+    !,
+    OneTuple=[(Class, Method, Offset)],
+    Out = tryBinarySearch(tryClassRelatedMethod, tryNOTClassRelatedMethod, OneTuple, 1).
+
+tryClassRelatedMethod((Class, Method, Offset)) :-
+    countGuess,
+    loginfoln('Guessing ~Q.', factClassRelatedMethod(Class, Method, Offset)),
+    try_assert(factClassRelatedMethod(Class, Method, Offset)).
+
+tryNOTClassRelatedMethod((Class, Method, Offset)) :-
+    countGuess,
+    loginfoln('Guessing ~Q.', factNOTClassRelatedMethod(Class, Method, Offset)),
+    try_assert(factNOTClassRelatedMethod(Class, Method, Offset)).
 
 % --------------------------------------------------------------------------------------------
 % Various rules for guessing method to class assignments...
