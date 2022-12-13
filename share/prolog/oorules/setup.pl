@@ -91,6 +91,7 @@
 :- dynamic factNOTMergeClasses/2 as incremental.
 :- dynamic factClassCallsMethod/3 as incremental.
 :- dynamic factClassRelatedMethod/3 as incremental.
+:- dynamic factNOTClassRelatedMethod/3 as incremental.
 
 % This fact was a sub-computation of guessMergeClassesB that added a lot of overhead.  By
 % putting it in a separate fact, we can make it a trigger-based fact that is maintained with
@@ -124,6 +125,7 @@ classArgs(factClassHasUnknownDerived/1, 1).
 classArgs(factNOTMergeClasses/2, 1).
 classArgs(factNOTMergeClasses/2, 2).
 classArgs(factClassRelatedMethod/3, 1).
+classArgs(factNOTClassRelatedMethod/3, 1).
 classArgs(factClassCallsMethod/3, 1).
 classArgs(factClassSizeGTE/2, 1).
 classArgs(factClassSizeLTE/2, 1).
@@ -585,6 +587,10 @@ guess :-
               guessFinalDeletingDestructor(Out);
               % RealDestructorChange! (uncomment next line and add semicolon above)
               %guessFinalRealDestructor(Out)
+
+              % Guess that a call to a class with an embedded object is actually
+              % going to the outer object.
+              guessClassRelatedMethod(Out);
 
               % These rules must come very late, but before guessCommitClassHasNoBase.  See
               % guess.pl for more commentary.
