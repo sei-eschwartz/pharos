@@ -227,12 +227,12 @@ dispatchTrigger(factMethodInVFTable(VFTable1, _Offset, Method), Out) :-
 
 % reasonClassRelatedMethod_B
 dispatchTrigger(findint(FindMethod, FindClass), Out) :-
-    setof((Class1, Method2),
+    setof((Class1, Method2, unknown),
           Class2^Method1^(((Class1=FindClass, Method1=FindMethod);
                            (Class2=FindClass, Method2=FindMethod)),
                           (reasonClassRelatedMethod_B(Class1, Class2, Method1, Method2),
-                           not(factClassRelatedMethod(Class1, Method2)),
-                           loginfoln('Concluding ~Q.', factClassRelatedMethod(Class1, Method2)))),
+                           not(factClassRelatedMethod(Class1, Method2, unknown)),
+                           loginfoln('Concluding ~Q.', factClassRelatedMethod(Class1, Method2, unknown)))),
           ClassSets),
     maplist(try_assert_builder(factClassRelatedMethod), ClassSets, ActionSets),
     Out = all(ActionSets).

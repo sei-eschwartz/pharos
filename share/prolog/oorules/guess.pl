@@ -979,7 +979,8 @@ guessLateMergeClasses(Out) :-
 
 
 guessLateMergeClasses_G1(Class1, Class2) :-
-    factClassRelatedMethod(Class1, Method),
+    member(Offset, [0, unknown]),
+    factClassRelatedMethod(Class1, Method, Offset),
     not(purecall(Method)), % Never merge purecall methods into classes.
     % Same reasoning as in guessMergeClasses_B...
     not(symbolProperty(Method, virtual)),
@@ -1002,8 +1003,8 @@ guessLateMergeClasses_G1(Class1, Class2) :-
 
     find(Method, Class2),
 
+    delay_guess(guessMergeClasses_LateG1(Class1, Class2, Offset)),
 
-    delay_guess(guessMergeClasses_LateG1(Class1, Class2)),
     checkMergeClasses(Class1, Class2),
     logtraceln('Proposing ~Q.', factLateMergeClasses_G1(Class1, Class2, Method)).
 
@@ -1026,12 +1027,13 @@ guessLateMergeClasses(Out) :-
 % And finally just guess regardless of derived class facts.
 % ED_PAPER_INTERESTING
 guessLateMergeClasses_G2(Class1, Class2) :-
-    factClassRelatedMethod(Class1, Method),
+    member(Offset, [0, unknown]),
+    factClassRelatedMethod(Class1, Method, Offset),
     not(purecall(Method)), % Never merge purecall methods into classes.
     % Same reasoning as in guessMergeClasses_B...
     not(symbolProperty(Method, virtual)),
     find(Method, Class2),
-    delay_guess(guessMergeClasses_LateG2(Class1, Class2)),
+    delay_guess(guessMergeClasses_LateG2(Class1, Class2, Offset)),
     checkMergeClasses(Class1, Class2),
     logtraceln('Proposing ~Q.', factLateMergeClasses_G2(Class1, Class2)).
 
@@ -1210,7 +1212,8 @@ guessMergeClasses(Out) :-
 guessMergeClassesC1(DerivedClass, CalledClass) :-
     % A derived class calls a method
     % There is only ambiguity when Offset == 0
-    factClassCallsMethod(DerivedClass, CalledMethod, 0),
+    Call=factClassCallsMethod(DerivedClass, CalledMethod, 0),
+    Call,
     not(purecall(CalledMethod)), % Never merge purecall methods into classes.
     factDerivedClass(DerivedClass, BaseClass, Offset),
     find(CalledMethod, CalledClass),
