@@ -862,7 +862,7 @@ guessClassHasNoBaseSpecial(Class) :-
 
     % Class does not have any base classes
     % -10: Very low priority negation!
-    delay(not(factDerivedClass(Class, _Base, _Offset)), superlate_guessClassHasNoBaseSpecial(Class)),
+    delay(not(factDerivedClass(Class, _Base, _DOffset)), superlate_guessClassHasNoBaseSpecial(Class)),
 
     % ejs 11/18/22 A problem in ha_example.dll is that ha_example::~ha_example
     % is a singleton that installs handler::vftable, but we never connect
@@ -873,7 +873,7 @@ guessClassHasNoBaseSpecial(Class) :-
     not((
         % There is not a Method on Class that installs a VFTable on another class
         find(Method, Class),
-        factVFTableWrite(_Insn, Method, Offset, VFTable),
+        factVFTableWrite(_Insn, Method, _VFTOffset, VFTable),
         find(VFTable, Class2), iso_dif(Class, Class2),
 
         % We could check to see if the VFTable installation is explained by an
@@ -1056,7 +1056,7 @@ guessLateMergeClasses(Out) :-
 % reasonClassRelatedMethod_B.
 
 guessClassRelatedMethod1(C1, M2, unknown) :-
-    reasonClassRelatedMethod_B(C1, C2, M1, M2, false),
+    reasonClassRelatedMethod_B(C1, _C2, _M1, M2, false),
     % Only trigger the guess if the forward rule won't apply
     not(forall(reasonClassAtOffset(C1, 0, _, Seq),
                sequenceAreAllDerived(Seq))),
@@ -1555,6 +1555,8 @@ guessRealDestructor(Out) :-
 
     Out = tryOrNOTRealDestructor(Method).
 
+:- discontiguous guessRealDestructor/1.
+
 :- table guessHelper/3 as opaque.
 guessHelper(Func, Thunk, Method) :-
     once((callTarget(_Insn, Func, Thunk),
@@ -1571,7 +1573,7 @@ guessRealDestructor(Out) :-
                      factNOTRealDestructor(Method)),
 
     % It's called by a function
-    guessHelper(Func, Thunk, Method),
+    guessHelper(Func, _Thunk, Method),
 
     % And no one calls or thunks to Func.
     not(callTarget(_, _, Func)),
@@ -1880,7 +1882,7 @@ tryDelay((G,P,Commit)) :-
 
 tryNOTDelay((G,P)) :-
     loginfoln('tryNOTDelay'),
-    try_retract(delay_queue(G, P, Commit)),
+    try_retract(delay_queue(G, P, _Commit)),
 
     % Do nothing if we've already committed one way or the other
     %% (not(G) -> true;
@@ -1902,7 +1904,7 @@ tryOrNOTDelay((G, P)) :-
     (
         tryDelay(G);
         tryNOTDelay(G);
-        logwarnln('Something is wrong upstream: ~Q.', delay(Method)),
+        logwarnln('Something is wrong upstream: ~Q.', delay(G, P)),
         fail
     ).
 

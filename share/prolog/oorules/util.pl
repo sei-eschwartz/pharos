@@ -42,7 +42,7 @@ delay_helper(G, _, _) :-
 % want to handle that first to give A the opportunity to handle it.
 delay_helper(_, Pin, _) :-
     priority_helper(Pin, P),
-    delay_queue(_, OldP, Commit), OldP @< P,
+    delay_queue(_, OldP, _), OldP @< P,
     !,
     fail.
 
