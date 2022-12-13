@@ -382,7 +382,8 @@ insanityNegation(Out) :-
 
 :- table sanityChecks/1 as incremental.
 sanityChecks(Out) :-
-    groundSanityChecks(Out);
+    % Turn these off by default.
+    %groundSanityChecks(Out);
     insanityNoBaseConsistency(Out);
     insanityEmbeddedAndNot(Out);
     insanityConstructorAndNotConstructor(Out);
