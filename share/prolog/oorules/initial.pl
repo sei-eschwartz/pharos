@@ -54,7 +54,7 @@ unconditional(L) :- unconditional_list(L).
 
 % This can eventually compare the condition to the function's arguments, but for
 % now we'll just see if there is a condition.
-initVBasesCondition(Function, ConditionList) :-
+initVBasesCondition(_Function, ConditionList) :-
   not(unconditional(ConditionList)).
 
 % --------------------------------------------------------------------------------------------
