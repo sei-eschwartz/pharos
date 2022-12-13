@@ -2351,27 +2351,27 @@ reasonClassHasUnknownBaseSet(Set) :-
 % classRelatedMethod(Class, Method) is true if there is an object containing a method on Class
 % and Method.  The Class and Method are obviously related in some way, but there is no
 % information about the direction of that relationship.
-:- table reasonClassRelatedMethod/2 as incremental.
-:- table reasonClassRelatedMethod_A/2 as incremental.
-:- table reasonClassRelatedMethod_B/2 as incremental.
-:- table reasonClassRelatedMethod_C/2 as incremental.
+:- table reasonClassRelatedMethod/3 as incremental.
+:- table reasonClassRelatedMethod_A/3 as incremental.
+:- table reasonClassRelatedMethod_B/3 as incremental.
+:- table reasonClassRelatedMethod_C/3 as incremental.
 
-reasonClassRelatedMethod(Class, Method) :-
-    reasonClassRelatedMethod_A(Class, Method);
+reasonClassRelatedMethod(Class, Method, Offset) :-
+    reasonClassRelatedMethod_A(Class, Method, Offset);
     % _B is now a trigger rule
     % Re-enabled (temporarily) for negation branch
-    reasonClassRelatedMethod_B(Class, Method);
-    reasonClassRelatedMethod_C(Class, Method).
+    reasonClassRelatedMethod_B(Class, Method, Offset);
+    reasonClassRelatedMethod_C(Class, Method, Offset).
 
 % ClassCallsMethod => ClassRelatedMethod
-reasonClassRelatedMethod_A(Class, Method) :-
-    factClassCallsMethod(Class, Method, _).
+reasonClassRelatedMethod_A(Class, Method, Offset) :-
+    factClassCallsMethod(Class, Method, Offset).
 
 :- table thisPtrUsage/3 as opaque.
 thisPtrUsage(Function, ThisPtr, Method) :-
     thisPtrUsage(_, Function, ThisPtr, Method).
 
-reasonClassRelatedMethod_B(Class1, Method2) :-
+reasonClassRelatedMethod_B(Class1, Method2, unknown) :-
     reasonClassRelatedMethod_B(Class1, _, _, Method2).
 
 % Because two methods are called on the same this-pointer in the same function.  This rule is
@@ -2404,28 +2404,23 @@ reasonClassRelatedMethod_B(Class1, Class2, Method1, Method2) :-
     % (a method on Function's class).  This incorrectly concludes that Method2 is called from
     % Method1 unless it is blocked by a clause like this...  but what is really correct here?
 
-    % ejs 2/12/21 Adding a more conservative (but possibly unnecessary) check for ANY object at
-    % offset 0 (instead of Class1).
-
     % We probably don't want to commit to these.  If we had to choose between
     % getting a RelatedMethod wrong and an ObjectInObject, it's probably better
     % to get the RelatedMethod wrong.
 
-    delay(not((find(Function, FunctionClass), factObjectInObject(FunctionClass, _InnerClass1, 0)))),
+    delay(not((factObjectInObject(Class1, _InnerClass1, 0)))),
 
     % We also need to verify that Class2 has no object at 0.
     delay(not((factObjectInObject(Class2, _InnerClass2, 0)))),
 
-    % Functions that are methods can call base methods
-
     % Debugging
-    logtraceln('~@~Q.', [not(factClassRelatedMethod(Class1, Method2)),
+    logtraceln('~@~Q.', [not(factClassRelatedMethod(Class1, Method2, 0)),
                          reasonClassRelatedMethod_B(function=Function, class1=Class1, class2=Class2, method1=Method1, method2=Method2)]).
 
 % ejs 6/15/21 We made a modification to reasonClassCallsMethod_D that turned out to be
 % incorrect, but improves edit distance by ~0.7% on the paper suite.  This rule is an attempt
 % to re-implement that without the directionality.
-reasonClassRelatedMethod_C(InnerClass, InnerMethod) :-
+reasonClassRelatedMethod_C(InnerClass, InnerMethod, unknown) :-
     % An outer method calls and inner method on a this pointer.
     thisPtrUsage(_Insn, OuterMethod, InnerThisPtr, InnerMethod),
     % There's an offset from the outer this pointer to the inner this pointer.
@@ -2439,7 +2434,7 @@ reasonClassRelatedMethod_C(InnerClass, InnerMethod) :-
     iso_dif(OuterClass, InnerClass),
     iso_dif(InnerClass, InnerMethod),
     % Debugging
-    logtraceln('~@~Q.', [not(factClassRelatedMethod(InnerClass, InnerMethod)),
+    logtraceln('~@~Q.', [not(factClassRelatedMethod(InnerClass, InnerMethod, unknown)),
                          reasonClassRelatedMethod_C(OuterClass, OuterMethod,
                                                     InnerClass, InnerMethod)]).
 
@@ -2962,7 +2957,7 @@ reasonMergeClasses_J(VFTable1Class, VFTable2Class) :-
 % If two methods are present on the same object, and we know neither method's class has a base
 % class, the methods must be on the same object.
 reasonMergeClasses_K(Class1, Class2) :-
-    factClassRelatedMethod(Class1, Method),
+    factClassRelatedMethod(Class1, Method, _),
     factClassHasNoBase(Class1),
     find(Method, Class2),
     factClassHasNoBase(Class2),
