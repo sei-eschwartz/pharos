@@ -230,7 +230,7 @@ dispatchTrigger(findint(FindMethod, FindClass), Out) :-
     setof((Class1, Method2, unknown),
           Class2^Method1^(((Class1=FindClass, Method1=FindMethod);
                            (Class2=FindClass, Method2=FindMethod)),
-                          (reasonClassRelatedMethod_B(Class1, Class2, Method1, Method2),
+                          (reasonClassRelatedMethod_B(Class1, Class2, Method1, Method2, true),
                            not(factClassRelatedMethod(Class1, Method2, unknown)),
                            loginfoln('Concluding ~Q.', factClassRelatedMethod(Class1, Method2, unknown)))),
           ClassSets),

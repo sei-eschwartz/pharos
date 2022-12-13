@@ -2366,13 +2366,13 @@ thisPtrUsage(Function, ThisPtr, Method) :-
     thisPtrUsage(_, Function, ThisPtr, Method).
 
 reasonClassRelatedMethod_B(Class1, Method2, unknown) :-
-    reasonClassRelatedMethod_B(Class1, _, _, Method2).
+    reasonClassRelatedMethod_B(Class1, _, _, Method2, true).
 
 % Because two methods are called on the same this-pointer in the same function.  This rule is
 % NOT direction safe, because it simply observes two methods being called on the same object
 % pointer, and does not account for inheritance relationships.
 % PAPER: Call-1
-reasonClassRelatedMethod_B(Class1, Class2, Method1, Method2) :-
+reasonClassRelatedMethod_B(Class1, Class2, Method1, Method2, Strict) :-
 
     % Method1, Class1 are bound
     (   nonvar(Method1), nonvar(Class1)
@@ -2402,14 +2402,14 @@ reasonClassRelatedMethod_B(Class1, Class2, Method1, Method2) :-
     % getting a RelatedMethod wrong and an ObjectInObject, it's probably better
     % to get the RelatedMethod wrong.
 
-    delay(not((factObjectInObject(Class1, _InnerClass1, 0)))),
-
-    % We also need to verify that Class2 has no object at 0.
-    delay(not((factObjectInObject(Class2, _InnerClass2, 0)))),
-
-    % Debugging
-    logtraceln('~@~Q.', [not(factClassRelatedMethod(Class1, Method2, unknown)),
-                         reasonClassRelatedMethod_B(function=Function, class1=Class1, class2=Class2, method1=Method1, method2=Method2)]).
+    (Strict=true
+    -> (delay(forall(reasonClassAtOffset(Class1, 0, _, Seq),
+          sequenceAreAllDerived(Seq))),
+        delay(forall(reasonClassAtOffset(Class2, 0, _, Seq),
+          sequenceAreAllDerived(Seq))),
+        logtraceln('~@~Q.', [not(factClassRelatedMethod(Class1, Method2, unknown)),
+                         reasonClassRelatedMethod_B(function=Function, class1=Class1, class2=Class2, method1=Method1, method2=Method2)]))
+    ; true).
 
 % ejs 6/15/21 We made a modification to reasonClassCallsMethod_D that turned out to be
 % incorrect, but improves edit distance by ~0.7% on the paper suite.  This rule is an attempt
@@ -2553,8 +2553,10 @@ reasonClassAtOffset(OuterClass, Offset, InnerClass) :-
     reasonClassAtOffset_int(OuterClass, Offset, InnerClass, _).
 
 isDerivedHelper(factDerivedClass(_, _, _)).
+isEmbeddedHelper(factEmbeddedObject(_,_,_)).
 
 sequenceAreAllDerived(L) :- maplist(isDerivedHelper, L).
+sequenceAreAllEmbedded(L) :- maplist(isEmbeddedHelper, L).
 
 % ejs 6/14/22 Isn't this just a more specific version of _C?  It's not clear what the OIO tells
 % us.
