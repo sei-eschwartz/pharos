@@ -2408,7 +2408,7 @@ reasonClassRelatedMethod_B(Class1, Class2, Method1, Method2) :-
     delay(not((factObjectInObject(Class2, _InnerClass2, 0)))),
 
     % Debugging
-    logtraceln('~@~Q.', [not(factClassRelatedMethod(Class1, Method2, 0)),
+    logtraceln('~@~Q.', [not(factClassRelatedMethod(Class1, Method2, unknown)),
                          reasonClassRelatedMethod_B(function=Function, class1=Class1, class2=Class2, method1=Method1, method2=Method2)]).
 
 % ejs 6/15/21 We made a modification to reasonClassCallsMethod_D that turned out to be
