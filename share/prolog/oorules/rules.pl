@@ -1259,6 +1259,7 @@ reasonNOTVFTableEntry_B(VFTableAddress, Offset, Entry) :-
     factVFTable(VFTableAddress),
     possibleVFTableEntry(VFTableAddress, Offset, Entry),
     Offset \= 0,
+    integer(VFTableAddress),
     ComputedAddress is VFTableAddress + Offset,
     factVFTable(ComputedAddress).
 
@@ -1269,6 +1270,7 @@ reasonNOTVFTableEntry_C(VFTable, Offset, Entry) :-
     factVFTable(VFTable),
     possibleVFTableEntry(VFTable, Offset, Entry),
     Offset \= 0,
+    integer(VFTable),
     ComputedOffset is Offset - 4,
     possibleVFTableEntry(VFTable, ComputedOffset, OtherEntry),
     factNOTVFTableEntry(VFTable, ComputedOffset, OtherEntry).
