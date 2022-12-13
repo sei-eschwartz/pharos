@@ -63,12 +63,20 @@ delay_helper(G, _, _) :-
 delay_helper(G, _, _) :-
     not(G), !, fail.
 
+% G is aleady queued
+delay_helper(G, Pin, Commit) :-
+    priority_helper(Pin, PL),
+    delay_queue(G, PL, Commit),
+    !,
+    logtraceln('~Q already queued.', [G]),
+    fail.
+    
 % Queue G and fail.
 delay_helper(G, Pin, Commit) :-
     !,
-    Pin =.. P,
+    priority_helper(Pin, PL),
     logdebugln('I am queueing delay ~Q', G),
-    assert(delay_queue(G, P, Commit)),
+    assert(delay_queue(G, PL, Commit)),
     fail.
 
 % This predicate is intended to be used in guessing rules to make sure that
