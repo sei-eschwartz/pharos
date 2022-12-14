@@ -3545,6 +3545,8 @@ reasonClassSizeGTE_B(Class, Size) :-
 % from each other -- but that's a bit trickier.
 % PAPER: CSize-1
 reasonClassSizeGTE_C(Class, Size) :-
+    % ejs 12/14/22 This rule is disabled.  See the note in GTE_F from the same date.
+    fail,
     reasonClassRelationship(Class, BaseClass),
     factClassSizeGTE(BaseClass, Size),
     % Debugging
@@ -3660,26 +3662,44 @@ reasonClassSizeGTE_E(Class, Size) :-
     logtraceln('~@~Q.', [not((factClassSizeGTE(Class, ExistingSize), ExistingSize >= Size)),
                          reasonClassSizeGTE_E(Class, Size)]).
 
+impossibleResizingSituation(Class, InnerClass, Offset) :-
+    factDerivedClass(Class, InnerClass, Offset, nonvirtual),
+    factDerivedClass(InnerClass, InnerVirtual1, Offset1, Virt1),
+    member(Virt1, [virtual, unknown]),
+    factDerivedClass(InnerClass, InnerVirtual2, Offset2, Virt2),
+    member(Virt2, [virtual, unknown]),
+    iso_dif(InnerVirtual1, InnerVirtual2).
+
 % The given class is certain to be of this size or greater.  The reasoning for this rule is the
 % if we're certain that there's a member at a given offset, and that member is certain to be an
 % instance of a certain class (either inherited or embedded) the the enclosing class must be
 % large enough to accomodate the minimize size of the contained object instance
+
+% ejs 12/14/22 There are two problems we need to be aware of.  When the inner
+% object is a virtual base, the inner object may have a virtual base that is
+% already on Class, and we need to make sure we don't double count it.  Second,
+% we have observed that a derived class can be 7 bytes SMALLER than an inherited
+% class because of virtual bases being arranged and the effect on padding.  For
+% this to happen, we believe that the inner class must be non-virtual and
+% contain two virtual bases.
+
 % PAPER: CSize-4
 reasonClassSizeGTE_F(Class, Size) :-
-    %% find(_Method, Class),
-
-    % ejs 8/12/22: This rule does NOT apply when the inner object is on a virtual base, because
-    % it may contain a virtual base that is already also on Class, and the size would be double
-    % counted.
-    (factEmbeddedObject(Class, InnerClass, Offset);
-     factDerivedClass(Class, InnerClass, Offset, nonvirtual)),
-
-    % Even though Class and InnerClass shouldn't be the same, if they were permitting that in
-    % this rule will introduce an endless loop preventing us from reaching sanity checks that
-    % would detect the condition, so we need to prtect against it here as well.
-    iso_dif(Class, InnerClass),
+    factObjectInObject(Class, InnerClass, Offset),
     factClassSizeGTE(InnerClass, InnerClassSize),
-    Size is Offset + InnerClassSize,
+
+     % Weird resizing situation
+    (impossibleResizingSituation(Class, InnerClass, Offset)
+     -> Size is Offset + InnerClassSize - 7
+     % Need to make sure we don't double-count virtual bases
+     ;  (factDerivedClass(Class, InnerClass, Offset, V), member(V, [virtual, unknown]))
+     -> Size is InnerClassSize
+     % Embedded objects are normal
+     ;  factEmbeddedObject(Class, InnerClass, Offset)
+     -> Size is Offset + InnerClassSize
+     ;  factDerivedClass(Class, InnerClass, Offset, nonvirtual)
+     -> Size is Offset + InnerClassSize),
+
     % Debugging
     logtraceln('~@~Q.', [not((factClassSizeGTE(Class, ExistingSize), ExistingSize >= Size)),
                          reasonClassSizeGTE_F(InnerClass, InnerClassSize,
@@ -3748,10 +3768,27 @@ reasonClassSizeLTE_C(Class, Size) :-
 
 % The given class is certain to be of this size or smaller.  The reasoning is that a base class
 % must always be smaller than or equal in size to it's derived classes.
+
+% This was completely rewritten to mirror ClassSizeGTE_F.  See the notes there about corner cases.
+
 % PAPER: CSize-1
 reasonClassSizeLTE_D(Class, Size) :-
-    reasonClassRelationship(DerivedClass, Class),
-    factClassSizeLTE(DerivedClass, Size),
+
+    factObjectInObject(OuterClass, Class, Offset),
+    factClassSizeLTE(OuterClass, OuterClassSize),
+
+     % Weird resizing situation. The outer class can be 7 bytes smaller; inner class can be 7 bytes larger
+    (impossibleResizingSituation(OuterClass, Class, Offset)
+     -> Size is OuterClassSize - Offset + 7
+     % Need to make sure we don't double-count virtual bases
+     ;  (factDerivedClass(OuterClass, Class, Offset, V), member(V, [virtual, unknown]))
+     -> Size is OuterClassSize
+     % Embedded objects are normal
+     ;  factEmbeddedObject(Class, InnerClass, Offset)
+     -> Size is OuterClassSize - Offset
+     ;  factDerivedClass(Class, InnerClass, Offset, nonvirtual)
+     -> Size is OuterClassSize - Offset),
+
     logtraceln('~@~Q.', [not((factClassSizeLTE(Class, ExistingSize), ExistingSize =< Size)),
                          reasonClassSizeLTE_D(DerivedClass, Class, Size)]).
 
