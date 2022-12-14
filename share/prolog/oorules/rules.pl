@@ -1641,10 +1641,10 @@ thisPtrAdjustment(M, 0) :-
      -> true
      ;
      % We could be a deleting destructor.  Shoot.  Well, if our real destructor
-     % is virtual, then we should see a call from some method in a vftable to
-     % us, right?  If not, then our real destructor is not virtual, and we don't
+     % is virtual, then we should a call from us to some method in a vftable,
+     % right?  If not, then our real destructor is not virtual, and we don't
      % have an adjustment.
-         forall((methodCallAtOffset_preadjust(_, PossibleRealD, M, _), possibleVFTableEntry(Addr, Offset, Entry), dethunk(Entry, PossibleRealD)),
+         forall((methodCallAtOffset_preadjust(_, M, PossibleRealD, _), possibleVFTableEntry(Addr, Offset, Entry), dethunk(Entry, PossibleRealD)),
            % The entry has been disproved
            factNOTVFTableEntry(Addr, Offset, Entry))
      ).
