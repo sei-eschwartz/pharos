@@ -1647,13 +1647,24 @@ thisPtrAdjustment(M, 0) :-
      -> true
      ;
      % We could be a deleting destructor.  Shoot.  Well, if our real destructor
-     % is virtual, then we should a call from us to some method in a vftable,
-     % right?  If not, then our real destructor is not virtual, and we don't
-     % have an adjustment.
+     % is virtual, then we should have a call from us to some method in a
+     % vftable, right?
+     
+     % ejs 12/15/22 Yes... as long as it's not inlined.  But we can still check
+     % for this.  We should also check if any destructors on the class are
+     % virtual.
+     
+     % Check for non-inlined calls to potential real destructor.  This is useful
+     % if we haven't merged the real destructor yet.     
          forall((methodCallAtOffset_preadjust(_, M, PossibleRealD, _), possibleVFTableEntry(Addr, Offset, Entry), dethunk(Entry, PossibleRealD)),
            % The entry has been disproved
            factNOTVFTableEntry(Addr, Offset, Entry))
-     ).
+     ),
+     
+     % Check realdestructors that we know are on the same class
+        find(M, C),
+        forall((find(RealDestructor, C), factRealDestructor(RealDestructor), possibleVFTableEntry(Addr, Offset, Entry), dethunk(Entry, RealDestructor)),
+               factNOTVFTableEntry(Addr, Offset, Entry)).
 
 % XXX: Implement computation of thisptr adjustment if we know where a virtual function was
 % originally defined.  How do we know we have recovered the whole inheritance hierarchy?  RTTI?
