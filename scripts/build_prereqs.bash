@@ -7,6 +7,8 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 NCPU="${NCPU:-1}"
 PREFIX="${PREFIX:-/usr/local}"
 
+sudo apt remove unixodbc-dev
+
 # BOOST
 if [ "$COMPILE_BOOST" != "" ]
 then
