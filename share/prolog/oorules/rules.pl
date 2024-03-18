@@ -2014,6 +2014,38 @@ reasonDerivedClass_F(DerivedClass, BaseClass, Offset, virtual) :-
                          reasonDerivedClass_F(DerivedClass, BaseClass, Offset,
                                               VBTableAddress)]).
 
+reasonDerivedClass_VirtAnalyzer(DerivedClass, BaseClass, Offset, virtual) :-
+
+    % We see the outer method installing a vbtable
+    factVBTableWrite(_Insn, OuterMethod, VBPtrOffset, VBTableAddress),
+
+    % VirtAnalyzer uses "vbase magic" offsets as a signature to detect vbtables
+    % (0, 0xffffff20, 0xffffffc0, 0xfffffe28, 0xfffffffc, 0xfffffff8)
+    MagicOffsets = [0, 4, 8, 64, 224, 472],
+    factVBTableEntry(VBTableAddress, 0, VbptrOffset),
+    NegativeVbptrOffset is -VbptrOffset,
+    member(NegativeVbptrOffset, MagicOffsets),
+
+    % The signature passed.  Now they look at a non-zero vbtable entry
+    factVBTableEntry(VBTableAddress, TableOffset, ObjOffset),
+    TableOffset > 0,
+
+    % They tend compute an adjusted offset, trying each of the magic offsets
+    % I think this accounts for cases when the vbptr is not at offset 0.  See reasonDerivedClass_F.
+    member(MagicOffset, MagicOffsets),
+    AdjustedOffset is ObjOffset - MagicOffset,
+
+    % XXX: They have some code for detecting inlining that doesn't work, but I didn't try to replicate it here.
+
+    % We see a call at AdjustedOffset
+    callTarget(CallInsn, OuterMethod, InnerMethod),
+    funcParameter(OuterMethod, ecx, ThisPtr),
+    thisPtrOffset(ThisPtr, AdjustedOffset, CalleeThisPtr),
+    callParameter(CallInsn, OuterMethod, ecx, CalleeThisPtr),
+
+    find(OuterMethod, DerivedClass),
+    find(InnerMethod, BaseClass).
+
 % --------------------------------------------------------------------------------------------
 :- table reasonNOTDerivedClass/3 as incremental.
 
