@@ -2017,6 +2017,7 @@ reasonDerivedClass_F(DerivedClass, BaseClass, Offset, virtual) :-
 reasonDerivedClass_VirtAnalyzer(DerivedClass, BaseClass, AdjustedOffset, virtual) :-
     % We see the outer method installing a vbtable
     factVBTableWrite(_Insn, OuterMethod, _UnusedObjVBPtrOffset, VBTableAddress),
+    find(OuterMethod, DerivedClass),
 
     % And a vftable
     factVFTableWrite(_Insn2, OuterMethod, _UnusedObjVFPtrOffset, _UnusedVFTableAddress),
@@ -2031,10 +2032,11 @@ reasonDerivedClass_VirtAnalyzer(DerivedClass, BaseClass, AdjustedOffset, virtual
     % The signature passed.  Now they look at a non-zero vbtable entry
     factVBTableEntry(VBTableAddress, TableOffset, ObjOffset),
     TableOffset > 0,
- 
+
     % VirtAnalyzer computes an adjusted offset, trying each of the magic offsets
     % I think this accounts for cases when the vbptr is not at offset 0.  See reasonDerivedClass_F.
     AdjustedOffset is ObjOffset + VBPtrOffset,
+
 
     % XXX: They have some code for detecting inlining that doesn't work, but I didn't try to replicate it here.
 
@@ -2044,7 +2046,12 @@ reasonDerivedClass_VirtAnalyzer(DerivedClass, BaseClass, AdjustedOffset, virtual
     thisPtrOffset(ThisPtr, AdjustedOffset, CalleeThisPtr),
     callParameter(CallInsn, OuterMethod, ecx, CalleeThisPtr),
 
-    find(OuterMethod, DerivedClass),
+    % We want to make sure that InnerMethod is not an inlined constructor.  This
+    % is hard to do, but if there is only one object starting at that offset,
+    % then it can't be inlined.
+    forall(reasonClassAtOffset(DerivedClass, AdjustedOffset, _InnerClass, L),
+           length(L, 1)),
+
     find(InnerMethod, BaseClass).
 
 % --------------------------------------------------------------------------------------------
