@@ -2034,8 +2034,7 @@ reasonDerivedClass_VirtAnalyzer(DerivedClass, BaseClass, AdjustedOffset, virtual
  
     % VirtAnalyzer computes an adjusted offset, trying each of the magic offsets
     % I think this accounts for cases when the vbptr is not at offset 0.  See reasonDerivedClass_F.
-    member(MagicOffset, MagicOffsets),
-    AdjustedOffset is ObjOffset - MagicOffset,
+    AdjustedOffset is ObjOffset + VBPtrOffset,
 
     % XXX: They have some code for detecting inlining that doesn't work, but I didn't try to replicate it here.
 
