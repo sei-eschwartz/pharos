@@ -1,0 +1,1243 @@
+Warning: /home/eschwartz/pharos-paper/share/prolog/oorules/initial.pl:57:
+Warning:    Singleton variables: [Function]
+Warning: /home/eschwartz/pharos-paper/share/prolog/oorules/rules.pl:345:
+Warning:    Singleton variables: [VirtualBase]
+Warning: /home/eschwartz/pharos-paper/share/prolog/oorules/rules.pl:3336:
+Warning:    Singleton variables: [Size1,Size2]
+Warning: /home/eschwartz/pharos-paper/share/prolog/oorules/rules.pl:3682:
+Warning:    Singleton variables: [Offset1,Offset2]
+Warning: /home/eschwartz/pharos-paper/share/prolog/oorules/rules.pl:3792:
+Warning:    Singleton variables: [DerivedClass]
+Warning: /home/eschwartz/pharos-paper/share/prolog/oorules/rules.pl:3792:
+Warning:    Singleton variable in branch: InnerClass
+Enter the general maximum size (static max is 5):
+Ok, the maximum size is: 4
+Select a class of Create a class? to create between 0 and 2
+0: false
+1: true
+Selected true
+Select a class of Add a method to create between 0 and 2
+0: false
+1: true
+Selected false
+Creating new Identifier{0}
+Creating class members for class 0
+Select a class of Add new variable to context to create between 0 and 2
+0: false
+1: true
+Selected false
+Creating new Class{
+ id:0
+ bases:[]
+ methods:[Method{400, Identifier{0}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1}]
+ members:InitContext{[], [], []}
+}
+Select a class of Create a class? to create between 0 and 2
+0: false
+1: true
+Selected true
+Select a class of Add a new base class? to create between 0 and 2
+0: false
+1: true
+Selected false
+Select a class of Add a method to create between 0 and 2
+0: false
+1: true
+Selected false
+Creating new Identifier{1}
+Creating class members for class 1
+Select a class of Add new variable to context to create between 0 and 2
+0: false
+1: true
+Selected true
+Context: Creating next varidentifier
+Creating new Identifier{0}
+Context: Creating next type
+Select a class of Type to create between 0 and 4
+0: AbstractType
+1: PtrType
+2: DeletablePtrType
+3: ClassType
+Selected ClassType
+Selecting index 3
+Creating ClassType.  Selecting Class now.
+Enter a number between 0 and 1 exclusive
+Returning existing St10shared_ptrIN6Source5ClassEE Class{
+ id:0
+ bases:[]
+ methods:[Method{400, Identifier{0}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1}]
+ members:InitContext{[], [], []}
+}
+Creating new ClassType{0}
+Select a class of Add new variable to context to create between 0 and 2
+0: false
+1: true
+Selected true
+Context: Creating next varidentifier
+Creating new Identifier{1}
+Context: Creating next type
+Create new 4Type or select existing?  Enter 0 for new, or any other number less than 10 for existing
+Enter a number between 0 and 1 exclusive
+Returning existing St10shared_ptrI4TypeE ClassType{0}
+Select a class of Add new variable to context to create between 0 and 2
+0: false
+1: true
+Selected true
+Context: Creating next varidentifier
+Creating new Identifier{2}
+Context: Creating next type
+Create new 4Type or select existing?  Enter 0 for new, or any other number less than 10 for existing
+Enter a number between 0 and 1 exclusive
+Returning existing St10shared_ptrI4TypeE ClassType{0}
+Select a class of Add new variable to context to create between 0 and 2
+0: false
+1: true
+Selected false
+Reading Expression for InitContext initializer of Identifier{0} type ClassType{0}
+Expression creator
+Select a class of Expression to create between 0 and 2
+0: Rvalue
+1: Lvalue
+Selected Lvalue
+Selecting index 1
+Lvalue creator depth=5
+Select a class of Lvalue to create between 0 and 1
+0: Varexp
+Selected Varexp
+Selecting index 0
+Ok there are 0 compatible variables in the context
+selecting failed...
+Selecting index 0
+selecting failed...
+Selecting index 1
+Rvalue creator
+Select a class of Rvalue to create between 0 and 9
+0: AbstractLiteral
+1: Nullptr
+2: New
+3: This
+4: Call
+5: AddressOf
+6: Deref
+7: ObjConstruct
+8: ObjPtrCast
+Selected ObjPtrCast
+Selecting index 8
+selecting failed...
+Selecting index 8
+Unable to make AbstractLiteral for type ClassType{0}
+selecting failed...
+Selecting index 8
+selecting failed...
+Selecting index 8
+Select a class of Call method? to create between 0 and 2
+0: false
+1: true
+Selected false
+There are no possible functions to call
+selecting failed...
+Selecting index 8
+Expression creator
+Select a class of Expression to create between 0 and 2
+0: Rvalue
+1: Lvalue
+Selected Rvalue
+Selecting index 0
+Rvalue creator
+Select a class of Rvalue to create between 0 and 9
+0: AbstractLiteral
+1: Nullptr
+2: New
+3: This
+4: Call
+5: AddressOf
+6: Deref
+7: ObjConstruct
+8: ObjPtrCast
+Selected AbstractLiteral
+Selecting index 0
+Unable to make AbstractLiteral for type PtrType{ClassType{0}}
+selecting failed...
+Selecting index 0
+Pointer type PtrType{ClassType{0}} accepted!
+Creating new Nullptr{PtrType{ClassType{0}}}
+Creating new Deref{ClassType{0}, Nullptr{PtrType{ClassType{0}}}}
+Reading Expression for InitContext initializer of Identifier{1} type ClassType{0}
+Create new N6Source10ExpressionE or select existing?  Enter 0 for new, or any other number less than 10 for existing
+Enter a number between 0 and 1 exclusive
+Returning existing St10shared_ptrIN6Source10ExpressionEE Deref{ClassType{0}, Nullptr{PtrType{ClassType{0}}}}
+Reading Expression for InitContext initializer of Identifier{2} type ClassType{0}
+Create new N6Source10ExpressionE or select existing?  Enter 0 for new, or any other number less than 10 for existing
+Enter a number between 0 and 1 exclusive
+Returning existing St10shared_ptrIN6Source10ExpressionEE Deref{ClassType{0}, Nullptr{PtrType{ClassType{0}}}}
+Creating new Class{
+ id:1
+ bases:[]
+ methods:[Method{401, Identifier{1}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1}]
+ members:InitContext{[(Identifier{0}, Deref{ClassType{0}, Nullptr{PtrType{ClassType{0}}}}),
+   (Identifier{1}, Deref{ClassType{0}, Nullptr{PtrType{ClassType{0}}}}),
+   (Identifier{2}, Deref{ClassType{0}, Nullptr{PtrType{ClassType{0}}}})],
+  [(Identifier{0}, ClassType{0}), (Identifier{1}, ClassType{0}), (Identifier{2}, ClassType{0})],
+  [Identifier{0}, Identifier{1}, Identifier{2}]}
+}
+Select a class of Create a class? to create between 0 and 2
+0: false
+1: true
+Selected true
+Select a class of Add a new base class? to create between 0 and 2
+0: false
+1: true
+Selected true
+Selecting class for a base
+Existing bases: [
+  
+]
+HMM I am 2 considering inheritance of 0 and found not_ambiguous=1
+HMM I am 2 considering inheritance of 1 and found not_ambiguous=1
+Remaining unselected bases: [
+  Class{
+ id:0
+ bases:[]
+ methods:[Method{400, Identifier{0}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1}]
+ members:InitContext{[], [], []}
+},
+  Class{
+ id:1
+ bases:[]
+ methods:[Method{401, Identifier{1}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1}]
+ members:InitContext{[(Identifier{0}, Deref{ClassType{0}, Nullptr{PtrType{ClassType{0}}}}),
+   (Identifier{1}, Deref{ClassType{0}, Nullptr{PtrType{ClassType{0}}}}),
+   (Identifier{2}, Deref{ClassType{0}, Nullptr{PtrType{ClassType{0}}}})],
+  [(Identifier{0}, ClassType{0}), (Identifier{1}, ClassType{0}), (Identifier{2}, ClassType{0})],
+  [Identifier{0}, Identifier{1}, Identifier{2}]}
+}
+]
+Select a class of class to add as a base class to create between 0 and 2
+0: Class{
+ id:0
+ bases:[]
+ methods:[Method{400, Identifier{0}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1}]
+ members:InitContext{[], [], []}
+}
+1: Class{
+ id:1
+ bases:[]
+ methods:[Method{401, Identifier{1}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1}]
+ members:InitContext{[(Identifier{0}, Deref{ClassType{0}, Nullptr{PtrType{ClassType{0}}}}),
+   (Identifier{1}, Deref{ClassType{0}, Nullptr{PtrType{ClassType{0}}}}),
+   (Identifier{2}, Deref{ClassType{0}, Nullptr{PtrType{ClassType{0}}}})],
+  [(Identifier{0}, ClassType{0}), (Identifier{1}, ClassType{0}), (Identifier{2}, ClassType{0})],
+  [Identifier{0}, Identifier{1}, Identifier{2}]}
+}
+Selected Class{
+ id:1
+ bases:[]
+ methods:[Method{401, Identifier{1}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1}]
+ members:InitContext{[(Identifier{0}, Deref{ClassType{0}, Nullptr{PtrType{ClassType{0}}}}),
+   (Identifier{1}, Deref{ClassType{0}, Nullptr{PtrType{ClassType{0}}}}),
+   (Identifier{2}, Deref{ClassType{0}, Nullptr{PtrType{ClassType{0}}}})],
+  [(Identifier{0}, ClassType{0}), (Identifier{1}, ClassType{0}), (Identifier{2}, ClassType{0})],
+  [Identifier{0}, Identifier{1}, Identifier{2}]}
+}
+Select a class of inheritance type to create between 0 and 2
+0: Normal
+1: Virtual
+Selected Virtual
+Select a class of Add a new base class? to create between 0 and 2
+0: false
+1: true
+Selected false
+Select a class of Add a method to create between 0 and 2
+0: false
+1: true
+Selected false
+Creating new Identifier{2}
+Creating class members for class 2
+Select a class of Add new variable to context to create between 0 and 2
+0: false
+1: true
+Selected false
+Creating new Class{
+ id:2
+ bases:[(1, Virtual)]
+ methods:[Method{402, Identifier{2}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1}]
+ members:InitContext{[], [], []}
+}
+Select a class of Create a class? to create between 0 and 2
+0: false
+1: true
+Selected false
+Select a class of Add new function to create between 0 and 2
+0: false
+1: true
+Selected false
+Select a class of Should we add actions to method and function bodies? to create between 0 and 2
+0: false
+1: true
+Selected false
+Creating new Program{[Class{
+   id:0
+   bases:[]
+   methods:[Method{400, Identifier{0}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1}]
+   members:InitContext{[], [], []}
+  },
+  Class{
+   id:1
+   bases:[]
+   methods:[Method{401, Identifier{1}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1}]
+   members:InitContext{[(Identifier{0}, Deref{ClassType{0}, Nullptr{PtrType{ClassType{0}}}}),
+     (Identifier{1}, Deref{ClassType{0}, Nullptr{PtrType{ClassType{0}}}}),
+     (Identifier{2}, Deref{ClassType{0}, Nullptr{PtrType{ClassType{0}}}})],
+    [(Identifier{0}, ClassType{0}), (Identifier{1}, ClassType{0}), (Identifier{2}, ClassType{0})],
+    [Identifier{0}, Identifier{1}, Identifier{2}]}
+  },
+  Class{
+   id:2
+   bases:[(1, Virtual)]
+   methods:[Method{402, Identifier{2}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1}]
+   members:InitContext{[], [], []}
+  }],
+ []}
+Done!
+Program{[Class{
+   id:0
+   bases:[]
+   methods:[Method{400, Identifier{0}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1}]
+   members:InitContext{[], [], []}
+  },
+  Class{
+   id:1
+   bases:[]
+   methods:[Method{401, Identifier{1}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1}]
+   members:InitContext{[(Identifier{0}, Deref{ClassType{0}, Nullptr{PtrType{ClassType{0}}}}),
+     (Identifier{1}, Deref{ClassType{0}, Nullptr{PtrType{ClassType{0}}}}),
+     (Identifier{2}, Deref{ClassType{0}, Nullptr{PtrType{ClassType{0}}}})],
+    [(Identifier{0}, ClassType{0}), (Identifier{1}, ClassType{0}), (Identifier{2}, ClassType{0})],
+    [Identifier{0}, Identifier{1}, Identifier{2}]}
+  },
+  Class{
+   id:2
+   bases:[(1, Virtual)]
+   methods:[Method{402, Identifier{2}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1}]
+   members:InitContext{[], [], []}
+  }],
+ []}
+
+CPP: 
+// type for special constructors
+struct special_constructor {};
+struct C0;
+
+struct C1;
+
+struct C2;
+
+struct C0  {
+/* method id 400 */ C0 ();
+C0 (special_constructor);
+};
+struct C1  {
+/* method id 401 */ C1 ();
+C1 (special_constructor);
+C0 v0;
+C0 v1;
+C0 v2;
+};
+struct C2 : public virtual C1 {
+/* method id 402 */ C2 ();
+C2 (special_constructor);
+};
+// definitions
+/* method id 400 */ C0::C0 () {
+
+}
+C0::C0 (special_constructor)  {}
+
+/* method id 401 */ C1::C1 () {
+
+}
+C1::C1 (special_constructor)  {}
+
+/* method id 402 */ C2::C2 () {
+
+}
+C2::C2 (special_constructor) : C1(special_constructor ()) {}
+
+
+ComputeVBTables: Class 2 inherits 0 vbtables from base 1: {}
+Adding table for [ 2 ]
+Adding entry to vbtable representing the displacement from class 2's vbptr to class 1 as path [ 2 ]
+done
+XXX Only add deleting destructor if someone calls delete
+XXX Only add deleting destructor if someone calls delete
+XXX Only add deleting destructor if someone calls delete
+XXX MSVC optimization
+XXX ThisCall should maybe subclass FunClass
+XXX MSVC optimization
+XXX ThisCall should maybe subclass FunClass
+XXX MSVC optimization
+XXX ThisCall should maybe subclass FunClass
+XXX MSVC optimization
+XXX ThisCall should maybe subclass FunClass
+XXX Already some compiled actions, skipping Method{400, Identifier{0}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1} for now.
+XXX Already some compiled actions, skipping Method{401, Identifier{1}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1} for now.
+XXX Already some compiled actions, skipping Method{402, Identifier{2}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1} for now.
+CP before optimization: 
+Program{0,
+ [Function{0,
+   [$0 = Comment{func0,
+     Start of constructor Method{400, Identifier{0}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1} for class 0}
+    $1 = Comment{func0, Begin constructor user code actions}
+    $2 = Comment{func0,
+     Compiling actions from Method{400,
+     Identifier{0},
+     VoidType{},
+     Context{[], []},
+     InitContext{[], [], []},
+     [
+     
+     ],
+     0,
+     Constructor,
+     1}}
+    $3 = Comment{func0, End constructor user code actions}
+    $4 = Comment{func0,
+     End of constructor Method{400, Identifier{0}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1} for class 0}]},
+  Function{1,
+   [$0 = Comment{func1,
+     Start of constructor Method{401, Identifier{1}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1} for class 1}
+    $1 = Comment{func1, Call Constructor of embedded var Identifier{0} of class 0 at offset 0 for class 1}
+    $2 = GetArg{func1, [], 32, 0}
+    $3 = ThisCall{thisptr=$2, conditions=[nullptr], Function{0}, auto_call_to_base_class=0, args=[$2]}
+    $4 = Comment{func1, Call Constructor of embedded var Identifier{1} of class 0 at offset 1 for class 1}
+    $5 = GetArg{func1, [], 32, 0}
+    $6 = ThisPtrConstOffset{func1, [], 32, $5, 1}
+    $7 = ThisCall{thisptr=$5, conditions=[nullptr], Function{0}, auto_call_to_base_class=0, args=[$6]}
+    $8 = Comment{func1, Call Constructor of embedded var Identifier{2} of class 0 at offset 2 for class 1}
+    $9 = GetArg{func1, [], 32, 0}
+    $10 = ThisPtrConstOffset{func1, [], 32, $9, 2}
+    $11 = ThisCall{thisptr=$9, conditions=[nullptr], Function{0}, auto_call_to_base_class=0, args=[$10]}
+    $12 = Comment{func1, Begin constructor user code actions}
+    $13 = Comment{func1,
+     Compiling actions from Method{401,
+     Identifier{1},
+     VoidType{},
+     Context{[], []},
+     InitContext{[], [], []},
+     [
+     
+     ],
+     0,
+     Constructor,
+     1}}
+    $14 = Comment{func1, End constructor user code actions}
+    $15 = Comment{func1,
+     End of constructor Method{401, Identifier{1}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1} for class 1}]},
+  Function{2,
+   [$0 = Comment{func2,
+     Start of constructor Method{402, Identifier{2}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1} for class 2}
+    $1 = GetArg{func2, [], 1, 1}
+    $2 = Comment{func2,  Install vbtable VBTable{0, class 1 <- 4} at offset 0 for [ 2 ]}
+    $3 = GetArg{func2, [], 32, 0}
+    $4 = Comment{func2, Computing virtual offset VirtualOffset{nullptr, 0}}
+    $5 = GetArg{func2, [], 32, 0}
+    $6 = VBTableWrite{func2, $3, VBTable{0, class 1 <- 4}}
+    $7 = Comment{func2, Call Constructor of vbase 1 at offset 4 of class 2}
+    $8 = GetArg{func2, [], 32, 0}
+    $9 = ThisPtrConstOffset{func2, [], 32, $8, 4}
+    $10 = ThisCall{thisptr=$8, conditions=[GetArg{func2, [], 1, 1}], Function{1}, auto_call_to_base_class=1, args=[$9]}
+    $11 = Comment{func2, Begin constructor user code actions}
+    $12 = Comment{func2,
+     Compiling actions from Method{402,
+     Identifier{2},
+     VoidType{},
+     Context{[], []},
+     InitContext{[], [], []},
+     [
+     
+     ],
+     0,
+     Constructor,
+     1}}
+    $13 = Comment{func2, End constructor user code actions}
+    $14 = Comment{func2,
+     End of constructor Method{402, Identifier{2}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1} for class 2}]}],
+ [],
+ [([ 2 ], VBTable{0, class 1 <- 4})],
+ []}
+Select a class of Enable function inlining? to create between 0 and 2
+0: false
+1: true
+Selected true
+Select a class of Enable function inlining for thiscall ThisCall{thisptr=$2, conditions=[nullptr], Function{0}, auto_call_to_base_class=0, args=[$2]} in Function{1} to create between 0 and 2
+0: false
+1: true
+Selected false
+Select a class of Enable function inlining for thiscall ThisCall{thisptr=$5, conditions=[nullptr], Function{0}, auto_call_to_base_class=0, args=[$6]} in Function{1} to create between 0 and 2
+0: false
+1: true
+Selected false
+Select a class of Enable function inlining for thiscall ThisCall{thisptr=$9, conditions=[nullptr], Function{0}, auto_call_to_base_class=0, args=[$10]} in Function{1} to create between 0 and 2
+0: false
+1: true
+Selected false
+Select a class of Enable function inlining for thiscall ThisCall{thisptr=$8, conditions=[GetArg{func2, [], 1, 1}], Function{1}, auto_call_to_base_class=1, args=[$9]} in Function{2} to create between 0 and 2
+0: false
+1: true
+Selected true
+Inlining call from Function{2,
+ [$0 = Comment{func2,
+   Start of constructor Method{402, Identifier{2}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1} for class 2}
+  $1 = GetArg{func2, [], 1, 1}
+  $2 = Comment{func2,  Install vbtable VBTable{0, class 1 <- 4} at offset 0 for [ 2 ]}
+  $3 = GetArg{func2, [], 32, 0}
+  $4 = Comment{func2, Computing virtual offset VirtualOffset{nullptr, 0}}
+  $5 = GetArg{func2, [], 32, 0}
+  $6 = VBTableWrite{func2, $3, VBTable{0, class 1 <- 4}}
+  $7 = Comment{func2, Call Constructor of vbase 1 at offset 4 of class 2}
+  $8 = GetArg{func2, [], 32, 0}
+  $9 = ThisPtrConstOffset{func2, [], 32, $8, 4}
+  $10 = ThisCall{thisptr=$8, conditions=[GetArg{func2, [], 1, 1}], Function{1}, auto_call_to_base_class=1, args=[$9]}
+  $11 = Comment{func2, Begin constructor user code actions}
+  $12 = Comment{func2,
+   Compiling actions from Method{402,
+   Identifier{2},
+   VoidType{},
+   Context{[], []},
+   InitContext{[], [], []},
+   [
+   
+   ],
+   0,
+   Constructor,
+   1}}
+  $13 = Comment{func2, End constructor user code actions}
+  $14 = Comment{func2,
+   End of constructor Method{402, Identifier{2}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1} for class 2}]}
+to
+Function{1,
+ [$0 = Comment{func1,
+   Start of constructor Method{401, Identifier{1}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1} for class 1}
+  $1 = Comment{func1, Call Constructor of embedded var Identifier{0} of class 0 at offset 0 for class 1}
+  $2 = GetArg{func1, [], 32, 0}
+  $3 = ThisCall{thisptr=$2, conditions=[nullptr], Function{0}, auto_call_to_base_class=0, args=[$2]}
+  $4 = Comment{func1, Call Constructor of embedded var Identifier{1} of class 0 at offset 1 for class 1}
+  $5 = GetArg{func1, [], 32, 0}
+  $6 = ThisPtrConstOffset{func1, [], 32, $5, 1}
+  $7 = ThisCall{thisptr=$5, conditions=[nullptr], Function{0}, auto_call_to_base_class=0, args=[$6]}
+  $8 = Comment{func1, Call Constructor of embedded var Identifier{2} of class 0 at offset 2 for class 1}
+  $9 = GetArg{func1, [], 32, 0}
+  $10 = ThisPtrConstOffset{func1, [], 32, $9, 2}
+  $11 = ThisCall{thisptr=$9, conditions=[nullptr], Function{0}, auto_call_to_base_class=0, args=[$10]}
+  $12 = Comment{func1, Begin constructor user code actions}
+  $13 = Comment{func1,
+   Compiling actions from Method{401,
+   Identifier{1},
+   VoidType{},
+   Context{[], []},
+   InitContext{[], [], []},
+   [
+   
+   ],
+   0,
+   Constructor,
+   1}}
+  $14 = Comment{func1, End constructor user code actions}
+  $15 = Comment{func1,
+   End of constructor Method{401, Identifier{1}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1} for class 1}]}
+Select a class of Enable redundant vftable elimination? to create between 0 and 2
+0: false
+1: true
+Selected false
+CP:
+Program{0,
+ [Function{0,
+   [$0 = Comment{func0,
+     Start of constructor Method{400, Identifier{0}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1} for class 0}
+    $1 = Comment{func0, Begin constructor user code actions}
+    $2 = Comment{func0,
+     Compiling actions from Method{400,
+     Identifier{0},
+     VoidType{},
+     Context{[], []},
+     InitContext{[], [], []},
+     [
+     
+     ],
+     0,
+     Constructor,
+     1}}
+    $3 = Comment{func0, End constructor user code actions}
+    $4 = Comment{func0,
+     End of constructor Method{400, Identifier{0}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1} for class 0}]},
+  Function{1,
+   [$0 = Comment{func1,
+     Start of constructor Method{401, Identifier{1}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1} for class 1}
+    $1 = Comment{func1, Call Constructor of embedded var Identifier{0} of class 0 at offset 0 for class 1}
+    $2 = GetArg{func1, [], 32, 0}
+    $3 = ThisCall{thisptr=$2, conditions=[nullptr], Function{0}, auto_call_to_base_class=0, args=[$2]}
+    $4 = Comment{func1, Call Constructor of embedded var Identifier{1} of class 0 at offset 1 for class 1}
+    $5 = GetArg{func1, [], 32, 0}
+    $6 = ThisPtrConstOffset{func1, [], 32, $5, 1}
+    $7 = ThisCall{thisptr=$5, conditions=[nullptr], Function{0}, auto_call_to_base_class=0, args=[$6]}
+    $8 = Comment{func1, Call Constructor of embedded var Identifier{2} of class 0 at offset 2 for class 1}
+    $9 = GetArg{func1, [], 32, 0}
+    $10 = ThisPtrConstOffset{func1, [], 32, $9, 2}
+    $11 = ThisCall{thisptr=$9, conditions=[nullptr], Function{0}, auto_call_to_base_class=0, args=[$10]}
+    $12 = Comment{func1, Begin constructor user code actions}
+    $13 = Comment{func1,
+     Compiling actions from Method{401,
+     Identifier{1},
+     VoidType{},
+     Context{[], []},
+     InitContext{[], [], []},
+     [
+     
+     ],
+     0,
+     Constructor,
+     1}}
+    $14 = Comment{func1, End constructor user code actions}
+    $15 = Comment{func1,
+     End of constructor Method{401, Identifier{1}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1} for class 1}]},
+  Function{2,
+   [$0 = Comment{func2,
+     Start of constructor Method{402, Identifier{2}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1} for class 2}
+    $1 = GetArg{func2, [], 1, 1}
+    $2 = Comment{func2,  Install vbtable VBTable{0, class 1 <- 4} at offset 0 for [ 2 ]}
+    $3 = GetArg{func2, [], 32, 0}
+    $4 = Comment{func2, Computing virtual offset VirtualOffset{nullptr, 0}}
+    $5 = GetArg{func2, [], 32, 0}
+    $6 = VBTableWrite{func2, $3, VBTable{0, class 1 <- 4}}
+    $7 = Comment{func2, Call Constructor of vbase 1 at offset 4 of class 2}
+    $8 = GetArg{func2, [], 32, 0}
+    $9 = ThisPtrConstOffset{func2, [], 32, $8, 4}
+    $10 = Comment{func2, Beginning of inlined function call to Function{1}}
+    $11 = Comment{func2,
+     Start of constructor Method{401, Identifier{1}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1} for class 1}
+    $12 = Comment{func2, Call Constructor of embedded var Identifier{0} of class 0 at offset 0 for class 1}
+    $13 = ThisCall{thisptr=$9, conditions=[nullptr, GetArg{func2, [], 1, 1}], Function{0}, auto_call_to_base_class=0, args=[$9]}
+    $14 = Comment{func2, Call Constructor of embedded var Identifier{1} of class 0 at offset 1 for class 1}
+    $15 = ThisPtrConstOffset{func2, [GetArg{func2, [], 1, 1}], 32, $9, 1}
+    $16 = ThisCall{thisptr=$9, conditions=[nullptr, GetArg{func2, [], 1, 1}], Function{0}, auto_call_to_base_class=0, args=[$15]}
+    $17 = Comment{func2, Call Constructor of embedded var Identifier{2} of class 0 at offset 2 for class 1}
+    $18 = ThisPtrConstOffset{func2, [GetArg{func2, [], 1, 1}], 32, $9, 2}
+    $19 = ThisCall{thisptr=$9, conditions=[nullptr, GetArg{func2, [], 1, 1}], Function{0}, auto_call_to_base_class=0, args=[$18]}
+    $20 = Comment{func2, Begin constructor user code actions}
+    $21 = Comment{func2,
+     Compiling actions from Method{401,
+     Identifier{1},
+     VoidType{},
+     Context{[], []},
+     InitContext{[], [], []},
+     [
+     
+     ],
+     0,
+     Constructor,
+     1}}
+    $22 = Comment{func2, End constructor user code actions}
+    $23 = Comment{func2,
+     End of constructor Method{401, Identifier{1}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1} for class 1}
+    $24 = Comment{func2, End of inlined function call to Function{1}}
+    $25 = Comment{func2, Begin constructor user code actions}
+    $26 = Comment{func2,
+     Compiling actions from Method{402,
+     Identifier{2},
+     VoidType{},
+     Context{[], []},
+     InitContext{[], [], []},
+     [
+     
+     ],
+     0,
+     Constructor,
+     1}}
+    $27 = Comment{func2, End constructor user code actions}
+    $28 = Comment{func2,
+     End of constructor Method{402, Identifier{2}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1} for class 2}]}],
+ [],
+ [([ 2 ], VBTable{0, class 1 <- 4})],
+ []}
+Test driver: #include <iostream>
+void check_driver() {
+/*
+class C0    size(0)
+0    +---
+0    +---
+*/
+{
+ const C0* obj = new C0(special_constructor());
+ // verify class size
+ const size_t vc_size = sizeof(C0);
+ const size_t layout_size = 1;
+ if (vc_size == layout_size) {
+  std::cerr << "CLASSSIZE CORRECT: C0 " << layout_size << std::endl;
+ } else {
+  std::cerr << "CLASSSIZE INCORRECT: C0 " << vc_size << " " << layout_size << std::endl;
+ }
+ // verify base offset
+}
+/*
+class C1    size(3)
+0    +---
+0    | var0: ClassType{0}
+1    | var1: ClassType{0}
+2    | var2: ClassType{0}
+3    +---
+*/
+{
+ const C1* obj = new C1(special_constructor());
+ // verify class size
+ const size_t vc_size = sizeof(C1);
+ const size_t layout_size = 3;
+ if (vc_size == layout_size) {
+  std::cerr << "CLASSSIZE CORRECT: C1 " << layout_size << std::endl;
+ } else {
+  std::cerr << "CLASSSIZE INCORRECT: C1 " << vc_size << " " << layout_size << std::endl;
+ }
+ // verify base offset
+}
+/*
+class C2    size(7)
+0    +---
+0    | {vbptr}
+4    +---
+4    +--- (virtual base class C1)
+4    | var0: ClassType{0}
+5    | var1: ClassType{0}
+6    | var2: ClassType{0}
+7    +---
+*/
+{
+ const C2* obj = new C2(special_constructor());
+ // verify class size
+ const size_t vc_size = sizeof(C2);
+ const size_t layout_size = 7;
+ if (vc_size == layout_size) {
+  std::cerr << "CLASSSIZE CORRECT: C2 " << layout_size << std::endl;
+ } else {
+  std::cerr << "CLASSSIZE INCORRECT: C2 " << vc_size << " " << layout_size << std::endl;
+ }
+ // verify base offset
+ {
+ const C1* baseobj = (C1*) obj;
+ const size_t computed_offset = (uintptr_t)baseobj - (uintptr_t)obj;
+ const size_t model_offset = 4;
+ if (computed_offset == model_offset) {
+  std::cerr << "BASEOFFSET CORRECT: C2 C1 " << computed_offset << std::endl;
+ } else {
+  const size_t vc_base_size = sizeof(C1);
+  if (vc_base_size == 0 || vc_base_size == 1) std::cerr << "BASEOFFSET WEIRD: C2 C1 ";
+  else std::cerr << "BASEOFFSET INCORRECT: C2 C1 ";
+  std::cerr << computed_offset << " " << model_offset << std::endl;
+ }}}
+ std::cerr << "SUCCESS" << std::endl;
+}
+int main() { check_driver (); }
+Compiled VFTables:
+{}
+Class: Class{
+ id:0
+ bases:[]
+ methods:[Method{400, Identifier{0}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1}]
+ members:InitContext{[], [], []}
+}
+ vfptr on: none
+ vbptr on: none
+layout: 
+class C0    size(0)
+0    +---
+0    +---
+
+VFTables for class:
+VBTables for class:
+
+
+
+Class: Class{
+ id:1
+ bases:[]
+ methods:[Method{401, Identifier{1}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1}]
+ members:InitContext{[(Identifier{0}, Deref{ClassType{0}, Nullptr{PtrType{ClassType{0}}}}),
+   (Identifier{1}, Deref{ClassType{0}, Nullptr{PtrType{ClassType{0}}}}),
+   (Identifier{2}, Deref{ClassType{0}, Nullptr{PtrType{ClassType{0}}}})],
+  [(Identifier{0}, ClassType{0}), (Identifier{1}, ClassType{0}), (Identifier{2}, ClassType{0})],
+  [Identifier{0}, Identifier{1}, Identifier{2}]}
+}
+ vfptr on: none
+ vbptr on: none
+layout: 
+class C1    size(3)
+0    +---
+0    | var0: ClassType{0}
+1    | var1: ClassType{0}
+2    | var2: ClassType{0}
+3    +---
+
+VFTables for class:
+VBTables for class:
+
+
+
+Class: Class{
+ id:2
+ bases:[(1, Virtual)]
+ methods:[Method{402, Identifier{2}, VoidType{}, Context{[], []}, InitContext{[], [], []}, [    ], 0, Constructor, 1}]
+ members:InitContext{[], [], []}
+}
+ vfptr on: none
+ vbptr on: 2
+layout: 
+class C2    size(7)
+0    +---
+0    | {vbptr}
+4    +---
+4    +--- (virtual base class C1)
+4    | var0: ClassType{0}
+5    | var1: ClassType{0}
+6    | var2: ClassType{0}
+7    +---
+
+VFTables for class:
+VBTables for class:
+ VBTable for inheritance path [ 2 ]: class 1 <- 4
+
+
+
+thisptr adjustments:
+ Method 400: 0
+ Method 401: 0
+ Method 402: 0
+XXX fix returns_self
+This is non-abstracted MSVC specific code
+XXX fix returns_self
+This is non-abstracted MSVC specific code
+check_CertainConstructorOrDestructor_sound(''), check_CertainConstructorOrDestructor_complete(''), check_ClassCallsMethodB_sound(''), check_ClassCallsMethodC_sound(''), check_ClassCallsMethodB_complete(''), check_ClassCallsMethodC_complete(''), check_ClassSizeGTEB_sound(''), check_ClassSizeGTEC_sound(''), check_ClassSizeGTED_sound(''), check_ClassSizeGTEE_sound(''), check_ClassSizeGTEF_sound(''), check_ClassSizeGTEG_sound(''), check_ClassSizeLTEB_sound(''), check_ClassSizeLTEC_sound(''), check_ClassSizeLTED_sound(''), check_Constructor_sound(''), check_Constructor_complete(''), check_DerivedClassB_sound(''), check_DerivedClassC_sound(''), check_DerivedClassD_sound(''), check_DerivedClassE_sound(''), check_DerivedClassB_complete(''), check_DerivedClassC_complete(''), check_DerivedClassD_complete(''), check_DerivedClassE_complete(''), check_DerivedClassOIOF_sound(''), check_DerivedClassOIOVirtAnalyzer_sound(''), check_DerivedClassOIOF_complete(''), check_DerivedClassOIOVirtAnalyzer_complete(''), check_EmbeddedObjectB_sound(''), check_EmbeddedObjectC_sound(''), check_EmbeddedObjectD_sound(''), check_EmbeddedObjectB_complete(''), check_EmbeddedObjectC_complete(''), check_EmbeddedObjectD_complete(''), check_MergeClassesB_sound(''), check_MergeClassesC_sound(''), check_MergeClassesE_sound(''), check_MergeClassesG_sound(''), check_MergeClassesH_sound(''), check_MergeClassesJ_sound(''), check_MergeClassesK_sound(''), check_MergeClassesB_complete(''), check_MergeClassesC_complete(''), check_MergeClassesE_complete(''), check_MergeClassesG_complete(''), check_MergeClassesH_complete(''), check_MergeClassesJ_complete(''), check_MergeClassesK_complete(''), check_MethodB_sound(''), check_MethodC_sound(''), check_MethodD_sound(''), check_MethodE_sound(''), check_MethodF_sound(''), check_MethodG_sound(''), check_MethodH_sound(''), check_MethodI_sound(''), check_MethodJ_sound(''), check_MethodK_sound(''), check_MethodL_sound(''), check_MethodM_sound(''), check_MethodN_sound(''), check_MethodB_complete(''), check_MethodC_complete(''), check_MethodD_complete(''), check_MethodE_complete(''), check_MethodF_complete(''), check_MethodG_complete(''), check_MethodH_complete(''), check_MethodI_complete(''), check_MethodJ_complete(''), check_MethodK_complete(''), check_MethodL_complete(''), check_MethodM_complete(''), check_MethodN_complete(''), check_NOTConstructorB_sound(''), check_NOTConstructorC_sound(''), check_NOTConstructorD_sound(''), check_NOTConstructorF_sound(''), check_NOTConstructorG_sound(''), check_NOTConstructorH_sound(''), check_NOTConstructorI_sound(''), check_NOTConstructorJ_sound(''), check_NOTConstructorB_complete(''), check_NOTConstructorC_complete(''), check_NOTConstructorD_complete(''), check_NOTConstructorF_complete(''), check_NOTConstructorG_complete(''), check_NOTConstructorH_complete(''), check_NOTConstructorI_complete(''), check_NOTConstructorJ_complete(''), check_NOTDerivedClass_sound(''), check_NOTMergeClassesJ_sound(''), check_NOTMergeClassesC_sound(''), check_NOTMergeClassesE_sound(''), check_NOTMergeClassesF_sound(''), check_NOTMergeClassesG_sound(''), check_NOTMergeClassesI_sound(''), check_NOTMergeClassesK_sound(''), check_NOTMergeClassesL_sound(''), check_NOTMergeClassesM_sound(''), check_NOTMergeClassesO_sound(''), check_NOTMergeClassesP_sound(''), check_NOTMergeClassesQ_sound(''), check_NOTMergeClassesR_sound(''), check_NOTMergeClassesJ_complete(''), check_NOTMergeClassesC_complete(''), check_NOTMergeClassesE_complete(''), check_NOTMergeClassesF_complete(''), check_NOTMergeClassesG_complete(''), check_NOTMergeClassesI_complete(''), check_NOTMergeClassesK_complete(''), check_NOTMergeClassesL_complete(''), check_NOTMergeClassesM_complete(''), check_NOTMergeClassesO_complete(''), check_NOTMergeClassesP_complete(''), check_NOTMergeClassesQ_complete(''), check_NOTMergeClassesR_complete(''), check_NOTRealDestructorB_sound(''), check_NOTRealDestructorC_sound(''), check_NOTRealDestructorD_sound(''), check_NOTRealDestructorE_sound(''), check_NOTRealDestructorF_sound(''), check_NOTRealDestructorG_sound(''), check_NOTRealDestructorH_sound(''), check_NOTRealDestructorI_sound(''), check_NOTRealDestructorJ_sound(''), check_NOTRealDestructorB_complete(''), check_NOTRealDestructorC_complete(''), check_NOTRealDestructorD_complete(''), check_NOTRealDestructorE_complete(''), check_NOTRealDestructorF_complete(''), check_NOTRealDestructorG_complete(''), check_NOTRealDestructorH_complete(''), check_NOTRealDestructorI_complete(''), check_NOTRealDestructorJ_complete(''), check_ObjectInObjectB_sound(''), check_ObjectInObjectC_sound(''), check_ObjectInObjectD_sound(''), check_ObjectInObjectE_sound(''), check_ObjectInObjectF_sound(''), check_ObjectInObjectB_complete(''), check_ObjectInObjectC_complete(''), check_ObjectInObjectD_complete(''), check_ObjectInObjectE_complete(''), check_ObjectInObjectF_complete(''), check_ObjectInObjectB_sound(''), check_ObjectInObjectC_sound(''), check_ObjectInObjectD_sound(''), check_ObjectInObjectE_sound(''), check_ObjectInObjectF_sound(''), check_ObjectInObjectB_complete(''), check_ObjectInObjectC_complete(''), check_ObjectInObjectD_complete(''), check_ObjectInObjectE_complete(''), check_ObjectInObjectF_complete(''), check_RealDestructor_sound(''), check_RealDestructor_complete(''), check_VFTableSizeGTE_sound(''), check_VFTableSizeLTE_sound(''), check_VftableBelongs_sound(''), check_VftableBelongs_complete('')
+Warning: stream:9:
+Warning:    Singleton variables: [PC]
+Warning: stream:18:
+Warning:    Singleton variables: [Annot,Len,PC,CSAnnot,CSLen]
+Warning: stream:28:
+Warning:    Singleton variables: [Uncovered]
+Warning: stream:33:
+Warning:    Singleton variables: [CP,FCP,SFile]
+Warning: stream:140:
+Warning:    Clauses of factObjectInObject/3 are not together in the source-file
+Warning:    Earlier definition at stream:137
+Warning:    Current predicate: factNOTDerivedClass/3
+Warning:    Use :- discontiguous factObjectInObject/3. to suppress this message
+Warning: stream:141:
+Warning:    Clauses of factEmbeddedObject/3 are not together in the source-file
+Warning:    Earlier definition at stream:138
+Warning:    Current predicate: factObjectInObject/3
+Warning:    Use :- discontiguous factEmbeddedObject/3. to suppress this message
+Warning: stream:142:
+Warning:    Clauses of factNOTDerivedClass/3 are not together in the source-file
+Warning:    Earlier definition at stream:139
+Warning:    Current predicate: factEmbeddedObject/3
+Warning:    Use :- discontiguous factNOTDerivedClass/3. to suppress this message
+Warning: stream:143:
+Warning:    Clauses of factObjectInObject/3 are not together in the source-file
+Warning:    Earlier definition at stream:137
+Warning:    Current predicate: factNOTDerivedClass/3
+Warning:    Use :- discontiguous factObjectInObject/3. to suppress this message
+Warning: stream:144:
+Warning:    Clauses of factEmbeddedObject/3 are not together in the source-file
+Warning:    Earlier definition at stream:138
+Warning:    Current predicate: factObjectInObject/3
+Warning:    Use :- discontiguous factEmbeddedObject/3. to suppress this message
+Warning: stream:145:
+Warning:    Clauses of factNOTDerivedClass/3 are not together in the source-file
+Warning:    Earlier definition at stream:139
+Warning:    Current predicate: factEmbeddedObject/3
+Warning:    Use :- discontiguous factNOTDerivedClass/3. to suppress this message
+Warning: stream:146:
+Warning:    Clauses of factObjectInObject/3 are not together in the source-file
+Warning:    Earlier definition at stream:137
+Warning:    Current predicate: factNOTDerivedClass/3
+Warning:    Use :- discontiguous factObjectInObject/3. to suppress this message
+Warning: stream:151:
+Warning:    Clauses of factClassSizeGTE/2 are not together in the source-file
+Warning:    Earlier definition at stream:149
+Warning:    Current predicate: factClassSizeLTE/2
+Warning:    Use :- discontiguous factClassSizeGTE/2. to suppress this message
+Warning: stream:152:
+Warning:    Clauses of factClassSizeLTE/2 are not together in the source-file
+Warning:    Earlier definition at stream:150
+Warning:    Current predicate: factClassSizeGTE/2
+Warning:    Use :- discontiguous factClassSizeLTE/2. to suppress this message
+Warning: stream:153:
+Warning:    Clauses of factClassSizeGTE/2 are not together in the source-file
+Warning:    Earlier definition at stream:149
+Warning:    Current predicate: factClassSizeLTE/2
+Warning:    Use :- discontiguous factClassSizeGTE/2. to suppress this message
+Warning: stream:154:
+Warning:    Clauses of factClassSizeLTE/2 are not together in the source-file
+Warning:    Earlier definition at stream:150
+Warning:    Current predicate: factClassSizeGTE/2
+Warning:    Use :- discontiguous factClassSizeLTE/2. to suppress this message
+Warning: stream:160:
+Warning:    Clauses of findint/2 are not together in the source-file
+Warning:    Earlier definition at stream:155
+Warning:    Current predicate: factNOTDeletingDestructor/1
+Warning:    Use :- discontiguous findint/2. to suppress this message
+Warning: stream:161:
+Warning:    Clauses of factMethod/1 are not together in the source-file
+Warning:    Earlier definition at stream:156
+Warning:    Current predicate: findint/2
+Warning:    Use :- discontiguous factMethod/1. to suppress this message
+Warning: stream:162:
+Warning:    Clauses of factConstructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:157
+Warning:    Current predicate: factMethod/1
+Warning:    Use :- discontiguous factConstructor/1. to suppress this message
+Warning: stream:163:
+Warning:    Clauses of factNOTRealDestructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:158
+Warning:    Current predicate: factConstructor/1
+Warning:    Use :- discontiguous factNOTRealDestructor/1. to suppress this message
+Warning: stream:164:
+Warning:    Clauses of factNOTDeletingDestructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:159
+Warning:    Current predicate: factNOTRealDestructor/1
+Warning:    Use :- discontiguous factNOTDeletingDestructor/1. to suppress this message
+Warning: stream:165:
+Warning:    Clauses of findint/2 are not together in the source-file
+Warning:    Earlier definition at stream:155
+Warning:    Current predicate: factNOTDeletingDestructor/1
+Warning:    Use :- discontiguous findint/2. to suppress this message
+Warning: stream:166:
+Warning:    Clauses of factMethod/1 are not together in the source-file
+Warning:    Earlier definition at stream:156
+Warning:    Current predicate: findint/2
+Warning:    Use :- discontiguous factMethod/1. to suppress this message
+Warning: stream:167:
+Warning:    Clauses of factConstructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:157
+Warning:    Current predicate: factMethod/1
+Warning:    Use :- discontiguous factConstructor/1. to suppress this message
+Warning: stream:168:
+Warning:    Clauses of factNOTRealDestructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:158
+Warning:    Current predicate: factConstructor/1
+Warning:    Use :- discontiguous factNOTRealDestructor/1. to suppress this message
+Warning: stream:169:
+Warning:    Clauses of factNOTDeletingDestructor/1 are not together in the source-file
+Warning:    Earlier definition at stream:159
+Warning:    Current predicate: factNOTRealDestructor/1
+Warning:    Use :- discontiguous factNOTDeletingDestructor/1. to suppress this message
+Warning: stream:196:
+Warning:    Singleton variables: [M]
+Warning: stream:207:
+Warning:    Redefined static procedure possibleVFTableWrite/5
+Warning:    Previously defined at /home/eschwartz/pharos-paper/share/prolog/oorules/initial.pl:24
+Warning: stream:215:
+Warning:    Redefined static procedure possibleVBTableWrite/5
+Warning:    Previously defined at /home/eschwartz/pharos-paper/share/prolog/oorules/initial.pl:26
+RESULT,TRUE,sound,CertainConstructorOrDestructor,"CertainConstructorOrDestructor(function(2))",""
+RESULT,FALSE,complete,CertainConstructorOrDestructor,"CertainConstructorOrDestructor(function(0))",""
+RESULT,FALSE,complete,CertainConstructorOrDestructor,"CertainConstructorOrDestructor(function(1))",""
+RESULT,TRUE,complete,CertainConstructorOrDestructor,"CertainConstructorOrDestructor(function(2))",""
+RESULT,FALSE,complete,ClassCallsMethodB,"ClassCallsMethodB(class(0),function(0))",""
+RESULT,FALSE,complete,ClassCallsMethodB,"ClassCallsMethodB(class(0),function(0))",""
+RESULT,FALSE,complete,ClassCallsMethodB,"ClassCallsMethodB(class(1),function(1))",""
+RESULT,FALSE,complete,ClassCallsMethodB,"ClassCallsMethodB(class(1),function(1))",""
+RESULT,FALSE,complete,ClassCallsMethodB,"ClassCallsMethodB(class(2),function(2))",""
+RESULT,FALSE,complete,ClassCallsMethodB,"ClassCallsMethodB(class(2),function(1))",""
+RESULT,FALSE,complete,ClassCallsMethodB,"ClassCallsMethodB(class(2),function(2))",""
+RESULT,FALSE,complete,ClassCallsMethodC,"ClassCallsMethodC(class(0),function(0))",""
+RESULT,FALSE,complete,ClassCallsMethodC,"ClassCallsMethodC(class(0),function(0))",""
+RESULT,FALSE,complete,ClassCallsMethodC,"ClassCallsMethodC(class(1),function(1))",""
+RESULT,FALSE,complete,ClassCallsMethodC,"ClassCallsMethodC(class(1),function(1))",""
+RESULT,FALSE,complete,ClassCallsMethodC,"ClassCallsMethodC(class(2),function(2))",""
+RESULT,FALSE,complete,ClassCallsMethodC,"ClassCallsMethodC(class(2),function(1))",""
+RESULT,FALSE,complete,ClassCallsMethodC,"ClassCallsMethodC(class(2),function(2))",""
+RESULT,TRUE,sound,ClassSizeGTEB,"ClassSizeGTEB(class(2),0,7)",""
+RESULT,TRUE,sound,ClassSizeGTEB,"ClassSizeGTEB(class(1),0,3)",""
+RESULT,TRUE,sound,ClassSizeGTEB,"ClassSizeGTEB(class(0),0,0)",""
+RESULT,TRUE,sound,ClassSizeGTEF,"ClassSizeGTEF(class(2),3,7)",""
+RESULT,TRUE,sound,ClassSizeGTEF,"ClassSizeGTEF(class(1),2,3)",""
+RESULT,TRUE,sound,ClassSizeGTEF,"ClassSizeGTEF(class(1),1,3)",""
+RESULT,TRUE,sound,ClassSizeGTEF,"ClassSizeGTEF(class(1),0,3)",""
+RESULT,TRUE,sound,ClassSizeLTEB,"ClassSizeLTEB(class(2),268435455,7)",""
+RESULT,TRUE,sound,ClassSizeLTEB,"ClassSizeLTEB(class(1),268435455,3)",""
+RESULT,TRUE,sound,ClassSizeLTEB,"ClassSizeLTEB(class(0),268435455,0)",""
+RESULT,TRUE,sound,ClassSizeLTED,"ClassSizeLTED(class(1),7,3)",""
+RESULT,TRUE,sound,Constructor,"Constructor(function(2))",""
+RESULT,FALSE,complete,Constructor,"Constructor(function(0))",""
+RESULT,FALSE,complete,Constructor,"Constructor(function(1))",""
+RESULT,TRUE,complete,Constructor,"Constructor(function(2))",""
+RESULT,TRUE,sound,DerivedClassC,"DerivedClassC(class(2),class(1),4,unknown)",""
+RESULT,FALSE,complete,DerivedClassB,"DerivedClassB(class(2),class(1),4,virtual)",""
+RESULT,FALSE,complete,DerivedClassB,"DerivedClassB(class(2),class(1),4,unknown)",""
+RESULT,FALSE,complete,DerivedClassC,"DerivedClassC(class(2),class(1),4,virtual)",""
+RESULT,FALSE,complete,DerivedClassC,"DerivedClassC(class(2),class(1),4,unknown)",""
+RESULT,FALSE,complete,DerivedClassD,"DerivedClassD(class(2),class(1),4,virtual)",""
+RESULT,FALSE,complete,DerivedClassD,"DerivedClassD(class(2),class(1),4,unknown)",""
+RESULT,FALSE,complete,DerivedClassE,"DerivedClassE(class(2),class(1),4,virtual)",""
+RESULT,FALSE,complete,DerivedClassE,"DerivedClassE(class(2),class(1),4,unknown)",""
+RESULT,TRUE,sound,DerivedClassOIOF,"DerivedClassOIOF(class(2),class(1),4,virtual)",""
+RESULT,FALSE,sound,DerivedClassOIOVirtAnalyzer,"DerivedClassOIOVirtAnalyzer(class(2),class(0),4,virtual)",""
+RESULT,TRUE,complete,DerivedClassOIOF,"DerivedClassOIOF(class(2),class(1),4,virtual)",""
+RESULT,FALSE,complete,DerivedClassOIOF,"DerivedClassOIOF(class(2),class(1),4,unknown)",""
+RESULT,FALSE,complete,DerivedClassOIOVirtAnalyzer,"DerivedClassOIOVirtAnalyzer(class(2),class(1),4,virtual)",""
+RESULT,FALSE,complete,DerivedClassOIOVirtAnalyzer,"DerivedClassOIOVirtAnalyzer(class(2),class(1),4,unknown)",""
+RESULT,TRUE,sound,EmbeddedObjectB,"EmbeddedObjectB(class(1),class(0),2)",""
+RESULT,TRUE,sound,EmbeddedObjectB,"EmbeddedObjectB(class(1),class(0),1)",""
+RESULT,TRUE,sound,EmbeddedObjectB,"EmbeddedObjectB(class(1),class(0),0)",""
+RESULT,TRUE,sound,EmbeddedObjectC,"EmbeddedObjectC(class(1),class(0),2)",""
+RESULT,TRUE,sound,EmbeddedObjectC,"EmbeddedObjectC(class(1),class(0),1)",""
+RESULT,TRUE,sound,EmbeddedObjectC,"EmbeddedObjectC(class(1),class(0),0)",""
+RESULT,TRUE,sound,EmbeddedObjectD,"EmbeddedObjectD(class(1),class(0),2)",""
+RESULT,TRUE,sound,EmbeddedObjectD,"EmbeddedObjectD(class(1),class(0),1)",""
+RESULT,TRUE,complete,EmbeddedObjectB,"EmbeddedObjectB(class(1),class(0),0)",""
+RESULT,TRUE,complete,EmbeddedObjectB,"EmbeddedObjectB(class(1),class(0),1)",""
+RESULT,TRUE,complete,EmbeddedObjectB,"EmbeddedObjectB(class(1),class(0),2)",""
+RESULT,TRUE,complete,EmbeddedObjectC,"EmbeddedObjectC(class(1),class(0),0)",""
+RESULT,TRUE,complete,EmbeddedObjectC,"EmbeddedObjectC(class(1),class(0),1)",""
+RESULT,TRUE,complete,EmbeddedObjectC,"EmbeddedObjectC(class(1),class(0),2)",""
+RESULT,FALSE,complete,EmbeddedObjectD,"EmbeddedObjectD(class(1),class(0),0)",""
+RESULT,TRUE,complete,EmbeddedObjectD,"EmbeddedObjectD(class(1),class(0),1)",""
+RESULT,TRUE,complete,EmbeddedObjectD,"EmbeddedObjectD(class(1),class(0),2)",""
+RESULT,FALSE,complete,MergeClassesB,"MergeClassesB(function(0),class(0))",""
+RESULT,FALSE,complete,MergeClassesB,"MergeClassesB(function(1),class(1))",""
+RESULT,FALSE,complete,MergeClassesB,"MergeClassesB(function(2),class(2))",""
+RESULT,TRUE,complete,MergeClassesC,"MergeClassesC(function(0),class(0))",""
+RESULT,FALSE,complete,MergeClassesC,"MergeClassesC(function(1),class(1))",""
+RESULT,FALSE,complete,MergeClassesC,"MergeClassesC(function(2),class(2))",""
+RESULT,FALSE,complete,MergeClassesE,"MergeClassesE(function(0),class(0))",""
+RESULT,TRUE,complete,MergeClassesE,"MergeClassesE(function(1),class(1))",""
+RESULT,FALSE,complete,MergeClassesE,"MergeClassesE(function(2),class(2))",""
+RESULT,FALSE,complete,MergeClassesG,"MergeClassesG(function(0),class(0))",""
+RESULT,FALSE,complete,MergeClassesG,"MergeClassesG(function(1),class(1))",""
+RESULT,FALSE,complete,MergeClassesG,"MergeClassesG(function(2),class(2))",""
+RESULT,FALSE,complete,MergeClassesH,"MergeClassesH(function(0),class(0))",""
+RESULT,FALSE,complete,MergeClassesH,"MergeClassesH(function(1),class(1))",""
+RESULT,FALSE,complete,MergeClassesH,"MergeClassesH(function(2),class(2))",""
+RESULT,FALSE,complete,MergeClassesJ,"MergeClassesJ(function(0),class(0))",""
+RESULT,FALSE,complete,MergeClassesJ,"MergeClassesJ(function(1),class(1))",""
+RESULT,FALSE,complete,MergeClassesJ,"MergeClassesJ(function(2),class(2))",""
+RESULT,TRUE,complete,MergeClassesK,"MergeClassesK(function(0),class(0))",""
+RESULT,TRUE,complete,MergeClassesK,"MergeClassesK(function(1),class(1))",""
+RESULT,FALSE,complete,MergeClassesK,"MergeClassesK(function(2),class(2))",""
+RESULT,TRUE,sound,MethodB,"MethodB(function(2))",""
+RESULT,TRUE,sound,MethodB,"MethodB(function(1))",""
+RESULT,TRUE,sound,MethodB,"MethodB(function(0))",""
+RESULT,TRUE,sound,MethodI,"MethodI(function(2))",""
+RESULT,TRUE,sound,MethodJ,"MethodJ(function(2))",""
+RESULT,TRUE,sound,MethodJ,"MethodJ(function(1))",""
+RESULT,TRUE,sound,MethodJ,"MethodJ(function(0))",""
+RESULT,TRUE,complete,MethodB,"MethodB(function(0))",""
+RESULT,TRUE,complete,MethodB,"MethodB(function(1))",""
+RESULT,TRUE,complete,MethodB,"MethodB(function(2))",""
+RESULT,FALSE,complete,MethodC,"MethodC(function(0))",""
+RESULT,FALSE,complete,MethodC,"MethodC(function(1))",""
+RESULT,FALSE,complete,MethodC,"MethodC(function(2))",""
+RESULT,FALSE,complete,MethodD,"MethodD(function(0))",""
+RESULT,FALSE,complete,MethodD,"MethodD(function(1))",""
+RESULT,FALSE,complete,MethodD,"MethodD(function(2))",""
+RESULT,FALSE,complete,MethodE,"MethodE(function(0))",""
+RESULT,FALSE,complete,MethodE,"MethodE(function(1))",""
+RESULT,FALSE,complete,MethodE,"MethodE(function(2))",""
+RESULT,FALSE,complete,MethodF,"MethodF(function(0))",""
+RESULT,FALSE,complete,MethodF,"MethodF(function(1))",""
+RESULT,FALSE,complete,MethodF,"MethodF(function(2))",""
+RESULT,FALSE,complete,MethodG,"MethodG(function(0))",""
+RESULT,FALSE,complete,MethodG,"MethodG(function(1))",""
+RESULT,FALSE,complete,MethodG,"MethodG(function(2))",""
+RESULT,FALSE,complete,MethodH,"MethodH(function(0))",""
+RESULT,FALSE,complete,MethodH,"MethodH(function(1))",""
+RESULT,FALSE,complete,MethodH,"MethodH(function(2))",""
+RESULT,FALSE,complete,MethodI,"MethodI(function(0))",""
+RESULT,FALSE,complete,MethodI,"MethodI(function(1))",""
+RESULT,TRUE,complete,MethodI,"MethodI(function(2))",""
+RESULT,TRUE,complete,MethodJ,"MethodJ(function(0))",""
+RESULT,TRUE,complete,MethodJ,"MethodJ(function(1))",""
+RESULT,TRUE,complete,MethodJ,"MethodJ(function(2))",""
+RESULT,FALSE,complete,MethodK,"MethodK(function(0))",""
+RESULT,FALSE,complete,MethodK,"MethodK(function(1))",""
+RESULT,FALSE,complete,MethodK,"MethodK(function(2))",""
+RESULT,FALSE,complete,MethodL,"MethodL(function(0))",""
+RESULT,FALSE,complete,MethodL,"MethodL(function(1))",""
+RESULT,FALSE,complete,MethodL,"MethodL(function(2))",""
+RESULT,FALSE,complete,MethodM,"MethodM(function(0))",""
+RESULT,FALSE,complete,MethodM,"MethodM(function(1))",""
+RESULT,FALSE,complete,MethodM,"MethodM(function(2))",""
+RESULT,FALSE,complete,MethodN,"MethodN(function(0))",""
+RESULT,FALSE,complete,MethodN,"MethodN(function(1))",""
+RESULT,FALSE,complete,MethodN,"MethodN(function(2))",""
+RESULT,TRUE,sound,NOTDerivedClass,"NOTDerivedClass(class(1),class(0),2)",""
+RESULT,TRUE,sound,NOTDerivedClass,"NOTDerivedClass(class(1),class(0),1)",""
+RESULT,TRUE,sound,NOTDerivedClass,"NOTDerivedClass(class(1),class(0),0)",""
+RESULT,TRUE,sound,NOTMergeClassesJ,"NOTMergeClassesJ(class(1),class(2))",""
+RESULT,TRUE,sound,NOTMergeClassesJ,"NOTMergeClassesJ(class(0),class(2))",""
+RESULT,TRUE,sound,NOTMergeClassesJ,"NOTMergeClassesJ(class(0),class(1))",""
+RESULT,TRUE,sound,NOTMergeClassesC,"NOTMergeClassesC(class(1),class(2))",""
+RESULT,TRUE,sound,NOTMergeClassesG,"NOTMergeClassesG(class(1),class(2))",""
+RESULT,TRUE,sound,NOTMergeClassesG,"NOTMergeClassesG(class(0),class(1))",""
+RESULT,TRUE,sound,NOTMergeClassesM,"NOTMergeClassesM(class(0),class(1))",""
+RESULT,TRUE,sound,NOTMergeClassesM,"NOTMergeClassesM(class(0),class(2))",""
+RESULT,TRUE,sound,NOTMergeClassesM,"NOTMergeClassesM(class(1),class(2))",""
+RESULT,TRUE,sound,NOTMergeClassesM,"NOTMergeClassesM(class(0),class(1))",""
+RESULT,TRUE,sound,NOTMergeClassesM,"NOTMergeClassesM(class(0),class(2))",""
+RESULT,TRUE,sound,NOTMergeClassesM,"NOTMergeClassesM(class(1),class(2))",""
+RESULT,TRUE,sound,NOTMergeClassesP,"NOTMergeClassesP(class(0),class(2))",""
+RESULT,TRUE,sound,NOTMergeClassesP,"NOTMergeClassesP(class(0),class(1))",""
+RESULT,TRUE,complete,NOTMergeClassesJ,"NOTMergeClassesJ(class(0),class(1))",""
+RESULT,TRUE,complete,NOTMergeClassesJ,"NOTMergeClassesJ(class(0),class(2))",""
+RESULT,FALSE,complete,NOTMergeClassesJ,"NOTMergeClassesJ(class(1),class(0))",""
+RESULT,TRUE,complete,NOTMergeClassesJ,"NOTMergeClassesJ(class(1),class(2))",""
+RESULT,FALSE,complete,NOTMergeClassesJ,"NOTMergeClassesJ(class(2),class(0))",""
+RESULT,FALSE,complete,NOTMergeClassesJ,"NOTMergeClassesJ(class(2),class(1))",""
+RESULT,FALSE,complete,NOTMergeClassesC,"NOTMergeClassesC(class(0),class(1))",""
+RESULT,FALSE,complete,NOTMergeClassesC,"NOTMergeClassesC(class(0),class(2))",""
+RESULT,FALSE,complete,NOTMergeClassesC,"NOTMergeClassesC(class(1),class(0))",""
+RESULT,TRUE,complete,NOTMergeClassesC,"NOTMergeClassesC(class(1),class(2))",""
+RESULT,FALSE,complete,NOTMergeClassesC,"NOTMergeClassesC(class(2),class(0))",""
+RESULT,FALSE,complete,NOTMergeClassesC,"NOTMergeClassesC(class(2),class(1))",""
+RESULT,FALSE,complete,NOTMergeClassesE,"NOTMergeClassesE(class(0),class(1))",""
+RESULT,FALSE,complete,NOTMergeClassesE,"NOTMergeClassesE(class(0),class(2))",""
+RESULT,FALSE,complete,NOTMergeClassesE,"NOTMergeClassesE(class(1),class(0))",""
+RESULT,FALSE,complete,NOTMergeClassesE,"NOTMergeClassesE(class(1),class(2))",""
+RESULT,FALSE,complete,NOTMergeClassesE,"NOTMergeClassesE(class(2),class(0))",""
+RESULT,FALSE,complete,NOTMergeClassesE,"NOTMergeClassesE(class(2),class(1))",""
+RESULT,FALSE,complete,NOTMergeClassesF,"NOTMergeClassesF(class(0),class(1))",""
+RESULT,FALSE,complete,NOTMergeClassesF,"NOTMergeClassesF(class(0),class(2))",""
+RESULT,FALSE,complete,NOTMergeClassesF,"NOTMergeClassesF(class(1),class(0))",""
+RESULT,FALSE,complete,NOTMergeClassesF,"NOTMergeClassesF(class(1),class(2))",""
+RESULT,FALSE,complete,NOTMergeClassesF,"NOTMergeClassesF(class(2),class(0))",""
+RESULT,FALSE,complete,NOTMergeClassesF,"NOTMergeClassesF(class(2),class(1))",""
+RESULT,TRUE,complete,NOTMergeClassesG,"NOTMergeClassesG(class(0),class(1))",""
+RESULT,FALSE,complete,NOTMergeClassesG,"NOTMergeClassesG(class(0),class(2))",""
+RESULT,FALSE,complete,NOTMergeClassesG,"NOTMergeClassesG(class(1),class(0))",""
+RESULT,TRUE,complete,NOTMergeClassesG,"NOTMergeClassesG(class(1),class(2))",""
+RESULT,FALSE,complete,NOTMergeClassesG,"NOTMergeClassesG(class(2),class(0))",""
+RESULT,FALSE,complete,NOTMergeClassesG,"NOTMergeClassesG(class(2),class(1))",""
+RESULT,FALSE,complete,NOTMergeClassesI,"NOTMergeClassesI(class(0),class(1))",""
+RESULT,FALSE,complete,NOTMergeClassesI,"NOTMergeClassesI(class(0),class(2))",""
+RESULT,FALSE,complete,NOTMergeClassesI,"NOTMergeClassesI(class(1),class(0))",""
+RESULT,FALSE,complete,NOTMergeClassesI,"NOTMergeClassesI(class(1),class(2))",""
+RESULT,FALSE,complete,NOTMergeClassesI,"NOTMergeClassesI(class(2),class(0))",""
+RESULT,FALSE,complete,NOTMergeClassesI,"NOTMergeClassesI(class(2),class(1))",""
+RESULT,FALSE,complete,NOTMergeClassesK,"NOTMergeClassesK(class(0),class(1))",""
+RESULT,FALSE,complete,NOTMergeClassesK,"NOTMergeClassesK(class(0),class(2))",""
+RESULT,FALSE,complete,NOTMergeClassesK,"NOTMergeClassesK(class(1),class(0))",""
+RESULT,FALSE,complete,NOTMergeClassesK,"NOTMergeClassesK(class(1),class(2))",""
+RESULT,FALSE,complete,NOTMergeClassesK,"NOTMergeClassesK(class(2),class(0))",""
+RESULT,FALSE,complete,NOTMergeClassesK,"NOTMergeClassesK(class(2),class(1))",""
+RESULT,FALSE,complete,NOTMergeClassesL,"NOTMergeClassesL(class(0),class(1))",""
+RESULT,FALSE,complete,NOTMergeClassesL,"NOTMergeClassesL(class(0),class(2))",""
+RESULT,FALSE,complete,NOTMergeClassesL,"NOTMergeClassesL(class(1),class(0))",""
+RESULT,FALSE,complete,NOTMergeClassesL,"NOTMergeClassesL(class(1),class(2))",""
+RESULT,FALSE,complete,NOTMergeClassesL,"NOTMergeClassesL(class(2),class(0))",""
+RESULT,FALSE,complete,NOTMergeClassesL,"NOTMergeClassesL(class(2),class(1))",""
+RESULT,TRUE,complete,NOTMergeClassesM,"NOTMergeClassesM(class(0),class(1))",""
+RESULT,TRUE,complete,NOTMergeClassesM,"NOTMergeClassesM(class(0),class(2))",""
+RESULT,FALSE,complete,NOTMergeClassesM,"NOTMergeClassesM(class(1),class(0))",""
+RESULT,TRUE,complete,NOTMergeClassesM,"NOTMergeClassesM(class(1),class(2))",""
+RESULT,FALSE,complete,NOTMergeClassesM,"NOTMergeClassesM(class(2),class(0))",""
+RESULT,FALSE,complete,NOTMergeClassesM,"NOTMergeClassesM(class(2),class(1))",""
+RESULT,FALSE,complete,NOTMergeClassesO,"NOTMergeClassesO(class(0),class(1))",""
+RESULT,FALSE,complete,NOTMergeClassesO,"NOTMergeClassesO(class(0),class(2))",""
+RESULT,FALSE,complete,NOTMergeClassesO,"NOTMergeClassesO(class(1),class(0))",""
+RESULT,FALSE,complete,NOTMergeClassesO,"NOTMergeClassesO(class(1),class(2))",""
+RESULT,FALSE,complete,NOTMergeClassesO,"NOTMergeClassesO(class(2),class(0))",""
+RESULT,FALSE,complete,NOTMergeClassesO,"NOTMergeClassesO(class(2),class(1))",""
+RESULT,TRUE,complete,NOTMergeClassesP,"NOTMergeClassesP(class(0),class(1))",""
+RESULT,TRUE,complete,NOTMergeClassesP,"NOTMergeClassesP(class(0),class(2))",""
+RESULT,FALSE,complete,NOTMergeClassesP,"NOTMergeClassesP(class(1),class(0))",""
+RESULT,FALSE,complete,NOTMergeClassesP,"NOTMergeClassesP(class(1),class(2))",""
+RESULT,FALSE,complete,NOTMergeClassesP,"NOTMergeClassesP(class(2),class(0))",""
+RESULT,FALSE,complete,NOTMergeClassesP,"NOTMergeClassesP(class(2),class(1))",""
+RESULT,FALSE,complete,NOTMergeClassesQ,"NOTMergeClassesQ(class(0),class(1))",""
+RESULT,FALSE,complete,NOTMergeClassesQ,"NOTMergeClassesQ(class(0),class(2))",""
+RESULT,FALSE,complete,NOTMergeClassesQ,"NOTMergeClassesQ(class(1),class(0))",""
+RESULT,FALSE,complete,NOTMergeClassesQ,"NOTMergeClassesQ(class(1),class(2))",""
+RESULT,FALSE,complete,NOTMergeClassesQ,"NOTMergeClassesQ(class(2),class(0))",""
+RESULT,FALSE,complete,NOTMergeClassesQ,"NOTMergeClassesQ(class(2),class(1))",""
+RESULT,FALSE,complete,NOTMergeClassesR,"NOTMergeClassesR(class(0),class(1))",""
+RESULT,FALSE,complete,NOTMergeClassesR,"NOTMergeClassesR(class(0),class(2))",""
+RESULT,FALSE,complete,NOTMergeClassesR,"NOTMergeClassesR(class(1),class(0))",""
+RESULT,FALSE,complete,NOTMergeClassesR,"NOTMergeClassesR(class(1),class(2))",""
+RESULT,FALSE,complete,NOTMergeClassesR,"NOTMergeClassesR(class(2),class(0))",""
+RESULT,FALSE,complete,NOTMergeClassesR,"NOTMergeClassesR(class(2),class(1))",""
+RESULT,TRUE,sound,NOTRealDestructorB,"NOTRealDestructorB(function(2))",""
+RESULT,TRUE,sound,NOTRealDestructorB,"NOTRealDestructorB(function(1))",""
+RESULT,TRUE,sound,NOTRealDestructorB,"NOTRealDestructorB(function(0))",""
+RESULT,TRUE,sound,NOTRealDestructorI,"NOTRealDestructorI(function(2))",""
+RESULT,TRUE,complete,NOTRealDestructorB,"NOTRealDestructorB(function(0))",""
+RESULT,TRUE,complete,NOTRealDestructorB,"NOTRealDestructorB(function(1))",""
+RESULT,TRUE,complete,NOTRealDestructorB,"NOTRealDestructorB(function(2))",""
+RESULT,FALSE,complete,NOTRealDestructorC,"NOTRealDestructorC(function(0))",""
+RESULT,FALSE,complete,NOTRealDestructorC,"NOTRealDestructorC(function(1))",""
+RESULT,FALSE,complete,NOTRealDestructorC,"NOTRealDestructorC(function(2))",""
+RESULT,FALSE,complete,NOTRealDestructorD,"NOTRealDestructorD(function(0))",""
+RESULT,FALSE,complete,NOTRealDestructorD,"NOTRealDestructorD(function(1))",""
+RESULT,FALSE,complete,NOTRealDestructorD,"NOTRealDestructorD(function(2))",""
+RESULT,FALSE,complete,NOTRealDestructorE,"NOTRealDestructorE(function(0))",""
+RESULT,FALSE,complete,NOTRealDestructorE,"NOTRealDestructorE(function(1))",""
+RESULT,FALSE,complete,NOTRealDestructorE,"NOTRealDestructorE(function(2))",""
+RESULT,FALSE,complete,NOTRealDestructorF,"NOTRealDestructorF(function(0))",""
+RESULT,FALSE,complete,NOTRealDestructorF,"NOTRealDestructorF(function(1))",""
+RESULT,FALSE,complete,NOTRealDestructorF,"NOTRealDestructorF(function(2))",""
+RESULT,FALSE,complete,NOTRealDestructorG,"NOTRealDestructorG(function(0))",""
+RESULT,FALSE,complete,NOTRealDestructorG,"NOTRealDestructorG(function(1))",""
+RESULT,FALSE,complete,NOTRealDestructorG,"NOTRealDestructorG(function(2))",""
+RESULT,FALSE,complete,NOTRealDestructorH,"NOTRealDestructorH(function(0))",""
+RESULT,FALSE,complete,NOTRealDestructorH,"NOTRealDestructorH(function(1))",""
+RESULT,FALSE,complete,NOTRealDestructorH,"NOTRealDestructorH(function(2))",""
+RESULT,FALSE,complete,NOTRealDestructorI,"NOTRealDestructorI(function(0))",""
+RESULT,FALSE,complete,NOTRealDestructorI,"NOTRealDestructorI(function(1))",""
+RESULT,TRUE,complete,NOTRealDestructorI,"NOTRealDestructorI(function(2))",""
+RESULT,FALSE,complete,NOTRealDestructorJ,"NOTRealDestructorJ(function(0))",""
+RESULT,FALSE,complete,NOTRealDestructorJ,"NOTRealDestructorJ(function(1))",""
+RESULT,FALSE,complete,NOTRealDestructorJ,"NOTRealDestructorJ(function(2))",""
+RESULT,TRUE,sound,ObjectInObjectB,"ObjectInObjectB(class(2),class(1),4)",""
+RESULT,TRUE,sound,ObjectInObjectC,"ObjectInObjectC(class(1),class(0),2)",""
+RESULT,TRUE,sound,ObjectInObjectC,"ObjectInObjectC(class(1),class(0),1)",""
+RESULT,TRUE,sound,ObjectInObjectC,"ObjectInObjectC(class(1),class(0),0)",""
+RESULT,TRUE,complete,ObjectInObjectB,"ObjectInObjectB(class(2),class(1),4)",""
+RESULT,FALSE,complete,ObjectInObjectB,"ObjectInObjectB(class(1),class(0),0)",""
+RESULT,FALSE,complete,ObjectInObjectB,"ObjectInObjectB(class(1),class(0),1)",""
+RESULT,FALSE,complete,ObjectInObjectB,"ObjectInObjectB(class(1),class(0),2)",""
+RESULT,FALSE,complete,ObjectInObjectC,"ObjectInObjectC(class(2),class(1),4)",""
+RESULT,TRUE,complete,ObjectInObjectC,"ObjectInObjectC(class(1),class(0),0)",""
+RESULT,TRUE,complete,ObjectInObjectC,"ObjectInObjectC(class(1),class(0),1)",""
+RESULT,TRUE,complete,ObjectInObjectC,"ObjectInObjectC(class(1),class(0),2)",""
+RESULT,FALSE,complete,ObjectInObjectD,"ObjectInObjectD(class(2),class(1),4)",""
+RESULT,FALSE,complete,ObjectInObjectD,"ObjectInObjectD(class(1),class(0),0)",""
+RESULT,FALSE,complete,ObjectInObjectD,"ObjectInObjectD(class(1),class(0),1)",""
+RESULT,FALSE,complete,ObjectInObjectD,"ObjectInObjectD(class(1),class(0),2)",""
+RESULT,FALSE,complete,ObjectInObjectE,"ObjectInObjectE(class(2),class(1),4)",""
+RESULT,TRUE,complete,ObjectInObjectE,"ObjectInObjectE(class(1),class(0),0)",""
+RESULT,TRUE,complete,ObjectInObjectE,"ObjectInObjectE(class(1),class(0),1)",""
+RESULT,TRUE,complete,ObjectInObjectE,"ObjectInObjectE(class(1),class(0),2)",""
+RESULT,FALSE,complete,ObjectInObjectF,"ObjectInObjectF(class(2),class(1),4)",""
+RESULT,FALSE,complete,ObjectInObjectF,"ObjectInObjectF(class(1),class(0),0)",""
+RESULT,FALSE,complete,ObjectInObjectF,"ObjectInObjectF(class(1),class(0),1)",""
+RESULT,FALSE,complete,ObjectInObjectF,"ObjectInObjectF(class(1),class(0),2)",""
+RESULT,TRUE,sound,ObjectInObjectB,"ObjectInObjectB(class(2),class(1),4)",""
+RESULT,TRUE,sound,ObjectInObjectC,"ObjectInObjectC(class(1),class(0),2)",""
+RESULT,TRUE,sound,ObjectInObjectC,"ObjectInObjectC(class(1),class(0),1)",""
+RESULT,TRUE,sound,ObjectInObjectC,"ObjectInObjectC(class(1),class(0),0)",""
+RESULT,TRUE,complete,ObjectInObjectB,"ObjectInObjectB(class(2),class(1),4)",""
+RESULT,FALSE,complete,ObjectInObjectB,"ObjectInObjectB(class(1),class(0),0)",""
+RESULT,FALSE,complete,ObjectInObjectB,"ObjectInObjectB(class(1),class(0),1)",""
+RESULT,FALSE,complete,ObjectInObjectB,"ObjectInObjectB(class(1),class(0),2)",""
+RESULT,FALSE,complete,ObjectInObjectC,"ObjectInObjectC(class(2),class(1),4)",""
+RESULT,TRUE,complete,ObjectInObjectC,"ObjectInObjectC(class(1),class(0),0)",""
+RESULT,TRUE,complete,ObjectInObjectC,"ObjectInObjectC(class(1),class(0),1)",""
+RESULT,TRUE,complete,ObjectInObjectC,"ObjectInObjectC(class(1),class(0),2)",""
+RESULT,FALSE,complete,ObjectInObjectD,"ObjectInObjectD(class(2),class(1),4)",""
+RESULT,FALSE,complete,ObjectInObjectD,"ObjectInObjectD(class(1),class(0),0)",""
+RESULT,FALSE,complete,ObjectInObjectD,"ObjectInObjectD(class(1),class(0),1)",""
+RESULT,FALSE,complete,ObjectInObjectD,"ObjectInObjectD(class(1),class(0),2)",""
+RESULT,FALSE,complete,ObjectInObjectE,"ObjectInObjectE(class(2),class(1),4)",""
+RESULT,TRUE,complete,ObjectInObjectE,"ObjectInObjectE(class(1),class(0),0)",""
+RESULT,TRUE,complete,ObjectInObjectE,"ObjectInObjectE(class(1),class(0),1)",""
+RESULT,TRUE,complete,ObjectInObjectE,"ObjectInObjectE(class(1),class(0),2)",""
+RESULT,FALSE,complete,ObjectInObjectF,"ObjectInObjectF(class(2),class(1),4)",""
+RESULT,FALSE,complete,ObjectInObjectF,"ObjectInObjectF(class(1),class(0),0)",""
+RESULT,FALSE,complete,ObjectInObjectF,"ObjectInObjectF(class(1),class(0),1)",""
+RESULT,FALSE,complete,ObjectInObjectF,"ObjectInObjectF(class(1),class(0),2)",""
