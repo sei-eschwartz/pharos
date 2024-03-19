@@ -1994,7 +1994,8 @@ reasonDerivedClass_E(DerivedClass, BaseClass, Offset, virtual) :-
 reasonDerivedClass_F(DerivedClass, BaseClass, Offset, virtual) :-
     factObjectInObject(DerivedClass, BaseClass, Offset),
     % There's an entry in some VBTable somehere (only unified by Offset so far).
-    factVBTableEntry(VBTableAddress, _TableObjectOffset, OffsetFromVBPtr),
+    factVBTableEntry(VBTableAddress, TableOffset, OffsetFromVBPtr),
+    TableOffset > 0,
     % And that VBTable is installed into an object in some Method.
     factVBTableWrite(_Insn, Method, VBPtrOffset, VBTableAddress),
     % Ensure that BaseClass is not empty.  If it is, there could be multiple
