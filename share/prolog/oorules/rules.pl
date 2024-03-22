@@ -2016,7 +2016,7 @@ reasonDerivedClass_F(DerivedClass, BaseClass, Offset, virtual) :-
 
 reasonDerivedClass_VirtAnalyzer(DerivedClass, BaseClass, AdjustedOffset, virtual) :-
     % We see the outer method installing a vbtable
-    factVBTableWrite(_Insn, OuterMethod, _UnusedObjVBPtrOffset, VBTableAddress),
+    factVBTableWrite(_Insn, OuterMethod, VBPtrOffsetFromWrite, VBTableAddress),
     find(OuterMethod, DerivedClass),
 
     % And a vftable
@@ -2035,7 +2035,7 @@ reasonDerivedClass_VirtAnalyzer(DerivedClass, BaseClass, AdjustedOffset, virtual
 
     % VirtAnalyzer computes an adjusted offset, trying each of the magic offsets
     % I think this accounts for cases when the vbptr is not at offset 0.  See reasonDerivedClass_F.
-    AdjustedOffset is ObjOffset + VBPtrOffset,
+    AdjustedOffset is ObjOffset + VBPtrOffsetFromWrite,
 
 
     % XXX: They have some code for detecting inlining that doesn't work, but I didn't try to replicate it here.
