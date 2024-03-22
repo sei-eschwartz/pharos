@@ -2019,12 +2019,8 @@ reasonDerivedClass_VirtAnalyzer(DerivedClass, BaseClass, AdjustedOffset, virtual
     factVBTableWrite(_Insn, OuterMethod, VBPtrOffsetFromWrite, VBTableAddress),
     find(OuterMethod, DerivedClass),
 
-    % VirtAnalyzer uses "vbase magic" offsets as a signature to detect vbtables
-    % (0, 0xffffff20, 0xffffffc0, 0xfffffe28, 0xfffffffc, 0xfffffff8)
-    MagicOffsets = [0, 4, 8, 64, 224, 472],
-    factVBTableEntry(VBTableAddress, 0, NegativeVBPtrOffset),
-    VBPtrOffset is -NegativeVBPtrOffset,
-    member(VBPtrOffset, MagicOffsets),
+    % This is redundant because of the Write and Entry.
+    factVBTable(VBTableAddress),
 
     % The signature passed.  Now they look at a non-zero vbtable entry
     factVBTableEntry(VBTableAddress, TableOffset, ObjOffset),
