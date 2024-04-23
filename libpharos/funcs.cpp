@@ -1207,7 +1207,8 @@ void FunctionDescriptor::_compute_function_hashes(ExtraFunctionHashData *extra) 
       // need to traverse the AST for operands lookng for "appropriate" wilcard candidates.
 
       // First we'll look for RIP-relative offsets, e.g., [rip + offset]
-
+      {
+        write_guard<decltype(mutex)> guard{mutex};
       AstMatching m;
       MatchResult rip_offsets = m.performMatching("$EXP=SgAsmMemoryReferenceExpression(SgAsmBinaryAdd($REG=SgAsmDirectRegisterExpression,$OFFSET=SgAsmIntegerValueExpression),$SEGMENTREG)", insn);
 
@@ -1242,6 +1243,7 @@ void FunctionDescriptor::_compute_function_hashes(ExtraFunctionHashData *extra) 
         auto addr = isSgAsmIntegerValueExpression((*i)["$ADDR"]);
         assert(addr);
         handle_pic_offset(addr->get_value(), addr);
+      }
       }
 
       int numnulls = 0;
