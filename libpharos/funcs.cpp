@@ -1058,6 +1058,8 @@ void FunctionDescriptor::_compute_function_hashes(ExtraFunctionHashData *extra) 
   // mwd: this code assumes this.  Is it guaranteed?
   assert(func);
 
+  static std::mutex matcher_mutex;
+  
   const CFG& cfg = get_pharos_cfg();
   write_guard<decltype(mutex)> guard{mutex};
   if (hashes_calculated) { return; }
@@ -1208,7 +1210,7 @@ void FunctionDescriptor::_compute_function_hashes(ExtraFunctionHashData *extra) 
 
       // First we'll look for RIP-relative offsets, e.g., [rip + offset]
       {
-        write_guard<decltype(mutex)> guard{mutex};
+        write_guard<decltype(matcher_mutex)> guard{matcher_mutex};
       AstMatching m;
       MatchResult rip_offsets = m.performMatching("$EXP=SgAsmMemoryReferenceExpression(SgAsmBinaryAdd($REG=SgAsmDirectRegisterExpression,$OFFSET=SgAsmIntegerValueExpression),$SEGMENTREG)", insn);
 
