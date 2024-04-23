@@ -1211,41 +1211,41 @@ void FunctionDescriptor::_compute_function_hashes(ExtraFunctionHashData *extra) 
       // First we'll look for RIP-relative offsets, e.g., [rip + offset]
       {
         write_guard<decltype(matcher_mutex)> guard{matcher_mutex};
-      AstMatching m;
-      MatchResult rip_offsets = m.performMatching("$EXP=SgAsmMemoryReferenceExpression(SgAsmBinaryAdd($REG=SgAsmDirectRegisterExpression,$OFFSET=SgAsmIntegerValueExpression),$SEGMENTREG)", insn);
+        AstMatching m;
+        MatchResult rip_offsets = m.performMatching("$EXP=SgAsmMemoryReferenceExpression(SgAsmBinaryAdd($REG=SgAsmDirectRegisterExpression,$OFFSET=SgAsmIntegerValueExpression),$SEGMENTREG)", insn);
 
-      for (auto i = rip_offsets.begin(); i != rip_offsets.end(); i++)
-      {
-        auto reg = isSgAsmDirectRegisterExpression((*i)["$REG"]);
-        assert(reg);
-        auto rd = reg->get_descriptor();
-        auto offset = isSgAsmIntegerValueExpression((*i)["$OFFSET"]);
-        assert(offset);
-        auto segmentreg = isSgAsmDirectRegisterExpression((*i)["$SEGMENTREG"]);
-        assert(segmentreg);
-
-
-        // XXX: Check that segmentreg == ds?
-
-        if (rd == ds.get_ip_reg())
+        for (auto i = rip_offsets.begin(); i != rip_offsets.end(); i++)
         {
-          dbg_disasm << "Found RIP-relative register base expression " << unparseX86Register(rd, {})
-                     << " " << unparseExpression(reg, {}, {}) << " " << unparseExpression(offset, {}, {}) << " " << unparseExpression(segmentreg, {}, {})
-                     << " " << debug_instruction(insn)
-                     << LEND;
-          const auto relative_addr = insn->get_address() + insn->get_size() + offset->get_value();
-          handle_pic_offset(relative_addr, offset);
+          auto reg = isSgAsmDirectRegisterExpression((*i)["$REG"]);
+          assert(reg);
+          auto rd = reg->get_descriptor();
+          auto offset = isSgAsmIntegerValueExpression((*i)["$OFFSET"]);
+          assert(offset);
+          auto segmentreg = isSgAsmDirectRegisterExpression((*i)["$SEGMENTREG"]);
+          assert(segmentreg);
+
+          // XXX: Check that segmentreg == ds?
+
+          if (rd == ds.get_ip_reg())
+          {
+            dbg_disasm << "Found RIP-relative register base expression " << unparseX86Register(rd, {})
+                       << " " << unparseExpression(reg, {}, {}) << " " << unparseExpression(offset, {}, {}) << " " << unparseExpression(segmentreg, {}, {})
+                       << " " << debug_instruction(insn)
+                       << LEND;
+            const auto relative_addr = insn->get_address() + insn->get_size() + offset->get_value();
+            handle_pic_offset(relative_addr, offset);
+          }
         }
-      }
 
-      // Next we'll look for constant addresses.
-      MatchResult const_addrs = m.performMatching("$ADDR=SgAsmIntegerValueExpression", insn);
+        // Next we'll look for constant addresses.
+        MatchResult const_addrs = m.performMatching("$ADDR=SgAsmIntegerValueExpression", insn);
 
-      for (auto i = const_addrs.begin(); i != const_addrs.end(); i++) {
-        auto addr = isSgAsmIntegerValueExpression((*i)["$ADDR"]);
-        assert(addr);
-        handle_pic_offset(addr->get_value(), addr);
-      }
+        for (auto i = const_addrs.begin(); i != const_addrs.end(); i++)
+        {
+          auto addr = isSgAsmIntegerValueExpression((*i)["$ADDR"]);
+          assert(addr);
+          handle_pic_offset(addr->get_value(), addr);
+        }
       }
 
       int numnulls = 0;
