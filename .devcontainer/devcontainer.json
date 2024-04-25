@@ -9,7 +9,7 @@
 		"dockerfile": "../Dockerfile",
 		"args": {
 			"CXXFLAGS": "-Og -g",
-			"NCPU": "4",
+			"NCPU": "1",
 			"RECLAIM": "" // Don't delete the build directories for a devcontainer!
 		}
 	},
