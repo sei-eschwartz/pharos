@@ -15,7 +15,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -y update && DEBIAN_FRONTEND=noninter
 # Only add the build prerequisites script so they won't be rebuilt on pharos code change
 RUN mkdir -p /root/pharos/scripts/
 ADD scripts/build_prereqs.bash /root/pharos/scripts/
-RUN /root/pharos/scripts/build_prereqs.bash $RECLAIM 2>&1 | tail -n 100000
+RUN /root/pharos/scripts/build_prereqs.bash $RECLAIM 2>&1 | dd bs=1 skip=2MiB
 
 ADD . /root/pharos
 
