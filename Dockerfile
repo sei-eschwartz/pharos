@@ -15,10 +15,10 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -y update && DEBIAN_FRONTEND=noninter
 # Only add the build prerequisites script so they won't be rebuilt on pharos code change
 RUN mkdir -p /root/pharos/scripts/
 ADD scripts/build_prereqs.bash /root/pharos/scripts/
-RUN /root/pharos/scripts/build_prereqs.bash $RECLAIM
+RUN /root/pharos/scripts/build_prereqs.bash $RECLAIM 2>&1 | tail -n 100000
 
 ADD . /root/pharos
 
 # Put everything in the same layer so it's much smaller
-RUN /root/pharos/scripts/build.bash $RECLAIM && \
+RUN /root/pharos/scripts/build.bash $RECLAIM 2>&1 | tail -n 100000 && \
   find /usr/local/lib /usr/local/bin | xargs file | grep 'current ar archive' | awk -F':' '{print $1}' | xargs strip
