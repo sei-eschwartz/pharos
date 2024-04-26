@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM ubuntu:jammy
 
 ARG NCPU=1
 ENV NCPU=$NCPU
