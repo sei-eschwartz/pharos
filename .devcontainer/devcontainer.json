@@ -8,8 +8,8 @@
 		// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
 		"dockerfile": "../Dockerfile",
 		"args": {
-			"CXXFLAGS": "-Og -g --param ggc-min-expand=5 --param ggc-min-heapsize=32768",
-			"NCPU": "4",
+			"CXXFLAGS": "-Og -g --param ggc-min-expand=100 --param ggc-min-heapsize=128000",
+			"NCPU": "2",
 			"RECLAIM": "" // Don't delete the build directories for a devcontainer!
 		}
 	},
