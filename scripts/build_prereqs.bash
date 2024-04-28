@@ -68,7 +68,7 @@ cmake -GNinja -DCMAKE_INSTALL_PREFIX=$PREFIX -DBOOST_ROOT=$PREFIX -DZ3_ROOT=$PRE
 # shortages, try again one thread at a time.  This is a reasonable
 # compromise between waiting for a single threaded build, and the
 # reliability problems introduced by parallel builds.
-ninja -k $NCPU -j $NCPU || true
+nice ninja -k $NCPU -j $NCPU || true
 ninja -j1
 sudo ninja -j $NCPU install
 test "$1" = "-reclaim" && rm -rf $DIR/rose $DIR/rose-build
