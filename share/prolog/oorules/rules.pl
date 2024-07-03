@@ -2018,9 +2018,6 @@ reasonDerivedClass_VirtAnalyzer(DerivedClass, BaseClass, AdjustedOffset, virtual
     % We see the outer method installing a vbtable
     factVBTableWrite(_Insn, OuterMethod, _UnusedObjVBPtrOffset, VBTableAddress),
 
-    % And a vftable
-    factVFTableWrite(_Insn2, OuterMethod, _UnusedObjVFPtrOffset, _UnusedVFTableAddress),
-
     % VirtAnalyzer uses "vbase magic" offsets as a signature to detect vbtables
     % (0, 0xffffff20, 0xffffffc0, 0xfffffe28, 0xfffffffc, 0xfffffff8)
     MagicOffsets = [0, 4, 8, 64, 224, 472],
