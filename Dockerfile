@@ -3,7 +3,7 @@ FROM ubuntu:latest
 ARG NCPU=1
 ENV NCPU=$NCPU
 
-ENV VERBOSE=1
+ENV NINJAFLAGS="-v"
 
 # This will reduce the memory usage by default
 ARG CXXFLAGS="--param ggc-min-expand=5 --param ggc-min-heapsize=32768"
