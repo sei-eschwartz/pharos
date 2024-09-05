@@ -6,8 +6,11 @@ ENV NCPU=$NCPU
 ENV NINJAFLAGS="-v"
 
 # This will reduce the memory usage by default
-ARG CXXFLAGS="--param ggc-min-expand=5 --param ggc-min-heapsize=32768"
+ARG CXXFLAGS="-pthread --param ggc-min-expand=5 --param ggc-min-heapsize=32768"
 ENV CXXFLAGS="$CXXFLAGS"
+
+ARG LDFLAGS="-pthread"
+ENV LDFLAGS="-pthread"
 
 # This will make a smaller, non-development Dockerfile by default
 ARG RECLAIM="-reclaim"
