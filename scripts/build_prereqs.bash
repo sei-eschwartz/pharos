@@ -30,7 +30,7 @@ cd swipl-devel
 mkdir build
 cd build
 cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$PREFIX -DINSTALL_DOCUMENTATION=off ..
-ninja -j $NCPU
+ninja -v -j $NCPU
 sudo ninja -j $NCPU install
 test "$1" = "-reclaim" && rm -rf $DIR/swipl-devel
 
@@ -43,7 +43,7 @@ cd z3
 mkdir build
 cd build
 cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_RULE_MESSAGES=off ..
-ninja -j $NCPU
+ninja -v -j $NCPU
 sudo ninja -j $NCPU install
 test "$1" = "-reclaim" && rm -rf $DIR/z3
 
@@ -69,8 +69,8 @@ cmake -GNinja -DCMAKE_INSTALL_PREFIX=$PREFIX -DBoost_ROOT=$PREFIX -DZ3_ROOT=$PRE
 # shortages, try again one thread at a time.  This is a reasonable
 # compromise between waiting for a single threaded build, and the
 # reliability problems introduced by parallel builds.
-ninja -k $NCPU -j $NCPU || true
-ninja -j1
+ninja -v -k $NCPU -j $NCPU || true
+ninja -v -j1
 sudo ninja -j $NCPU install
 test "$1" = "-reclaim" && rm -rf $DIR/rose $DIR/rose-build
 
