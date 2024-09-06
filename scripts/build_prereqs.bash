@@ -18,7 +18,7 @@ then
    tar -xjf boost_1_64_0.tar.bz2
    cd boost_1_64_0
    ./bootstrap.sh --prefix=$PREFIX --with-libraries=system,serialization,chrono,timer,iostreams,thread,date_time,random,regex,program_options,filesystem,wave
-   sudo ./b2 cxxflags="$CXXFLAGS" -j $NCPU toolset=gcc install
+   sudo ./b2 cxxflags="$CXXFLAGS" linkflags="$LDFLAGS" -j $NCPU toolset=gcc install
    test "$1" = "-reclaim" && sudo rm -rf $DIR/boost
 fi
 
