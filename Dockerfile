@@ -3,6 +3,7 @@ FROM ubuntu:latest
 ARG NCPU=1
 ENV NCPU=$NCPU
 
+# Verbose ninja
 ENV NINJAFLAGS="-v"
 
 # This will reduce the memory usage by default
