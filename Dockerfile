@@ -29,3 +29,5 @@ ADD . /root/pharos
 # Put everything in the same layer so it's much smaller
 RUN /root/pharos/scripts/build.bash $RECLAIM && \
   find /usr/local/lib /usr/local/bin | xargs file | grep 'current ar archive' | awk -F':' '{print $1}' | xargs strip
+
+RUN fn2hash --threads=20 ~/pharos/tests/ooex_vs2010/Lite/oo.exe || echo We crashed, oh no
