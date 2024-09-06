@@ -20,8 +20,8 @@ cmake -GNinja -DCMAKE_INSTALL_PREFIX=$PREFIX -DROSE_ROOT=$PREFIX \
       -DBOOST_ROOT=$PREFIX -DZ3_ROOT=$PREFIX -DSWIPL_ROOT=$PREFIX \
       -DYamlCpp_ROOT=/usr ..
 
-ninja -k $NCPU -j $NCPU || true
-ninja -j 1
+ninja -v -k $NCPU -j $NCPU || true
+ninja -v -j 1
 sudo ninja install
 echo ::endgroup::
 
