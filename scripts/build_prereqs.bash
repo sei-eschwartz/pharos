@@ -10,6 +10,7 @@ PREFIX="${PREFIX:-/usr/local}"
 # BOOST
 if [ "$COMPILE_BOOST" != "" ]
 then
+   echo ::group::Compiling Boost
    test -d boost && sudo rm -rf boost
    mkdir boost
    cd boost
@@ -20,9 +21,11 @@ then
    ./bootstrap.sh --prefix=$PREFIX --with-libraries=system,serialization,chrono,timer,iostreams,thread,date_time,random,regex,program_options,filesystem,wave
    sudo ./b2 cxxflags="$CXXFLAGS" linkflags="$LDFLAGS" -j $NCPU toolset=gcc install
    test "$1" = "-reclaim" && sudo rm -rf $DIR/boost
+   echo ::endgroup::
 fi
 
 # SWI
+echo ::group::Compiling SWI Prolog
 cd $DIR
 test -d swipl-devel && rm -rf swipl-devel
 git clone --recursive -b V8.5.12 --depth 1 https://github.com/swi-prolog/swipl-devel
@@ -33,8 +36,10 @@ cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$PREFIX -DINSTALL_DOCUMENTATION=off ..
 ninja -v -j $NCPU
 sudo ninja -j $NCPU install
 test "$1" = "-reclaim" && rm -rf $DIR/swipl-devel
+echo ::endgroup::
 
 # Z3
+echo ::group::Compiling Z3
 cd $DIR
 test -d z3 && rm -rf z3
 
@@ -46,8 +51,10 @@ cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_RULE_MESSAGES=off ..
 ninja -v -j $NCPU
 sudo ninja -j $NCPU install
 test "$1" = "-reclaim" && rm -rf $DIR/z3
+echo ::endgroup::
 
 # ROSE
+echo ::group::Compiling ROSE
 cd $DIR
 test -d rose && rm -rf rose
 
@@ -73,5 +80,6 @@ ninja -v -k $NCPU -j $NCPU || true
 ninja -v -j1
 sudo ninja -j $NCPU install
 test "$1" = "-reclaim" && rm -rf $DIR/rose $DIR/rose-build
+echo ::endgroup::
 
 exit 0

@@ -8,6 +8,7 @@ NCPU="${NCPU:-1}"
 PREFIX="${PREFIX:-/usr/local}"
 
 # Pharos
+echo ::group::Compiling Pharos
 cd $DIR/..
 
 sudo ldconfig
@@ -22,6 +23,7 @@ cmake -GNinja -DCMAKE_INSTALL_PREFIX=$PREFIX -DROSE_ROOT=$PREFIX \
 ninja -k $NCPU -j $NCPU || true
 ninja -j 1
 sudo ninja install
+echo ::endgroup::
 
 if [ "$1" = "-reclaim" ]
 then
