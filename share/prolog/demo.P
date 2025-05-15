@@ -1,0 +1,78 @@
+% Context for debug messages
+:- set_prolog_flag(message_context, [time, thread]).
+
+:- ['~/src/prolog/webstat/server'].
+:- set_setting(http:time_limit, 1800).
+:- initialization (   getenv('WEBSTAT_PORT', PortAtom)
+                  ->  atom_number(PortAtom, Port)
+                  ;   Port = 4000
+                  ),
+                  webstat([port(Port), timeout(300)]).
+
+:- set_prolog_flag(optimise, true).
+:- assert(logLevel(5)).
+:- [oorules/report].
+:- [oorules/setup].
+
+:- assert(debuggingEnabled).
+:- assert(rTTIEnabled).
+
+run :-
+    run('CImg').
+
+mysql :-
+    run('MySQL mysql.exe').
+
+mysqld :-
+    run('facts/mysqld.exe.facts').
+
+m6280 :-
+    run('Malware 628053dc').
+
+mdeb6 :-
+    run('Malware deb6a7a1').
+
+ff :-
+    run('Firefox').
+
+ed :-
+    set_prolog_flag(stack_limit, 100 000 000 000),
+    set_prolog_flag(table_space, 100 000 000 000),
+    %protocol('ed-mysqld.log'),
+    assert(profilingEnabled),
+    profile(psolve_no_halt('ts3w.facts')).
+
+run(Name) :-
+    set_prolog_flag(stack_limit, 10 000 000 000),
+    set_prolog_flag(table_space, 10 000 000 000),
+    once(paper_name_facts(Name, Facts)),
+    current_prolog_flag(pid, PID),
+    atom_concat(PID, '.log', LogFile),
+    setup_call_cleanup(
+        protocol(LogFile),
+        psolve_no_halt(Facts),
+        noprotocol).
+
+log_to(Facts, LogFile) :-
+    setup_call_cleanup(
+        protocol(LogFile),
+        run(Facts),
+        noprotocol).
+
+paper_times :-
+    csv_read_file('paper-table5.csv', Rows),
+    (   member(row(Name,_,_,_,_,_,Time,Mem,_), Rows),
+        format('~w ~`.t ~w~40| ~`.t ~w~50|~n', [Name, Time, Mem]),
+        fail
+    ;   true
+    ).
+
+paper_name_facts(Facts, Facts) :-
+    exists_file(Facts),
+    !.
+paper_name_facts(Name, Facts) :-
+    csv_read_file('paperprograms.csv', Rows),
+    member(row(Exe,_,Name,_,_), Rows),
+    file_base_name(Exe, Base),
+    format(atom(Facts), 'facts/~w.facts', [Base]),
+    exists_file(Facts).
