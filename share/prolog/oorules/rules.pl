@@ -2425,6 +2425,10 @@ reasonClassRelatedMethod_C(InnerClass, InnerMethod) :-
     reasonClassAtOffset(OuterClass, Offset, InnerClass),
     iso_dif(OuterClass, InnerClass),
     iso_dif(InnerClass, InnerMethod),
+
+    forall(reasonClassAtOffset(OuterClass, Offset, _, Seq),
+           sequenceAreAllDerived(Seq)),
+
     % Debugging
     logtraceln('~@~Q.', [not(factClassCallsMethod(InnerClass, InnerMethod)),
                          reasonClassRelatedMethod_C(OuterClass, OuterMethod,
