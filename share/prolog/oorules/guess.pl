@@ -177,6 +177,17 @@ possibleVFTable(VFTable) :-
     possibleVFTableWrite(_Insn, Func, _ThisPtr, _Offset1, VFTable),
     (factMethod(Func); factMethod(Entry)).
 
+% Experimental rule inspired by reasonMethod_Q from PR #295.  In some cases,
+% vftables are missed because we have a chicken-and-the-egg situation and can't
+% validate the methods.  This rule is more aggressive and says that if the first
+% entry dethunks to a possible method it is likely a vftable. But this could
+% falsely detect general pointer tables too.
+possibleVFTable(VFTable) :-
+    possibleVFTableWrite(_Insn, _Func, _ThisPtr, _Offset1, VFTable),
+    possibleVFTableEntry(VFTable, 0, Entry),
+    dethunk(Entry, VirtualMethod),
+    possibleMethod(VirtualMethod).
+
 guessVFTable(Out) :-
     reportFirstSeen('guessVFTable'),
     % See the commentary at possibleVFTable for how this goal constrains our guesses (and
