@@ -130,8 +130,8 @@ usefulClass(Class) :-
     findVFTable(_VFTable, Class).
 
 % A class is useful if it is not size zero.
-usefulClass(Class) :-
-    reasonMinimumPossibleClassSize(Class, Size), Size > 0.
+%usefulClass(Class) :-
+%    reasonMinimumPossibleClassSize(Class, Size), Size > 0.
 
 % A class containing a constructor is useful.
 usefulClass(Class) :-
