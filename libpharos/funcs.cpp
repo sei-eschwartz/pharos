@@ -346,6 +346,16 @@ std::string FunctionDescriptor::debug_deltas() const {
   return s.str();
 }
 
+// ROSE currently decodes ENDBR32 and ENDBR64 as x86_nop.  Match their encodings so that an
+// ordinary NOP before a jump does not accidentally broaden thunk detection.
+static bool is_endbr(const SgAsmX86Instruction* insn) {
+  if (!insn) return false;
+  const SgUnsignedCharList& bytes = insn->get_rawBytes();
+  return bytes.size() == 4 &&
+    bytes[0] == 0xf3 && bytes[1] == 0x0f && bytes[2] == 0x1e &&
+    (bytes[3] == 0xfa || bytes[3] == 0xfb);
+}
+
 void FunctionDescriptor::update_target_address() {
   // Determine whether we're a thunk, and if we are, what address we jump to.
 
@@ -385,11 +395,18 @@ void FunctionDescriptor::update_target_address() {
   // Now that we've found the entry point block we can get on with deciding whether we're a
   // thunk or not.  Begin by obtaining the statement (instruction) list.
   SgAsmStatementPtrList& insns = bblock->get_statementList();
-  // We're a thunk only if there's a single instruction in the block.
-  if (insns.size() != 1) return;
+  // We're a thunk only if the block contains a jump, optionally preceded by the ENDBR landing
+  // instruction required by Intel CET.  In particular, do not accept an arbitrary NOP here.
+  size_t jump_index = 0;
+  if (insns.size() == 2 && is_endbr(isSgAsmX86Instruction(insns[0]))) {
+    jump_index = 1;
+  }
+  else if (insns.size() != 1) {
+    return;
+  }
 
   // Get that instruction, and presume that it's an x86 instruction. :-(
-  SgAsmX86Instruction* insn = isSgAsmX86Instruction(insns[0]);
+  SgAsmX86Instruction* insn = isSgAsmX86Instruction(insns[jump_index]);
   // There must be an instruction, and it must be a jump.
   if (insn == NULL) return;
   if (insn->get_kind() != x86_jmp && insn->get_kind() != x86_farjmp) return;
