@@ -126,6 +126,26 @@ RegisterVector DescriptorSet::get_usual_registers()
   return pharos::get_usual_registers(get_architecture());
 }
 
+// ELF ET_DYN relocation offsets are relative to the image, but ROSE leaves r_offset in that
+// original coordinate system after mapping a PIE at a non-zero base.  Translate the offset
+// through its containing section so imports use the same addresses as the partitioner's
+// instructions and memory map.
+static rose_addr_t elf_relocation_target_va(
+  SgAsmElfFileHeader* header, rose_addr_t offset)
+{
+  if (header->get_e_type() != SgAsmElfFileHeader::ET_DYN) return offset;
+
+  for (SgAsmGenericSection* section : header->get_sectionsByRva(offset)) {
+    if (!section->isMapped()) continue;
+    rose_addr_t preferred_rva = section->get_mappedPreferredRva();
+    return section->get_mappedActualVa() + (offset - preferred_rva);
+  }
+
+  GWARN << "Unable to map ELF relocation offset " << addr_str(offset)
+        << " to its loaded address." << LEND;
+  return offset;
+}
+
 // This is called by all the DescriptorSet::DescriptorSet() constructors (including the "usual"
 // one and the version in tracesem where we pass in an already built engine) but NOT by the
 // super ancient constructor where we "build" a function manually.
@@ -218,7 +238,7 @@ void DescriptorSet::init()
             for (SgAsmElfRelocEntry *rel : relocSection->get_entries()->get_entries()) {
               if (rel->get_type() == SgAsmElfRelocEntry::R_X86_64_JUMP_SLOT ||
                   rel->get_type() == SgAsmElfRelocEntry::R_386_JMP_SLOT) {
-                rose_addr_t raddr = rel->get_r_offset();
+                rose_addr_t raddr = elf_relocation_target_va(elfHeader, rel->get_r_offset());
                 // ELF files don't say explicltly which files contain which symbols.  They're
                 std::string dll("ELF");
                 // Start with a NULL name.  The import descriptor constructor will change it to
