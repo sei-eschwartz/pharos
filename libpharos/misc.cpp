@@ -208,116 +208,111 @@ match_pic_thunk_pattern(SgAsmInstruction* first, SgAsmInstruction* second) {
   return dst->get_descriptor();
 }
 
-bool insn_is_nop(const SgAsmX86Instruction* insn) {
-  // The function is a response to poor performance and accuracy problems in
-  // SageInterface::isNOP().  We should really attempt to create an exhaustive list and handle
-  // this issue comprehensively including prefix bytes and other odditities.  The immediate
-  // goal was to produce correct answers for some important cases like "lea ecx, [ecx+0]", and
-  // eliminate the performance problem in isNOP().
+// Decompose a memory reference address into a base register and a constant displacement.
+// Accepts "[reg]" and "[reg + imm]" in either operand order, which covers the addressing forms
+// compilers use to build no-op LEAs.  Returns false for anything more complicated.
+static bool
+memref_base_and_displacement(const SgAsmMemoryReferenceExpression* mre,
+                             RegisterDescriptor& base, int64_t& displacement)
+{
+  SgAsmExpression* addr = mre->get_address();
 
-  const SgUnsignedCharList& bytes = insn->get_rawBytes();
-  size_t size = bytes.size();
-  if (size < 1) return false;
-
-  //   44 lea       ebx, [ebx+0]          ; BYTES  8D9B00000000
-  //  143 lea       ecx, [ecx+0]          ; BYTES  8D4900
-  //   24 lea       esp, [esp+0]          ; BYTES  8D642400
-  //   45 lea       esp, [esp+0]          ; BYTES  8DA42400000000
-  // 3086 mov       edi, edi              ; BYTES  8BFF
-  //    2 nop                             ; BYTES  90
-
-  // Perhaps there's a fancy C++11 way to do this efficicently.  In the mean time, this will
-  // get the job done without having to think about it too hard, and it will be very efficient
-  // as well.  Whether it will continute to scale well for maintenance is a unclear, but there
-  // is a good chance that we'll continue to need "code" to prevent the list from growing very
-  // large.  Until we know more, I deem this a reasonable approach.
-  switch (bytes.at(0)) {
-    // mov reg, reg 8BFF
-   case 0x8b:
-    if (size < 2) return false;
-    switch (bytes.at(1)) {
-     case 0xff: return true;
-    }
-    return false;
-    // lea ...
-   case 0x8d:
-    if (size < 2) return false;
-    switch (bytes.at(1)) {
-      // one byte displacements?
-     case 0x49:
-      if (size < 3) return false;
-      switch (bytes.at(2)) {
-       case 0x00: return true;
-      }
-      return false;
-      // two byte displacements?
-     case 0x64:
-      if (size < 3) return false;
-      switch (bytes.at(2)) {
-       case 0x24:
-        if (size < 4) return false;
-        switch (bytes.at(3)) {
-         case 0x00: return true;
-        }
-        return false;
-      }
-      return false;
-      // four byte displacements?
-     case 0xA4:
-      if (size < 3) return false;
-      switch (bytes.at(2)) {
-       case 0x24:
-        if (size < 4) return false;
-        switch (bytes.at(3)) {
-         case 0x00:
-          if (size < 5) return false;
-          switch (bytes.at(4)) {
-           case 0x00:
-            if (size < 6) return false;
-            switch (bytes.at(5)) {
-             case 0x00:
-              if (size < 7) return false;
-              switch (bytes.at(6)) {
-               case 0x00: return true;
-              }
-              return false;
-            }
-            return false;
-          }
-          return false;
-        }
-        return false;
-      }
-      return false;
-      // four byte displacements?
-     case 0x9B:
-      if (size < 3) return false;
-      switch (bytes.at(2)) {
-       case 0x00:
-        if (size < 4) return false;
-        switch (bytes.at(3)) {
-         case 0x00:
-          if (size < 5) return false;
-          switch (bytes.at(4)) {
-           case 0x00:
-            if (size < 6) return false;
-            switch (bytes.at(5)) {
-             case 0x00: return true;
-            }
-            return false;
-          }
-          return false;
-        }
-        return false;
-      }
-      return false;
-    }
-    return false;
-    // xchg eax, eax
-   case 0x90:
+  if (SgAsmDirectRegisterExpression* reg = isSgAsmDirectRegisterExpression(addr)) {
+    base = reg->get_descriptor();
+    displacement = 0;
     return true;
   }
-  return false;
+
+  SgAsmBinaryAdd* add = isSgAsmBinaryAdd(addr);
+  if (!add) return false;
+
+  SgAsmDirectRegisterExpression* reg = isSgAsmDirectRegisterExpression(add->get_lhs());
+  SgAsmIntegerValueExpression* off = isSgAsmIntegerValueExpression(add->get_rhs());
+  if (!reg) {
+    reg = isSgAsmDirectRegisterExpression(add->get_rhs());
+    off = isSgAsmIntegerValueExpression(add->get_lhs());
+  }
+  if (!reg || !off) return false;
+
+  base = reg->get_descriptor();
+  displacement = off->get_signedValue();
+  return true;
+}
+
+// Writing a 32 bit register in 64 bit mode zero extends into the full 64 bit register, so
+// "mov edi, edi" and "lea esi, [esi+0]" are genuine no-ops in 32 bit code but not in 64 bit
+// code.  Every other operand size leaves the surrounding bits alone.
+static bool
+write_preserves_register(const SgAsmX86Instruction* insn, RegisterDescriptor reg)
+{
+  return !(reg.nBits() == 32 && insn->architecture()->bitsPerWord() == 64);
+}
+
+// Do both operands name the same register, as in "mov edi, edi" or "xchg ax, ax"?
+static bool
+operands_are_same_register(const SgAsmX86Instruction* insn)
+{
+  const SgAsmExpressionPtrList& args = insn->get_operandList()->get_operands();
+  if (args.size() != 2) return false;
+  SgAsmDirectRegisterExpression* a = isSgAsmDirectRegisterExpression(args[0]);
+  SgAsmDirectRegisterExpression* b = isSgAsmDirectRegisterExpression(args[1]);
+  if (!a || !b || a->get_descriptor() != b->get_descriptor()) return false;
+  return write_preserves_register(insn, a->get_descriptor());
+}
+
+bool insn_is_nop(const SgAsmX86Instruction* insn) {
+  // This exists because SageInterface::isNOP() was both slow and inaccurate.  It used to be a
+  // hand maintained table of raw byte sequences, which could not keep up: compilers emit an
+  // ever growing variety of no-op encodings, and GCC alone uses "lea esi, [esi+0]" with and
+  // without a CS prefix, the 0F 1F "multi-byte nop" family, and "xchg ax, ax".  Testing the
+  // decoded operands covers all of those spellings, and any future ones, without a table.
+  if (!insn) return false;
+
+  switch (insn->get_kind()) {
+    // 0x90, and the 0F 1F multi-byte family, which ROSE also decodes to this kind.
+   case x86_nop:
+    return true;
+
+    // "mov edi, edi" (the MSVC hot-patch slot) and "xchg ax, ax" (66 90).
+   case x86_mov:
+   case x86_xchg:
+    return operands_are_same_register(insn);
+
+    // "lea reg, [reg+0]" in all of its widths and prefixings.
+   case x86_lea: {
+     const SgAsmExpressionPtrList& args = insn->get_operandList()->get_operands();
+     if (args.size() != 2) return false;
+     SgAsmDirectRegisterExpression* dst = isSgAsmDirectRegisterExpression(args[0]);
+     SgAsmMemoryReferenceExpression* mre = isSgAsmMemoryReferenceExpression(args[1]);
+     if (!dst || !mre) return false;
+
+     RegisterDescriptor base;
+     int64_t displacement = 0;
+     if (!memref_base_and_displacement(mre, base, displacement)) return false;
+     if (displacement != 0 || base != dst->get_descriptor()) return false;
+     return write_preserves_register(insn, dst->get_descriptor());
+   }
+
+   default:
+    return false;
+  }
+}
+
+bool insn_is_endbr(const SgAsmX86Instruction* insn) {
+  // ROSE decodes ENDBR32 and ENDBR64 as x86_nop, so match their encodings directly.
+  if (!insn) return false;
+  const SgUnsignedCharList& bytes = insn->get_rawBytes();
+  return bytes.size() == 4 &&
+    bytes[0] == 0xf3 && bytes[1] == 0x0f && bytes[2] == 0x1e &&
+    (bytes[3] == 0xfa || bytes[3] == 0xfb);
+}
+
+bool insn_is_entry_marker(const SgAsmX86Instruction* insn) {
+  if (!insn) return false;
+  // Intel CET requires this landing pad at every indirect branch target.
+  if (insn_is_endbr(insn)) return true;
+  // MSVC's hot-patch slot occupies the first two bytes of the function it introduces.
+  return insn->get_kind() == x86_mov && operands_are_same_register(insn);
 }
 
 // Get the fallthru address.  This should be one of the successors for every intruction except

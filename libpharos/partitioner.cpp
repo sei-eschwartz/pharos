@@ -532,6 +532,35 @@ uint8_t CERTEngine::read_byte(rose_addr_t addr) {
   return byte;
 }
 
+// Is this instruction the sort of thing compilers emit between functions to align the next one?
+//
+// This is deliberately not the same set as insn_is_nop().  INT3 is padding but is emphatically
+// not a no-op, and conversely the no-ops that mark a function entry -- the ENDBR landing pad and
+// the MSVC hot-patch slot -- are not padding, because consuming them would push the following
+// function's entry past its real beginning, the very problem this code exists to prevent.
+static bool
+insn_is_padding(const SgAsmX86Instruction* insn) {
+  if (!insn) return false;
+  if (insn_is_entry_marker(insn)) return false;
+  return insn_is_nop(insn) || insn->get_kind() == x86_int3;
+}
+
+// Consume padding instructions starting at addr, returning the address just past the last one,
+// or addr unchanged when the first instruction is not padding.
+static rose_addr_t
+consume_padding_insns(P2::PartitionerPtr const & partitioner, rose_addr_t addr) {
+  rose_addr_t current = addr;
+  while (true) {
+    // Never consume bytes that already belong to something else.
+    if (partitioner->instructionExists(current)) break;
+    SgAsmX86Instruction* insn = isSgAsmX86Instruction(partitioner->discoverInstruction(current));
+    if (!insn || insn->get_size() == 0) break;
+    if (!insn_is_padding(insn)) break;
+    current += insn->get_size();
+  }
+  return current;
+}
+
 P2::DataBlock::Ptr
 CERTEngine::try_making_padding_block(P2::PartitionerPtr const & partitioner, rose_addr_t addr, bool backwards) {
   // The padding data block that we're going to create (or return as a nulllptr).
@@ -542,6 +571,23 @@ CERTEngine::try_making_padding_block(P2::PartitionerPtr const & partitioner, ros
   rose_addr_t current = addr;
   uint8_t byte;
   uint8_t expected;
+
+  // Going forwards we can decode instructions, which is the only way to recognize the padding
+  // that compilers actually emit.  Alignment padding is not a run of identical bytes: GCC uses
+  // multi-byte no-ops such as "lea esi, [esi+0]" (with and without a CS prefix) and the 0F 1F
+  // family, none of which the byte oriented logic below can express.  Failing to consume them
+  // makes the following function appear to start at its padding instead of at its first real
+  // instruction.
+  if (!backwards) {
+    rose_addr_t end = consume_padding_insns(partitioner, addr);
+    if (end == addr) {
+      not_pad_gaps.insert(addr);
+      return dblock;
+    }
+    dblock = P2::DataBlock::instanceBytes(addr, end - addr);
+    partitioner->attachDataBlock(dblock);
+    return dblock;
+  }
 
   // Read the first byte.
   try {
@@ -561,12 +607,8 @@ CERTEngine::try_making_padding_block(P2::PartitionerPtr const & partitioner, ros
     return dblock;
   }
 
-  // Decide which direction we're advancing in.
-  int8_t direction;
-  if (backwards)
-    direction = -1;
-  else
-    direction = 1;
+  // We only reach here scanning backwards, one byte at a time.
+  int8_t direction = -1;
 
   // While there are more bytes of the same type, consume those as well.
   byte = expected;

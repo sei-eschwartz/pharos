@@ -87,10 +87,12 @@ constexpr auto x86_regclass_gpr     = Rose::BinaryAnalysis::x86_regclass_gpr;
 constexpr auto x86_regclass_ip      = Rose::BinaryAnalysis::x86_regclass_ip;
 constexpr auto x86_regclass_segment = Rose::BinaryAnalysis::x86_regclass_segment;
 constexpr auto x86_mov              = Rose::BinaryAnalysis::x86_mov;
+constexpr auto x86_nop              = Rose::BinaryAnalysis::x86_nop;
 constexpr auto x86_pop              = Rose::BinaryAnalysis::x86_pop;
 constexpr auto x86_push             = Rose::BinaryAnalysis::x86_push;
 constexpr auto x86_ret              = Rose::BinaryAnalysis::x86_ret;
 constexpr auto x86_sub              = Rose::BinaryAnalysis::x86_sub;
+constexpr auto x86_xchg             = Rose::BinaryAnalysis::x86_xchg;
 constexpr auto x86_xor              = Rose::BinaryAnalysis::x86_xor;
 constexpr auto x86_rep_insb         = Rose::BinaryAnalysis::x86_rep_insb;
 constexpr auto x86_repne_scasw      = Rose::BinaryAnalysis::x86_repne_scasw;
@@ -295,6 +297,16 @@ bool insn_is_repeat(const SgAsmX86Instruction* insn);
 
 // Is the instruction an X86 nop?
 bool insn_is_nop(const SgAsmX86Instruction* insn);
+
+// Is the instruction an ENDBR32/ENDBR64 CET landing pad?  ROSE decodes these as x86_nop, so
+// only a raw byte match can tell them apart from an ordinary no-op.
+bool insn_is_endbr(const SgAsmX86Instruction* insn);
+
+// Is the instruction a no-op whose purpose is to mark a function entry point rather than to pad
+// between functions?  Covers the CET landing pad and the MSVC "mov edi, edi" hot-patch slot.
+// These are no-ops by insn_is_nop(), but consuming them as padding would move a function's entry
+// address past its real beginning.
+bool insn_is_entry_marker(const SgAsmX86Instruction* insn);
 
 // If two instructions match the PIC thunk pattern "mov GPR32, [esp]; ret", return the
 // target GPR.  Used by both partitioner-level and FunctionDescriptor-level detection.
