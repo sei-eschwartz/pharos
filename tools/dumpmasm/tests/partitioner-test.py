@@ -85,8 +85,8 @@ def run_test(args):
     return 0
 
 def accept_test(args):
-    gen_path = test_output_path(args) + "part2diff"
-    ground_path = test_ground_path(args) + "part2prev"
+    gen_path = test_output_path(args) + ".part2"
+    ground_path = test_ground_path(args) + ".part2prev"
 
     if args.commands:
         print("cp %s %s" % (gen_path, ground_path))

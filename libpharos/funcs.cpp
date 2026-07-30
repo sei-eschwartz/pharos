@@ -346,16 +346,6 @@ std::string FunctionDescriptor::debug_deltas() const {
   return s.str();
 }
 
-// ROSE currently decodes ENDBR32 and ENDBR64 as x86_nop.  Match their encodings so that an
-// ordinary NOP before a jump does not accidentally broaden thunk detection.
-static bool is_endbr(const SgAsmX86Instruction* insn) {
-  if (!insn) return false;
-  const SgUnsignedCharList& bytes = insn->get_rawBytes();
-  return bytes.size() == 4 &&
-    bytes[0] == 0xf3 && bytes[1] == 0x0f && bytes[2] == 0x1e &&
-    (bytes[3] == 0xfa || bytes[3] == 0xfb);
-}
-
 void FunctionDescriptor::update_target_address() {
   // Determine whether we're a thunk, and if we are, what address we jump to.
 
@@ -398,7 +388,7 @@ void FunctionDescriptor::update_target_address() {
   // We're a thunk only if the block contains a jump, optionally preceded by the ENDBR landing
   // instruction required by Intel CET.  In particular, do not accept an arbitrary NOP here.
   size_t jump_index = 0;
-  if (insns.size() == 2 && is_endbr(isSgAsmX86Instruction(insns[0]))) {
+  if (insns.size() == 2 && insn_is_endbr(isSgAsmX86Instruction(insns[0]))) {
     jump_index = 1;
   }
   else if (insns.size() != 1) {
