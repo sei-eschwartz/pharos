@@ -682,7 +682,8 @@ struct ApiBackEdgeVisitor : public boost::base_visitor<ApiBackEdgeVisitor> {
 
 using ApiCfgPtr = std::shared_ptr<ApiCfg>;
 
-// Represents information about each CFG, notably the CFG itself and entry/exit blocks
+// Represents information about each CFG, notably the CFG itself and its entry and normal-return
+// exit blocks.  A component that cannot return has no exit.
 class ApiCfgComponent {
  private:
 
@@ -726,11 +727,13 @@ class ApiCfgComponent {
 
   void RemoveVertex(ApiCfgVertex );
 
-  void Replace(ApiCfgVertex &out_vertex, ApiCfgVertex &in_entry, ApiCfgVertex &in_exit_vertex);
+  void Replace(ApiCfgVertex &out_vertex, ApiCfgVertex &in_entry, ApiCfgVertex in_exit_vertex);
 
-  void InsertBefore(ApiCfgVertex &insert_vertex, ApiCfgVertex &in_entry_vertex, ApiCfgVertex &in_exit_vertex);
+  void InsertBefore(ApiCfgVertex &insert_vertex, ApiCfgVertex &in_entry_vertex,
+                    ApiCfgVertex in_exit_vertex);
 
-  void InsertAfter(ApiCfgVertex &insert_vertex, ApiCfgVertex &in_entry_vertex, ApiCfgVertex &in_exit_vertex);
+  void InsertAfter(ApiCfgVertex &insert_vertex, ApiCfgVertex &in_entry_vertex,
+                   ApiCfgVertex in_exit_vertex);
 
   rose_addr_t ConsolidateReturns(BlockSet &retns);
 

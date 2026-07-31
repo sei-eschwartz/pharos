@@ -1756,12 +1756,14 @@ void ApiCfgComponent::Initialize(const FunctionDescriptor &fd, AddrSet &api_call
   entry_ = fd.get_address();
   GDEBUG << "Setting entry to " << addr_str(entry_) << LEND;
 
-  // The following code selects the exit for the graph. One exit is necessary for consolidation
-  // so get all the the return blocks, select one as the primary return and then consolidate
-  // the other returns to refer to the primary return (if there are multiple retursn
-
-  // pick a return address from the set of return blocks
-  BlockSet retns = fd.get_return_blocks(); // Jeff, this should really use get_return_vertices()
+  // Select a normal-return exit for graph consolidation.  CFG sinks ending in calls known not
+  // to return are deliberately absent.  A function with no returning sink has no exit; terminal
+  // vertices remain in the graph but must never be connected to a caller's continuation.
+  BlockSet retns;
+  for (CfgVertex rvtx : fd.get_return_vertices()) {
+    SgAsmBlock *block = convert_vertex_to_bblock(src, rvtx);
+    if (block != nullptr) retns.insert(block);
+  }
   exit_ = INVALID_ADDRESS;
 
   // select the primary return
@@ -1769,27 +1771,13 @@ void ApiCfgComponent::Initialize(const FunctionDescriptor &fd, AddrSet &api_call
     SgAsmBlock *bb = *(retns.begin());
     exit_ = bb->get_address();
   }
-  else {
-
-    // No returns found. Select a node with a 0 out degree to be the exit
-    GDEBUG << "Could not find return vertex for " << addr_str(entry_)
-           << ", defaulting to the first vertex with 0 out degree" << LEND;
-
-    BGL_FORALL_VERTICES(rvtx,*cfg_,ApiCfg) {
-      ApiVertexInfo &vertex_info = (*cfg_)[rvtx];
-      if (0 == boost::out_degree(rvtx,*cfg_)) {
-        exit_ = vertex_info.block->get_address();
-        break;
-      }
-    }
-  }
   // There is more than one return, consolidate them to refer to the primary return
   if (retns.size() > 1) {
     // there are multiple returns
     exit_ = ConsolidateReturns(retns);
   }
   if (exit_ == INVALID_ADDRESS) {
-    GWARN << "Warning: could not find exit vertex for " << addr_str(entry_) << LEND;
+    GDEBUG << "Function " << addr_str(entry_) << " has no normal-return exit" << LEND;
   }
 
   // Finally, remove all vertices not needed for consolidation
@@ -2098,8 +2086,8 @@ bool ApiCfgComponent::Merge(ApiCfgComponentPtr to_insert, rose_addr_t merge_addr
   ApiCfgVertex orig_insert_entry_vertex = to_insert_copy.GetEntryVertex();
   ApiCfgVertex orig_insert_exit_vertex  = to_insert_copy.GetExitVertex();
 
-  if (orig_insert_entry_vertex == NULL_VERTEX || orig_insert_exit_vertex == NULL_VERTEX) {
-    GWARN << "Could not find to_insert entry/exit vertices - cannot merge" << LEND;
+  if (orig_insert_entry_vertex == NULL_VERTEX) {
+    GWARN << "Could not find to_insert entry vertex - cannot merge" << LEND;
     return false;
   }
 
@@ -2117,10 +2105,13 @@ bool ApiCfgComponent::Merge(ApiCfgComponentPtr to_insert, rose_addr_t merge_addr
   // done incrementally
 
   ApiCfgVertex insert_entry_vertex = iso_map[orig_insert_entry_vertex];
-  ApiCfgVertex insert_exit_vertex = iso_map[orig_insert_exit_vertex];
+  ApiCfgVertex insert_exit_vertex = NULL_VERTEX;
+  if (orig_insert_exit_vertex != NULL_VERTEX) {
+    insert_exit_vertex = iso_map[orig_insert_exit_vertex];
+  }
 
-  if (insert_entry_vertex==NULL_VERTEX || insert_exit_vertex==NULL_VERTEX) {
-    GWARN << "Could not find to_insert entry/exit vertices - cannot merge" << LEND;
+  if (insert_entry_vertex == NULL_VERTEX) {
+    GWARN << "Could not find copied entry vertex - cannot merge" << LEND;
     return false;
   }
 
@@ -2184,17 +2175,24 @@ bool ApiCfgComponent::Merge(ApiCfgComponentPtr to_insert, rose_addr_t merge_addr
   return true;
 }
 
-// inserts a graph after a given node
+// Insert a graph before a given node. An exitless inserted graph is terminal and therefore is
+// not connected to the original node.
 void ApiCfgComponent::InsertBefore(ApiCfgVertex &before_vertex, ApiCfgVertex &in_entry_vertex,
-                                   ApiCfgVertex &in_exit_vertex)
+                                   ApiCfgVertex in_exit_vertex)
 {
   ApiVertexInfo &in_entry_info = (*cfg_)[in_entry_vertex]; // entry block to insert
-  ApiVertexInfo &in_exit_info  = (*cfg_)[in_exit_vertex];  // exit block to insert
   ApiVertexInfo &before_vertex_info   = (*cfg_)[before_vertex];   // the block to prepend
 
-  GDEBUG << "Inserting before vertices: " << addr_str(before_vertex_info.block->get_address())
-         << " with " << addr_str(in_entry_info.block->get_address())
-         << ":" << addr_str(in_exit_info.block->get_address()) << LEND;
+  if (in_exit_vertex == NULL_VERTEX) {
+    GDEBUG << "Inserting terminal graph before vertex: "
+           << addr_str(before_vertex_info.block->get_address()) << " with "
+           << addr_str(in_entry_info.block->get_address()) << LEND;
+  }
+  else {
+    GDEBUG << "Inserting before vertices: " << addr_str(before_vertex_info.block->get_address())
+           << " with " << addr_str(in_entry_info.block->get_address()) << ":"
+           << addr_str((*cfg_)[in_exit_vertex].block->get_address()) << LEND;
+  }
 
   std::vector<ApiCfgVertex> edge_kill_list;
   // Connect the exit to successors of the before_vertex
@@ -2217,8 +2215,10 @@ void ApiCfgComponent::InsertBefore(ApiCfgVertex &before_vertex, ApiCfgVertex &in
     }
   }
 
-  // connect the entry to the before_vertex
-  boost::add_edge(in_exit_vertex, before_vertex, *cfg_);
+  // Only a normally returning inserted graph continues into the original node.
+  if (in_exit_vertex != NULL_VERTEX) {
+    boost::add_edge(in_exit_vertex, before_vertex, *cfg_);
+  }
 
   // remove the edges in to the before_vertex
   for (const ApiCfgVertex & vtx : edge_kill_list) {
@@ -2226,17 +2226,24 @@ void ApiCfgComponent::InsertBefore(ApiCfgVertex &before_vertex, ApiCfgVertex &in
   }
 }
 
-// inserts a graph after a given node
+// Insert a graph after a given node. An exitless inserted graph replaces the old continuation
+// with a terminal path.
 void ApiCfgComponent::InsertAfter(ApiCfgVertex &insert_vertex, ApiCfgVertex &in_entry_vertex,
-                                  ApiCfgVertex &in_exit_vertex)
+                                  ApiCfgVertex in_exit_vertex)
 {
   ApiVertexInfo &in_entry_info = (*cfg_)[in_entry_vertex]; // entry block to insert
-  ApiVertexInfo &in_exit_info  = (*cfg_)[in_exit_vertex];  // exit block to insert
   ApiVertexInfo &insert_info   = (*cfg_)[insert_vertex];   // the block to remove
 
-  GDEBUG << "Inserting after vertices: " << addr_str(insert_info.block->get_address())
-         << " with " << addr_str(in_entry_info.block->get_address())
-         << ":" << addr_str(in_exit_info.block->get_address()) << LEND;
+  if (in_exit_vertex == NULL_VERTEX) {
+    GDEBUG << "Inserting terminal graph after vertex: "
+           << addr_str(insert_info.block->get_address()) << " with "
+           << addr_str(in_entry_info.block->get_address()) << LEND;
+  }
+  else {
+    GDEBUG << "Inserting after vertices: " << addr_str(insert_info.block->get_address())
+           << " with " << addr_str(in_entry_info.block->get_address()) << ":"
+           << addr_str((*cfg_)[in_exit_vertex].block->get_address()) << LEND;
+  }
 
   std::vector<ApiCfgVertex> edge_kill_list;
   // Connect the exit to successors of the insert_vertex
@@ -2248,13 +2255,14 @@ void ApiCfgComponent::InsertAfter(ApiCfgVertex &insert_vertex, ApiCfgVertex &in_
 
     // if the edge doesn't already exist between these vertices. This will catch  and prevent
     // self edges
-    if (false == boost::edge(in_exit_vertex, next, *cfg_).second) {
+    if (in_exit_vertex != NULL_VERTEX &&
+        false == boost::edge(in_exit_vertex, next, *cfg_).second) {
 
       // take the in edge and make it refer to next out edge vertex
       boost::add_edge(in_exit_vertex, next, *cfg_);
 
       GDEBUG << "Adding edge from "
-             << addr_str(in_exit_info.block->get_address()) << " to "
+             << addr_str((*cfg_)[in_exit_vertex].block->get_address()) << " to "
              << addr_str((*cfg_)[next].block->get_address()) << LEND;
     }
   }
@@ -2268,27 +2276,33 @@ void ApiCfgComponent::InsertAfter(ApiCfgVertex &insert_vertex, ApiCfgVertex &in_
   }
 }
 
-// Replace vertex with a completely new graph. The in_entry_vertex is the start
-// of the new graph and in_exit_vertex is the end point of the new graph. out_vertex is where
-// the graph will patched in.
+// Replace a vertex with a completely new graph. The exit is optional: an exitless graph is
+// terminal and therefore does not inherit the replaced vertex's outgoing edges.
 void ApiCfgComponent::Replace(ApiCfgVertex &out_vertex, ApiCfgVertex &in_entry_vertex,
-                              ApiCfgVertex &in_exit_vertex)
+                              ApiCfgVertex in_exit_vertex)
 {
   assert(cfg_);
   ApiVertexInfo &in_entry_info = (*cfg_)[in_entry_vertex]; // entry block to insert
-  ApiVertexInfo &in_exit_info = (*cfg_)[in_exit_vertex];    // exit block to insert
   ApiVertexInfo &out_info = (*cfg_)[out_vertex]; // the block to remove
 
-  GDEBUG << "Replacing vertices: " << addr_str(out_info.block->get_address())
-         << " with " << addr_str(in_entry_info.block->get_address())
-         << ":" << addr_str(in_exit_info.block->get_address()) << LEND;
+  if (in_exit_vertex == NULL_VERTEX) {
+    GDEBUG << "Replacing vertex " << addr_str(out_info.block->get_address())
+           << " with terminal graph at " << addr_str(in_entry_info.block->get_address()) << LEND;
+  }
+  else {
+    GDEBUG << "Replacing vertices: " << addr_str(out_info.block->get_address())
+           << " with " << addr_str(in_entry_info.block->get_address()) << ":"
+           << addr_str((*cfg_)[in_exit_vertex].block->get_address()) << LEND;
+  }
 
   if (entry_ == out_info.block->get_address()) {
     entry_ = in_entry_info.block->get_address();
   }
   // removing exit point. Like entry, there can be multiple exits (should this be allowed?)
   if (exit_ == out_info.block->get_address()) {
-    exit_ = in_exit_info.block->get_address();
+    exit_ = in_exit_vertex == NULL_VERTEX
+      ? INVALID_ADDRESS
+      : (*cfg_)[in_exit_vertex].block->get_address();
   }
 
   // for each in-edge to the vertex to remove (out), make the previous vertex refer to the
@@ -2319,20 +2333,22 @@ void ApiCfgComponent::Replace(ApiCfgVertex &out_vertex, ApiCfgVertex &in_entry_v
     }
   }
 
-  // for each out edge of the out vertex, make the in_exit vertex refer to the out next vertex
+  // A returning inserted graph inherits the old continuation. An exitless graph deliberately
+  // drops it.
   BGL_FORALL_OUTEDGES(out_vertex,edge,*cfg_,ApiCfg) {
     // get the next vertex
     ApiCfgVertex next = boost::target(edge, *cfg_);
 
     // if the edge doesn't already exist between these vertices. This will catch  and prevent
     // self edges
-    if (false == boost::edge(in_exit_vertex, next, *cfg_).second) {
+    if (in_exit_vertex != NULL_VERTEX &&
+        false == boost::edge(in_exit_vertex, next, *cfg_).second) {
 
       // take the in edge and make it refer to next out edge vertex
       boost::add_edge(in_exit_vertex, next, *cfg_);
 
       GDEBUG << "Adding edge from "
-             << addr_str(in_exit_info.block->get_address()) << " to "
+             << addr_str((*cfg_)[in_exit_vertex].block->get_address()) << " to "
              << addr_str((*cfg_)[next].block->get_address()) << LEND;
     }
   }
