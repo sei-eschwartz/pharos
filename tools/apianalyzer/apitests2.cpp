@@ -117,32 +117,6 @@ TEST_F(ApiAnalyzerInterproceduralTest, TEST_SHOULD_NOT_FIND_INVALID_INTERPROCEDU
   EXPECT_EQ(results2.size(),ApiSearchResultVector::size_type(0));
 }
 
-// Temporarily disabled because the checked-in executable predates and does not match
-// tests/src/api/ApiGraphTestProgram2.cpp.  The binary contains an ExitProcess -> CloseHandle
-// sequence that is unreachable once non-returning calls are modeled correctly.
-TEST_F(ApiAnalyzerInterproceduralTest, DISABLED_TEST_SHOULD_HANDLE_INTERPROCEDURAL_BACKTRACKING) {
-
-  // Sig4:Kernel32.DLL!GetTickCount,Kernel32.DLL!GetModuleHandleA,Kernel32.DLL!ExitProcess,Kernel32.DLL!CloseHandle
-
-  ApiSig sig1;
-  sig1.name = "TEST_SHOULD_HANDLE_INTERPROCEDURAL_BACKTRACKING1";
-  sig1.api_calls.push_back(ApiSigFunc("KERNEL32.DLL!GETTICKCOUNT"));
-  sig1.api_calls.push_back(ApiSigFunc("KERNEL32.DLL!GETMODULEHANDLEA"));
-  sig1.api_calls.push_back(ApiSigFunc("KERNEL32.DLL!EXITPROCESS"));
-  sig1.api_calls.push_back(ApiSigFunc("KERNEL32.DLL!CLOSEHANDLE"));
-
-  sig1.api_count = sig1.api_calls.size();
-
-  ApiSearchResultVector results1;
-  bool r1 = api_graph_.Search(sig1, &results1);
-
-  EXPECT_TRUE(r1);
-
-  rose_addr_t component1 = 0x004013E0;
-  std::string expected1 = "0x004013E00x004013B00x004013BC0x004013C7";
-  CheckResultTree(component1, expected1, results1);
-}
-
 // ExitProcess is terminal, so nothing can follow it and this signature must not match.
 // Without the progress rollback in ApiSearchState::RevertState the search backtracks out of
 // ExitProcess but keeps looking for TerminateProcess, and reports a false match along a path
