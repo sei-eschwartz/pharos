@@ -31,6 +31,19 @@ ImportDescriptor::ImportDescriptor(DescriptorSet& ds_, rose_addr_t addr_,
 
   // Create a new variable value to represent the memory initialized by the loader.
   loader_variable = SymbolicValue::loader_defined();
+
+  _apply_name_tags();
+}
+
+// The import table is the only evidence we have about these functions, so a user tag on the
+// name is the only way to learn that one of them does not return.  Recording it on the private
+// function descriptor means every consumer sees it: CallDescriptor::get_never_returns() reads
+// it for direct calls, and _propagate_thunk_info() copies it onto thunks.
+void ImportDescriptor::_apply_name_tags() {
+  if (name == unknown_name) return;
+  if (function_descriptor.ds.tags().check_name(name, "nonreturn")) {
+    function_descriptor.set_never_returns(true);
+  }
 }
 
 std::string ImportDescriptor::get_dll_root() const {
@@ -53,6 +66,9 @@ void ImportDescriptor::merge_api_definition(APIDefinition const & def) {
 
   // Here's the real call that does most of the work.
   function_descriptor.set_api(def);
+
+  // The name may have just been resolved from an ordinal.
+  _apply_name_tags();
 }
 
 std::string ImportDescriptor::get_normalized_name() const {
