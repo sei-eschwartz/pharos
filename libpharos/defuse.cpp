@@ -1389,8 +1389,7 @@ void DUAnalysis::guess_function_delta() {
   // Because it's shorter than current_function...
   FunctionDescriptor* fd = current_function;
 
-
-  for (CFGVertex vertex : fd->get_return_vertices()) {
+  for (CFGVertex vertex : fd->get_return_vertices(ReturnVertices::NormalOnly)) {
     const SgAsmBlock *block = convert_vertex_to_bblock(cfg, vertex);
     // Find the return instruction.
     const SgAsmStatementPtrList &insns = block->get_statementList();
@@ -1428,7 +1427,9 @@ void DUAnalysis::update_function_delta() {
   // This is the number on the RETN instruction and is also our expected stack delta.
   int64_t retn_size = 0;
 
-  for (CFGVertex vertex : fd->get_return_vertices()) {
+  // A sink ending in a call that never returns is not a return path, so it must not contribute
+  // to the function's unified return stack delta.
+  for (CFGVertex vertex : fd->get_return_vertices(ReturnVertices::NormalOnly)) {
     const SgAsmBlock *block = convert_vertex_to_bblock(cfg, vertex);
     // Find the return instruction.
     const SgAsmStatementPtrList &insns = block->get_statementList();
@@ -1644,7 +1645,7 @@ DUAnalysis::update_output_state()
 
   // This list isn't really the return blocks, but rather all "out" edges in the control flow
   // graph which can contain jumps, and other strange things as a result of bad partitioning.
-  std::vector<CFGVertex> out_vertices = fd->get_return_vertices();
+  std::vector<CFGVertex> out_vertices = fd->get_return_vertices(ReturnVertices::All);
 
   // Create an empty output state when we don't know what else to do...  In this case because
   // there are no out edges from the function...  For example a jump to itself...  This choice

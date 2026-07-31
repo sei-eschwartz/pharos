@@ -1384,8 +1384,19 @@ std::vector<CFGVertex> FunctionDescriptor::get_vertices_in_flow_order(const CFG&
 
 // Return the list of blocks with no successors connected to the entry point in the Pharos CFG.
 // Since there's only a single entry vertex (vertex 0), it doesn't need to be passed.
-std::vector<CFGVertex> FunctionDescriptor::get_return_vertices() const {
-  return get_return_vertices(get_pharos_cfg(), entry_vertex);
+std::vector<CFGVertex>
+FunctionDescriptor::get_return_vertices(ReturnVertices which) const {
+  const CFG &cfg = get_pharos_cfg();
+  CFGVertexVector vertices = get_return_vertices(cfg, entry_vertex);
+  if (which == ReturnVertices::All) return vertices;
+
+  vertices.erase(std::remove_if(vertices.begin(), vertices.end(), [&](CFGVertex vertex) {
+    const SgAsmBlock *block = convert_vertex_to_bblock(cfg, vertex);
+    const SgAsmInstruction *last = block ? last_insn_in_block(block) : nullptr;
+    const CallDescriptor *call = last ? ds.get_call(last->get_address()) : nullptr;
+    return call != nullptr && call->get_never_returns();
+  }), vertices.end());
+  return vertices;
 }
 
 // Return the list of blocks with no successors from the provided CFG and entry point.
@@ -1394,11 +1405,11 @@ std::vector<CFGVertex> FunctionDescriptor::get_return_vertices(const CFG& cfg, C
   return analyzer.return_blocks(cfg, entry);
 }
 
-// Deprecated in favor of get_return_vertices(), provides backward compatability with apigraph.cpp
+// Deprecated in favor of get_return_vertices(); retained for backward compatibility.
 BlockSet FunctionDescriptor::get_return_blocks() const {
   BlockSet blocks;
   const CFG& cfg = get_pharos_cfg();
-  for (CFGVertex vertex : get_return_vertices()) {
+  for (CFGVertex vertex : get_return_vertices(ReturnVertices::All)) {
     SgAsmBlock *block = convert_vertex_to_bblock(cfg, vertex);
     if (block) blocks.insert(block);
   }
