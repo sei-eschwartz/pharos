@@ -566,7 +566,7 @@ struct ApiSearchState {
   // Reset the entire state
   void ClearState();
 
-  void RevertState(ApiCfgVertex revert_vertex, ApiWaypointDescriptor &revert_point);
+  void RevertState(ApiCfgVertex revert_vertex, const ApiWaypointDescriptor &removed_point);
 
 };
 

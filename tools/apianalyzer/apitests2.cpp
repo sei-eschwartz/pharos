@@ -143,6 +143,35 @@ TEST_F(ApiAnalyzerInterproceduralTest, DISABLED_TEST_SHOULD_HANDLE_INTERPROCEDUR
   CheckResultTree(component1, expected1, results1);
 }
 
+// ExitProcess is terminal, so nothing can follow it and this signature must not match.
+// Without the progress rollback in ApiSearchState::RevertState the search backtracks out of
+// ExitProcess but keeps looking for TerminateProcess, and reports a false match along a path
+// that never calls ExitProcess at all:
+//
+//   0x0040129A PeekNamedPipe .. 0x00401307 WriteFile .. 0x00401336 TerminateProcess
+TEST_F(ApiAnalyzerInterproceduralTest, TEST_BACKTRACK_ROLLS_BACK_SIGNATURE_PROGRESS) {
+
+  ApiSig sig;
+  sig.name = "TEST_BACKTRACK_ROLLS_BACK_SIGNATURE_PROGRESS";
+  sig.api_calls.push_back(ApiSigFunc("KERNEL32.DLL!PEEKNAMEDPIPE"));
+  sig.api_calls.push_back(ApiSigFunc("KERNEL32.DLL!EXITPROCESS"));
+  sig.api_calls.push_back(ApiSigFunc("KERNEL32.DLL!TERMINATEPROCESS"));
+  sig.api_count = sig.api_calls.size();
+
+  ApiSearchResultVector results;
+  bool matched = api_graph_.Search(sig, &results);
+
+  std::string paths;
+  for (const ApiSearchResult &result : results) {
+    paths += "\n  ";
+    for (const ApiWaypointDescriptor &waypoint : result.search_tree) {
+      paths += addr_str(waypoint.block->get_address()) + " ";
+    }
+  }
+  EXPECT_FALSE(matched) << "unexpected match:" << paths;
+  EXPECT_TRUE(results.empty());
+}
+
 // this is a basic inter-procedural signature
 TEST_F(ApiAnalyzerInterproceduralTest, TEST_SHOULD_NOT_FIND_INTERPROCEDURAL_SIG) {
 

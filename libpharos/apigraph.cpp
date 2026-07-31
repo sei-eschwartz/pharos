@@ -186,10 +186,13 @@ void ApiSearchState::ResetSearchState() {
 }
 
 // revert the state of a search
-void ApiSearchState::RevertState(ApiCfgVertex revert_vertex, ApiWaypointDescriptor &revert_point) {
+void ApiSearchState::RevertState(ApiCfgVertex revert_vertex,
+                                 const ApiWaypointDescriptor &removed_point) {
 
-  // This is a signature vertex
-  if (revert_point.name == start_api.name) {
+  // Roll signature progress back when Backtrack removed the API that began the current segment.
+  // The saved waypoint is authoritative: start_point was populated from last_point, which does
+  // not carry the ApiVertexInfo name.
+  if (progress > 0 && removed_point.name == start_api.name) {
     goal_api = start_api;
     progress--;
     if (progress > 0) {
@@ -634,7 +637,7 @@ bool ApiSearchExecutor::Backtrack() {
       return false;
     }
 
-    state_.RevertState(next_to_last.vertex, state_.start_point);
+    state_.RevertState(next_to_last.vertex, last);
 
     ApiCfgPtr cfg = comp->GetCfg();
     assert(cfg);
