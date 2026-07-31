@@ -40,6 +40,10 @@ callingConvention(0x4011af, '__fastcall').
 callingConvention(0x4011af, '__stdcall').
 callingConvention(0x4011af, '__thiscall').
 callingConvention(0x4011af, '__vectorcall').
+callingConvention(0x4011d4, '__fastcall').
+callingConvention(0x4011d4, '__stdcall').
+callingConvention(0x4011d4, '__thiscall').
+callingConvention(0x4011d4, '__vectorcall').
 callingConvention(0x401343, '__cdecl').
 callingConvention(0x401343, '__fastcall').
 callingConvention(0x401343, '__stdcall').
@@ -1435,9 +1439,7 @@ callReturn(0x4011c5, 0x4011af, eax, sv_10326401343490204).
 callReturn(0x4011df, 0x401339, eax, sv_12540759406433005699).
 callReturn(0x4011f3, 0x401339, eax, sv_16804454651505912717).
 callReturn(0x401242, 0x401339, eax, sv_6032595160830816265).
-callReturn(0x40124d, 0x401339, eax, sv_1015530610588860864).
 callReturn(0x401253, 0x401339, eax, sv_5794495711746393818).
-callReturn(0x40125e, 0x401339, eax, sv_5631765963165333290).
 callReturn(0x401264, 0x401339, eax, sv_2344917255844252614).
 callReturn(0x40126c, 0x401339, eax, sv_9624324814885770436).
 callReturn(0x40127d, 0x401339, eax, sv_13840316058767275363).
@@ -2648,6 +2650,9 @@ funcParameter(0x401112, 0x1, sv_5048448721890867272).
 funcParameter(0x401112, ecx, sv_16847872335693989724).
 funcParameter(0x40112f, 0, sv_12810582802689163358).
 funcParameter(0x4011af, 0, sv_48482967568623846).
+funcParameter(0x4011d4, 0, sv_10524151059875133784).
+funcParameter(0x4011d4, 0x1, sv_16267567249712424728).
+funcParameter(0x4011d4, 0x2, sv_6787773534387591530).
 funcParameter(0x401339, ebp, sv_5117069496128511490).
 funcParameter(0x401339, esp, sv_4425072461500039166).
 funcParameter(0x401389, ebx, sv_11566084216894359601).
@@ -2952,6 +2957,7 @@ funcReturn(0x4010eb, eax, sv_5358070181845398513).
 funcReturn(0x401112, eax, sv_16847872335693989724).
 funcReturn(0x40112f, eax, sv_10376602107485086357).
 funcReturn(0x4011af, eax, sv_10326401343490204).
+funcReturn(0x4011d4, eax, sv_852651925700776040).
 funcReturn(0x401343, eax, sv_13844100752708545617).
 funcReturn(0x40134c, eax, sv_41988639580172503).
 funcReturn(0x401355, eax, sv_5729663506877729734).
