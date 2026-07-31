@@ -97,8 +97,10 @@ TEST_F(ApiAnalyzerInterproceduralTest, TEST_SHOULD_NOT_FIND_INVALID_INTERPROCEDU
   EXPECT_EQ(results2.size(),ApiSearchResultVector::size_type(0));
 }
 
-// This test is designed to force backtracking for a valid signature
-TEST_F(ApiAnalyzerInterproceduralTest, TEST_SHOULD_HANDLE_INTERPROCEDURAL_BACKTRACKING) {
+// Temporarily disabled because the checked-in executable predates and does not match
+// tests/src/api/ApiGraphTestProgram2.cpp.  The binary contains an ExitProcess -> CloseHandle
+// sequence that is unreachable once non-returning calls are modeled correctly.
+TEST_F(ApiAnalyzerInterproceduralTest, DISABLED_TEST_SHOULD_HANDLE_INTERPROCEDURAL_BACKTRACKING) {
 
   // Sig4:Kernel32.DLL!GetTickCount,Kernel32.DLL!GetModuleHandleA,Kernel32.DLL!ExitProcess,Kernel32.DLL!CloseHandle
 
