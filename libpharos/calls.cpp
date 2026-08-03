@@ -11,7 +11,22 @@
 #include "misc.hpp"
 #include "vcall.hpp"
 
+#include <Rose/BinaryAnalysis/Partitioner2/Utility.h>
+
 namespace pharos {
+
+static bool
+partitioner_marks_call_noreturn(const DescriptorSet &ds, rose_addr_t call_address) {
+  const P2::BasicBlock::Ptr block = ds.get_block(call_address);
+  if (block == nullptr) return false;
+
+  const P2::Partitioner &partitioner = ds.get_partitioner();
+  if (!partitioner.basicBlockIsFunctionCall(block)) return false;
+
+  auto vertex = partitioner.findPlaceholder(block->address());
+  if (vertex == partitioner.cfg().vertices().end()) return false;
+  return !P2::hasCallReturnEdges(vertex);
+}
 
 template<> char const* EnumStrings<CallType>::data[] = {
   "Immediate",
@@ -206,26 +221,32 @@ bool CallDescriptor::get_never_returns() const {
   // If we have no idea about the call targets, assume that the call returns.
   if (targets.size() == 0) return false;
 
+  // With MAYRETURN_DEFAULT_YES, the partitioner emits a call-return edge unless it has
+  // affirmative evidence that this particular call cannot return.  Consult that evidence for
+  // internal calls as well as imports; an internal wrapper around a non-returning API is the
+  // common case where the FunctionDescriptor has not independently acquired never_returns.
+  if (partitioner_marks_call_noreturn(ds, address)) return true;
+
   // For each call target, if that target returns, then the call returns.
   for (rose_addr_t target : targets.values()) {
     const FunctionDescriptor* cfd = ds.get_func(target);
-    if (cfd) {
-      //OINFO << "Call " << address_string() << " calls " << cfd->address_string()
-      //      << " which returns = " << cfd->get_never_returns() << LEND;
-      if (! cfd->get_never_returns()) return false;
+    if (cfd == nullptr) {
+      const ImportDescriptor *id = ds.get_import(target);
+      if (id == nullptr) return false;
+
+      cfd = id->get_function_descriptor();
+      if (cfd != nullptr && cfd->get_never_returns()) continue;
+
+      auto may_return = ds.get_partitioner().configuration().functionMayReturn(id->get_name());
+      if (may_return && !*may_return) continue;
+
+      return false;
     }
-#if 0
-    // We should get the never returns status from the import database!
-    else {
-      const ImportDescriptor* cid = ds.get_import(target);
-      if (cid) {
-        OINFO << "Call " << address_string() << " calls " << cid->address_string()
-              << " which is " << cid->get_long_name() << LEND;
-      }
-    }
-#endif
+    // An unresolved target is not evidence that the call cannot return. Be conservative unless
+    // every target resolves to a function that is known not to return.
+    if (!cfd->get_never_returns()) return false;
   }
-  // If none of the targets ever return, the call does not return.
+  // Every target was resolved and is known not to return.
   return true;
 }
 

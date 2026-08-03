@@ -474,11 +474,19 @@ class FunctionDescriptor : private Immobile {
   static CFGVertexVector get_vertices_in_flow_order(const CFG& cfg, CFGVertex entry = entry_vertex);
   // Return the entry vertex
   static CFGVertex get_entry_vertex() { return entry_vertex; }
-  // Return the vertices with no successors from the Pharos (filtered) control flow graph.
-  CFGVertexVector get_return_vertices() const;
-  // Return the vertices with no successors from the provided control flow graph.
+  // Which CFG sinks get_return_vertices() should report.
+  enum class ReturnVertices {
+    NormalOnly,  // omit sinks ending in a call known not to return
+    All,         // every sink, including non-returning calls
+  };
+  // Return the reachable vertices with no successors from the Pharos (filtered) control flow
+  // graph. These are CFG sinks, and are not necessarily machine-level return instructions.
+  CFGVertexVector get_return_vertices(ReturnVertices which = ReturnVertices::NormalOnly) const;
+  // Low-level CFG-only form: return all reachable vertices with no successors. This overload
+  // cannot consult call descriptors to identify non-returning calls.
   static CFGVertexVector get_return_vertices(const CFG& cfg, CFGVertex entry = entry_vertex);
-  BlockSet get_return_blocks() const; // Deprecated in favor of get_return_vertices()
+  // Deprecated all-sinks compatibility wrapper; includes non-returning calls.
+  BlockSet get_return_blocks() const;
 
   SgAsmInstruction* get_insn(const rose_addr_t) const;
   InsnVector get_insns_addr_order() const;
@@ -528,6 +536,7 @@ class FunctionDescriptor : private Immobile {
 };
 
 using FuncDescVector = std::vector<FunctionDescriptor *>;
+using ReturnVertices = FunctionDescriptor::ReturnVertices;
 
 class FunctionDescriptorMap: public std::map<rose_addr_t, FunctionDescriptor> {
 

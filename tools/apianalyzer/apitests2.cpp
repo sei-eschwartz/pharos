@@ -67,6 +67,26 @@ class ApiAnalyzerTest2 : public testing::Test {
 // these are tests that concern the ApiCfgComponent class
 class ApiAnalyzerInterproceduralTest : public ApiAnalyzerTest2 { };
 
+TEST_F(ApiAnalyzerInterproceduralTest, TEST_NORETURN_WRAPPER_HAS_NO_NORMAL_EXIT) {
+  const CallDescriptor *wrapper_call = global_ds->get_call(0x0040107F);
+  ASSERT_NE(wrapper_call, nullptr);
+  EXPECT_TRUE(wrapper_call->get_never_returns());
+
+  ApiCfgComponentPtr wrapper = api_graph_.GetComponent(0x00401050);
+  ASSERT_NE(wrapper, nullptr);
+  EXPECT_EQ(wrapper->GetExitAddr(), INVALID_ADDRESS);
+
+  ApiCfgComponentPtr caller = api_graph_.GetComponent(0x00401060);
+  ASSERT_NE(caller, nullptr);
+  ApiCfgPtr cfg = caller->GetCfg();
+  ApiCfgVertex returning_branch = caller->GetVertexByAddr(0x0040107D);
+  ApiCfgVertex noreturn_branch = caller->GetVertexByAddr(0x0040107F);
+  ASSERT_NE(returning_branch, NULL_VERTEX);
+  ASSERT_NE(noreturn_branch, NULL_VERTEX);
+  EXPECT_FALSE(boost::edge(returning_branch, noreturn_branch, *cfg).second);
+  EXPECT_EQ(boost::out_degree(noreturn_branch, *cfg), ApiCfg::degree_size_type(0));
+}
+
 TEST_F(ApiAnalyzerInterproceduralTest, TEST_SHOULD_NOT_FIND_INVALID_INTERPROCEDURAL_SIG) {
   // self-loop + additional APIs
   ApiSig sig;
@@ -97,28 +117,33 @@ TEST_F(ApiAnalyzerInterproceduralTest, TEST_SHOULD_NOT_FIND_INVALID_INTERPROCEDU
   EXPECT_EQ(results2.size(),ApiSearchResultVector::size_type(0));
 }
 
-// This test is designed to force backtracking for a valid signature
-TEST_F(ApiAnalyzerInterproceduralTest, TEST_SHOULD_HANDLE_INTERPROCEDURAL_BACKTRACKING) {
+// ExitProcess is terminal, so nothing can follow it and this signature must not match.
+// Without the progress rollback in ApiSearchState::RevertState the search backtracks out of
+// ExitProcess but keeps looking for TerminateProcess, and reports a false match along a path
+// that never calls ExitProcess at all:
+//
+//   0x0040129A PeekNamedPipe .. 0x00401307 WriteFile .. 0x00401336 TerminateProcess
+TEST_F(ApiAnalyzerInterproceduralTest, TEST_BACKTRACK_ROLLS_BACK_SIGNATURE_PROGRESS) {
 
-  // Sig4:Kernel32.DLL!GetTickCount,Kernel32.DLL!GetModuleHandleA,Kernel32.DLL!ExitProcess,Kernel32.DLL!CloseHandle
+  ApiSig sig;
+  sig.name = "TEST_BACKTRACK_ROLLS_BACK_SIGNATURE_PROGRESS";
+  sig.api_calls.push_back(ApiSigFunc("KERNEL32.DLL!PEEKNAMEDPIPE"));
+  sig.api_calls.push_back(ApiSigFunc("KERNEL32.DLL!EXITPROCESS"));
+  sig.api_calls.push_back(ApiSigFunc("KERNEL32.DLL!TERMINATEPROCESS"));
+  sig.api_count = sig.api_calls.size();
 
-  ApiSig sig1;
-  sig1.name = "TEST_SHOULD_HANDLE_INTERPROCEDURAL_BACKTRACKING1";
-  sig1.api_calls.push_back(ApiSigFunc("KERNEL32.DLL!GETTICKCOUNT"));
-  sig1.api_calls.push_back(ApiSigFunc("KERNEL32.DLL!GETMODULEHANDLEA"));
-  sig1.api_calls.push_back(ApiSigFunc("KERNEL32.DLL!EXITPROCESS"));
-  sig1.api_calls.push_back(ApiSigFunc("KERNEL32.DLL!CLOSEHANDLE"));
+  ApiSearchResultVector results;
+  bool matched = api_graph_.Search(sig, &results);
 
-  sig1.api_count = sig1.api_calls.size();
-
-  ApiSearchResultVector results1;
-  bool r1 = api_graph_.Search(sig1, &results1);
-
-  EXPECT_TRUE(r1);
-
-  rose_addr_t component1 = 0x004013E0;
-  std::string expected1 = "0x004013E00x004013B00x004013BC0x004013C7";
-  CheckResultTree(component1, expected1, results1);
+  std::string paths;
+  for (const ApiSearchResult &result : results) {
+    paths += "\n  ";
+    for (const ApiWaypointDescriptor &waypoint : result.search_tree) {
+      paths += addr_str(waypoint.block->get_address()) + " ";
+    }
+  }
+  EXPECT_FALSE(matched) << "unexpected match:" << paths;
+  EXPECT_TRUE(results.empty());
 }
 
 // this is a basic inter-procedural signature
@@ -158,10 +183,46 @@ TEST_F(ApiAnalyzerInterproceduralTest, TEST_SHOULD_FIND_VALID_INTERPROCEDURAL_SI
   EXPECT_EQ(results.size(), ApiSearchResultVector::size_type(1));
 
   rose_addr_t component = 0x00401160;
-  // "0x0040129A 0x004010D0 0x004010A4 0x00401060 0x00401040 0x00401084 0x00401307"
-  std::string expected = "0x0040129A0x004010D00x004010A40x004010600x004010400x004010840x00401307";
+  // "0x0040129A 0x004010D0 0x004010A4 0x00401060 0x00401040 0x0040107D 0x00401307"
+  std::string expected = "0x0040129A0x004010D00x004010A40x004010600x004010400x0040107D0x00401307";
 
   CheckResultTree(component, expected, results);
+}
+
+TEST_F(ApiAnalyzerInterproceduralTest, TEST_SHOULD_FIND_SIG_ENDING_AT_EXITPROCESS) {
+  ApiSig sig;
+  sig.name = "TEST_SHOULD_FIND_SIG_ENDING_AT_EXITPROCESS";
+  sig.api_calls.push_back(ApiSigFunc("KERNEL32.DLL!PEEKNAMEDPIPE"));
+  sig.api_calls.push_back(ApiSigFunc("KERNEL32.DLL!READFILE"));
+  sig.api_calls.push_back(ApiSigFunc("KERNEL32.DLL!EXITPROCESS"));
+  sig.api_count = sig.api_calls.size();
+
+  ApiSearchResultVector results;
+  EXPECT_TRUE(api_graph_.Search(sig, &results));
+  EXPECT_EQ(results.size(), ApiSearchResultVector::size_type(1));
+}
+
+TEST_F(ApiAnalyzerInterproceduralTest, TEST_SHOULD_NOT_CONTINUE_AFTER_EXITPROCESS) {
+  ApiSig sig;
+  sig.name = "TEST_SHOULD_NOT_CONTINUE_AFTER_EXITPROCESS";
+  sig.api_calls.push_back(ApiSigFunc("KERNEL32.DLL!PEEKNAMEDPIPE"));
+  sig.api_calls.push_back(ApiSigFunc("KERNEL32.DLL!READFILE"));
+  sig.api_calls.push_back(ApiSigFunc("KERNEL32.DLL!EXITPROCESS"));
+  sig.api_calls.push_back(ApiSigFunc("KERNEL32.DLL!WRITEFILE"));
+  sig.api_count = sig.api_calls.size();
+
+  ApiSearchResultVector results;
+  bool matched = api_graph_.Search(sig, &results);
+  std::string paths;
+  for (const ApiSearchResult &result : results) {
+    if (!paths.empty()) paths += "; ";
+    for (const ApiWaypointDescriptor &waypoint : result.search_tree) {
+      if (!paths.empty() && paths.back() != ' ') paths += " -> ";
+      paths += addr_str(waypoint.block->get_address());
+    }
+  }
+  EXPECT_FALSE(matched) << "unexpected paths: " << paths;
+  EXPECT_TRUE(results.empty());
 }
 
 int main(int argc, char **argv) {

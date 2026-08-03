@@ -11,6 +11,8 @@
 #include <boost/graph/connected_components.hpp>
 #include <boost/foreach.hpp>
 
+#include <Rose/BinaryAnalysis/Partitioner2/Utility.h>
+
 #include <libpharos/pdg.hpp>
 #include <libpharos/misc.hpp>
 #include <libpharos/descriptors.hpp>
@@ -93,6 +95,76 @@ TEST_F(ApiAnalyzerTest, TestGraphViz) {
 
 // these are tests that concern the ApiCfgComponent class
 class ApiAnalyzerApiCfgComponentTest : public ApiAnalyzerTest { };
+
+// *****************************************************************************
+// A call is known not to return when the partitioner has affirmative call-site evidence, or
+// when it has targets and every target has affirmative non-returning evidence. Empty target
+// sets remain conservative.
+TEST_F(ApiAnalyzerApiCfgComponentTest, TEST_NORETURN_REQUIRES_ALL_TARGETS_KNOWN_NORETURNING) {
+  const CallDescriptor *create_pipe = global_ds->get_call(0x00401052);
+  ASSERT_NE(create_pipe, nullptr);
+  EXPECT_FALSE(create_pipe->get_never_returns());
+
+  const CallDescriptor *exit_process = global_ds->get_call(0x004012E7);
+  ASSERT_NE(exit_process, nullptr);
+  EXPECT_TRUE(exit_process->get_never_returns());
+
+  size_t empty_target_sets = 0;
+  size_t conservative_target_sets = 0;
+  size_t noreturn_target_sets = 0;
+
+  for (const auto &entry : global_ds->get_call_map()) {
+    const CallDescriptor &call = entry.second;
+    bool has_targets = false;
+    bool all_targets_noreturn = true;
+    bool partitioner_marks_noreturn = false;
+
+    const P2::BasicBlock::Ptr block = global_ds->get_block(call.get_address());
+    if (block != nullptr) {
+      const P2::Partitioner &partitioner = global_ds->get_partitioner();
+      auto vertex = partitioner.findPlaceholder(block->address());
+      partitioner_marks_noreturn = partitioner.basicBlockIsFunctionCall(block) &&
+        vertex != partitioner.cfg().vertices().end() &&
+        !P2::hasCallReturnEdges(vertex);
+    }
+
+    for (rose_addr_t target : call.get_targets()) {
+      has_targets = true;
+      const FunctionDescriptor *target_fd = global_ds->get_func(target);
+      if (target_fd == nullptr) {
+        const ImportDescriptor *target_import = global_ds->get_import(target);
+        if (target_import == nullptr) {
+          all_targets_noreturn = false;
+          continue;
+        }
+
+        target_fd = target_import->get_function_descriptor();
+        if (target_fd != nullptr && target_fd->get_never_returns()) continue;
+
+        auto may_return = global_ds->get_partitioner().configuration()
+          .functionMayReturn(target_import->get_name());
+        if (may_return && !*may_return) continue;
+
+        all_targets_noreturn = false;
+        continue;
+      }
+      if (!target_fd->get_never_returns()) {
+        all_targets_noreturn = false;
+      }
+    }
+
+    const bool expected = has_targets && (partitioner_marks_noreturn || all_targets_noreturn);
+    EXPECT_EQ(call.get_never_returns(), expected) << "call at " << addr_str(call.get_address());
+
+    if (!has_targets) ++empty_target_sets;
+    else if (expected) ++noreturn_target_sets;
+    else ++conservative_target_sets;
+  }
+
+  EXPECT_GT(empty_target_sets, 0U);
+  EXPECT_GT(conservative_target_sets, 0U);
+  EXPECT_GT(noreturn_target_sets, 0U);
+}
 
 // tests around graph construction
 
@@ -184,6 +256,40 @@ TEST_F(ApiAnalyzerApiCfgComponentTest, TEST_API_CALL_CORRECTLY_IDENTIFIED_AT_ENT
   const ApiVertexInfo& vi = (*cfg)[entry_vtx];
 
   EXPECT_EQ(vi.GetType(),ApiVertexInfo::API);
+}
+
+// *****************************************************************************
+// A non-returning API call is a terminal CFG vertex, not a return block. It must remain in the
+// component so signatures can end at the API without inventing a fall-through edge.
+TEST_F(ApiAnalyzerApiCfgComponentTest, TEST_NONRETURN_API_PRESERVED_AS_TERMINAL) {
+  const FunctionDescriptor *fd = global_ds->get_func(0x00401250);
+  ASSERT_NE(fd, nullptr);
+
+  auto contains_exit_process = [&](const FunctionDescriptor::CFGVertexVector &vertices) {
+    const CFG &cfg = fd->get_pharos_cfg();
+    for (CFGVertex vertex : vertices) {
+      const SgAsmBlock *block = convert_vertex_to_bblock(cfg, vertex);
+      const SgAsmInstruction *last = block ? last_insn_in_block(block) : nullptr;
+      if (last != nullptr && last->get_address() == 0x004012E7) return true;
+    }
+    return false;
+  };
+
+  EXPECT_FALSE(contains_exit_process(fd->get_return_vertices()));
+  EXPECT_TRUE(contains_exit_process(
+    fd->get_return_vertices(ReturnVertices::All)));
+
+  ApiCfgComponentPtr component = api_graph_.GetComponent(0x00401250);
+  ASSERT_NE(component, nullptr);
+
+  ApiCfgPtr cfg = component->GetCfg();
+  ApiCfgVertex exit_process = component->GetVertexByAddr(0x004012E5);
+  ASSERT_NE(exit_process, NULL_VERTEX);
+
+  const ApiVertexInfo &info = (*cfg)[exit_process];
+  EXPECT_EQ(info.GetType(), ApiVertexInfo::API);
+  EXPECT_EQ(info.api_name, "KERNEL32.DLL!EXITPROCESS");
+  EXPECT_EQ(boost::out_degree(exit_process, *cfg), ApiCfg::degree_size_type(0));
 }
 
 // *****************************************************************************

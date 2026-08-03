@@ -1243,8 +1243,6 @@ noCallsAfter(0x4111ea).
 noCallsAfter(0x4111ef).
 noCallsAfter(0x4111f4).
 noCallsAfter(0x411510).
-noCallsAfter(0x411610).
-noCallsAfter(0x411670).
 noCallsAfter(0x4116d0).
 noCallsAfter(0x411716).
 noCallsAfter(0x41171c).
@@ -1405,7 +1403,6 @@ noCallsBefore(0x4111f4).
 noCallsBefore(0x411560).
 noCallsBefore(0x411610).
 noCallsBefore(0x411670).
-noCallsBefore(0x4116d0).
 noCallsBefore(0x411716).
 noCallsBefore(0x41171c).
 noCallsBefore(0x411722).

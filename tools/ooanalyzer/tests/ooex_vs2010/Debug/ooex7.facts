@@ -2967,7 +2967,6 @@ noCallsAfter(0x412de0).
 noCallsAfter(0x412e40).
 noCallsAfter(0x4134e0).
 noCallsAfter(0x413690).
-noCallsAfter(0x413760).
 noCallsAfter(0x4137b0).
 noCallsAfter(0x413880).
 noCallsAfter(0x413b50).
@@ -3263,16 +3262,13 @@ noCallsBefore(0x4121e0).
 noCallsBefore(0x412220).
 noCallsBefore(0x412260).
 noCallsBefore(0x412490).
-noCallsBefore(0x4124f0).
 noCallsBefore(0x4126d0).
 noCallsBefore(0x412780).
 noCallsBefore(0x4128e0).
 noCallsBefore(0x412b20).
 noCallsBefore(0x412de0).
 noCallsBefore(0x412e40).
-noCallsBefore(0x4134e0).
 noCallsBefore(0x413530).
-noCallsBefore(0x413690).
 noCallsBefore(0x4137b0).
 noCallsBefore(0x413880).
 noCallsBefore(0x4139b0).

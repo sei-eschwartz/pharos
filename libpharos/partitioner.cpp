@@ -159,6 +159,181 @@ isX86MovAddJmpThunk(UNUSED P2::PartitionerConstPtr const &  partitioner, const s
   return {3, "pharos::isX86MovAddJmpThunk"s};
 }
 
+// Decompose the simple memory addressing forms used by Itanium ABI virtual-adjustment thunks.
+// ROSE represents a negative x86 displacement as an addition of a signed integer, so both
+// [reg+constant] and [reg-constant] arrive here as SgAsmBinaryAdd nodes.
+static bool
+match_register_displacement(const SgAsmMemoryReferenceExpression* mem,
+                            RegisterDescriptor& base, int64_t& displacement) {
+  if (!mem) return false;
+
+  SgAsmExpression* address = mem->get_address();
+  if (SgAsmDirectRegisterExpression* reg = isSgAsmDirectRegisterExpression(address)) {
+    base = reg->get_descriptor();
+    displacement = 0;
+    return true;
+  }
+
+  SgAsmBinaryAdd* add = isSgAsmBinaryAdd(address);
+  if (!add) return false;
+
+  SgAsmDirectRegisterExpression* reg = isSgAsmDirectRegisterExpression(add->get_lhs());
+  SgAsmIntegerValueExpression* offset = isSgAsmIntegerValueExpression(add->get_rhs());
+  if (!reg) {
+    reg = isSgAsmDirectRegisterExpression(add->get_rhs());
+    offset = isSgAsmIntegerValueExpression(add->get_lhs());
+  }
+  if (!reg || !offset) return false;
+
+  base = reg->get_descriptor();
+  displacement = offset->get_signedValue();
+  return true;
+}
+
+static bool
+is_amd64_this_pointer_register(RegisterDescriptor reg) {
+  return reg.majorNumber() == x86_regclass_gpr &&
+    (reg.minorNumber() == Rose::BinaryAnalysis::x86_gpr_di ||
+     reg.minorNumber() == Rose::BinaryAnalysis::x86_gpr_si) &&
+    reg.offset() == 0 && reg.nBits() == 64;
+}
+
+static bool
+is_endbr64(const SgAsmInstruction* insn) {
+  if (!insn) return false;
+  const SgUnsignedCharList& bytes = insn->get_rawBytes();
+  return bytes.size() == 4 &&
+    bytes[0] == 0xf3 && bytes[1] == 0x0f && bytes[2] == 0x1e && bytes[3] == 0xfa;
+}
+
+// Match a fixed Itanium ABI "this" adjustment.  The this pointer is normally in RDI, or RSI
+// when RDI holds the hidden address for an indirectly returned object.  GCC and Clang normally
+// use ADD or SUB, but LEA is equivalent and is also accepted when it preserves the data flow.
+static bool
+is_itanium_fixed_adjustment(SgAsmInstruction* insn, RegisterDescriptor& this_reg) {
+  SgAsmX86Instruction* xinsn = isSgAsmX86Instruction(insn);
+  if (!xinsn) return false;
+
+  const SgAsmExpressionPtrList& args = xinsn->get_operandList()->get_operands();
+  if (args.size() != 2) return false;
+
+  SgAsmDirectRegisterExpression* dst = isSgAsmDirectRegisterExpression(args[0]);
+  if (!dst || !is_amd64_this_pointer_register(dst->get_descriptor())) return false;
+  RegisterDescriptor candidate = dst->get_descriptor();
+
+  if (xinsn->get_kind() == x86_add || xinsn->get_kind() == x86_sub) {
+    SgAsmIntegerValueExpression* amount = isSgAsmIntegerValueExpression(args[1]);
+    if (!amount || amount->get_signedValue() == 0) return false;
+    this_reg = candidate;
+    return true;
+  }
+
+  if (xinsn->get_kind() == x86_lea) {
+    RegisterDescriptor base;
+    int64_t displacement = 0;
+    SgAsmMemoryReferenceExpression* src = isSgAsmMemoryReferenceExpression(args[1]);
+    if (!match_register_displacement(src, base, displacement) ||
+        base != candidate || displacement == 0) {
+      return false;
+    }
+    this_reg = candidate;
+    return true;
+  }
+
+  return false;
+}
+
+// Match the memory-derived adjustment used for a virtual base:
+//
+//   mov scratch, [this]
+//   add this, [scratch + displacement]
+//
+// Match the register data flow instead of requiring GCC's usual R10 scratch register.
+static bool
+is_itanium_virtual_adjustment(const std::vector<SgAsmInstruction*>& insns, size_t index,
+                              RegisterDescriptor& this_reg) {
+  if (index + 1 >= insns.size()) return false;
+
+  SgAsmX86Instruction* mov = isSgAsmX86Instruction(insns[index]);
+  if (!mov || mov->get_kind() != x86_mov) return false;
+  const SgAsmExpressionPtrList& mov_args = mov->get_operandList()->get_operands();
+  if (mov_args.size() != 2) return false;
+
+  SgAsmDirectRegisterExpression* scratch = isSgAsmDirectRegisterExpression(mov_args[0]);
+  if (!scratch) return false;
+  RegisterDescriptor scratch_reg = scratch->get_descriptor();
+  if (scratch_reg.majorNumber() != x86_regclass_gpr ||
+      scratch_reg.offset() != 0 || scratch_reg.nBits() != 64) {
+    return false;
+  }
+
+  RegisterDescriptor vtable_base;
+  int64_t ignored_displacement = 0;
+  SgAsmMemoryReferenceExpression* vtable = isSgAsmMemoryReferenceExpression(mov_args[1]);
+  if (!match_register_displacement(vtable, vtable_base, ignored_displacement) ||
+      !is_amd64_this_pointer_register(vtable_base) || ignored_displacement != 0 ||
+      scratch_reg == vtable_base) {
+    return false;
+  }
+
+  SgAsmX86Instruction* add = isSgAsmX86Instruction(insns[index + 1]);
+  if (!add || add->get_kind() != x86_add) return false;
+  const SgAsmExpressionPtrList& add_args = add->get_operandList()->get_operands();
+  if (add_args.size() != 2) return false;
+
+  SgAsmDirectRegisterExpression* add_dst = isSgAsmDirectRegisterExpression(add_args[0]);
+  if (!add_dst || add_dst->get_descriptor() != vtable_base) return false;
+
+  RegisterDescriptor adjustment_base;
+  int64_t adjustment_displacement = 0;
+  SgAsmMemoryReferenceExpression* adjustment = isSgAsmMemoryReferenceExpression(add_args[1]);
+  if (!match_register_displacement(adjustment, adjustment_base, adjustment_displacement) ||
+      adjustment_base != scratch_reg) {
+    return false;
+  }
+
+  this_reg = vtable_base;
+  return true;
+}
+
+// Detect SysV AMD64 thunks emitted under the Itanium C++ ABI.  This predicate is deliberately
+// installed only as a function splitter: scanning arbitrary executable bytes for these short
+// patterns would create too many speculative functions.
+P2::ThunkDetection
+isX86ItaniumAdjustingThunk(P2::PartitionerConstPtr const & partitioner,
+                           const std::vector<SgAsmInstruction*>& insns) {
+  if (!partitioner || insns.size() < 2) return {};
+
+  size_t index = 0;
+  if (is_endbr64(insns[index])) ++index;
+
+  bool fixed = false;
+  bool virtual_adjustment = false;
+  RegisterDescriptor fixed_this_reg;
+  RegisterDescriptor virtual_this_reg;
+
+  if (index < insns.size() &&
+      is_itanium_fixed_adjustment(insns[index], fixed_this_reg)) {
+    fixed = true;
+    ++index;
+  }
+
+  if (is_itanium_virtual_adjustment(insns, index, virtual_this_reg)) {
+    if (fixed && fixed_this_reg != virtual_this_reg) return {};
+    virtual_adjustment = true;
+    index += 2;
+  }
+
+  if (!fixed && !virtual_adjustment) return {};
+  if (index >= insns.size()) return {};
+
+  std::vector<SgAsmInstruction*> jump_insns{insns[index]};
+  if (!P2::isX86JmpImmThunk(partitioner, jump_insns)) return {};
+
+  using namespace std::string_literals;
+  return {index + 1, "pharos::isX86ItaniumAdjustingThunk"s};
+}
+
 // ===============================================================================================
 // Partitioner2
 // ===============================================================================================
@@ -212,11 +387,11 @@ P2::PartitionerPtr create_partitioner(const ProgOptVarMap& vm, P2::Engine* engin
   // passes.  We disabled these passes because they take additional CPU and don't provide any
   // benefit since we're not actually using them.
   settings.partitioner.doingPostAnalysis = false;
-  // Assume that functions always return.  We should enable this pass as soon as possible but
-  // it led to some differences in our test suite that were complicated and difficult to fix.
+  // Honor configured may-return answers and assume that functions return when the analysis
+  // cannot decide.
   settings.partitioner.doingPostFunctionMayReturn = false;
   settings.partitioner.functionReturnAnalysis =
-    Rose::BinaryAnalysis::Partitioner2::MAYRETURN_ALWAYS_YES;
+    Rose::BinaryAnalysis::Partitioner2::MAYRETURN_DEFAULT_YES;
   // We're not using ROSE's stack delta analysis or calling convention analysis because we have
   // our own.  We should consolidate these as soon as possible.
   settings.partitioner.doingPostFunctionStackDelta = false;
@@ -1716,6 +1891,12 @@ CERTEngine::createTunedPartitioner() {
   //OINFO << "Creating custom partitioner!" << LEND;
   auto partitioner = P2Engine::createTunedPartitioner();
 
+  // The unwinder transfers control to an exception handler and cannot return to the
+  // instruction following the call.
+  partitioner->configuration()
+    .insertMaybeFunction("_Unwind_Resume@plt")
+    .mayReturn(false);
+
   // We're building out own list of Prolog matchers because MatchRetPadPush does things that we
   // did not find helpful (like skipping "mov edi,edi" instructions as padding).
   partitioner->functionPrologueMatchers().clear();
@@ -1740,6 +1921,7 @@ CERTEngine::createTunedPartitioner() {
     new_thunk_splitters->predicates().push_back(pred);
   }
   new_thunk_splitters->predicates().push_back(isX86MovAddJmpThunk);
+  new_thunk_splitters->predicates().push_back(isX86ItaniumAdjustingThunk);
   functionSplittingThunks(new_thunk_splitters);
 
   // Register a basic block callback that will track jumps to prologues.

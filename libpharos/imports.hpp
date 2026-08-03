@@ -58,6 +58,11 @@ class ImportDescriptor : private Immobile {
   // the loader when the import is resolved at load time.
   SymbolicValuePtr loader_variable;
 
+  // Apply name-based function tags to the private function descriptor.  The name is not final
+  // at construction -- an import by ordinal can acquire one from an API definition -- so this
+  // is called from every place that sets it.  Assumes the caller holds the lock.
+  void _apply_name_tags();
+
  public:
 
   ImportDescriptor(DescriptorSet& ds_) : function_descriptor(ds_) {
