@@ -23,9 +23,10 @@ instructions](INSTALL.md) for more details.
 
 Since the primary objective for releasing this code is to provide
 transparency into our research and stimulate conversation with other
-binary static analysis researchers, please feel free to contact Cory
-Cohen <cfc@cert.org> with questions you may have about this work.  I
-may be unable to respond in a timely manner, but I will do my best.
+binary static analysis researchers, please feel free to contact Ed
+Schwartz <eschwartz@cert.org> with questions you may have about this
+work.  I may be unable to respond in a timely manner, but I will do 
+my best.
 
 # Pharos Static Binary Analysis Tools
 
