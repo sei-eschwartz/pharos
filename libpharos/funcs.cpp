@@ -23,6 +23,7 @@
 #include "method.hpp"
 #include "masm.hpp"
 #include "badcode.hpp"
+#include "partitioner.hpp"
 
 #include <boost/graph/iteration_macros.hpp>
 
@@ -355,6 +356,7 @@ void FunctionDescriptor::update_target_address() {
   // We're not a thunk unless this code says we are.
   target_address = 0;
   target_func = NULL;
+  thunk_adjustment = boost::none;
 
   // Shouldn't happen, but don't crash regardless.
   if (!func) return;
@@ -392,7 +394,25 @@ void FunctionDescriptor::update_target_address() {
     jump_index = 1;
   }
   else if (insns.size() != 1) {
-    return;
+    // The only other shape we accept is an adjusting thunk, which mutates the this-pointer
+    // before tail jumping.  Require the detection to cover the entire entry block, and the
+    // entry block to be the only block in the function, so that a function that merely begins
+    // with an adjustment sequence is never mistaken for a thunk.
+    if (p2func->basicBlockAddresses().size() != 1) return;
+
+    std::vector<SgAsmInstruction*> insn_list;
+    insn_list.reserve(insns.size());
+    for (SgAsmStatement* stmt : insns) {
+      SgAsmInstruction* insn = isSgAsmInstruction(stmt);
+      if (insn == NULL) return;
+      insn_list.push_back(insn);
+    }
+
+    auto thunk = detect_adjusting_thunk(ds.get_partitioner().sharedFromThis(), insn_list);
+    if (!thunk || thunk->ninsns != insn_list.size()) return;
+
+    jump_index = thunk->ninsns - 1;
+    thunk_adjustment = thunk->adjustment;
   }
 
   // Get that instruction, and presume that it's an x86 instruction. :-(

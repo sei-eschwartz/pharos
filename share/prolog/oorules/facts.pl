@@ -206,11 +206,18 @@ initialFact(symbolClass/4).
 %
 initialFact(symbolProperty/2).
 
-% thunk(Thunk, Function).
+% thunk(Thunk, Function, Adjustment).
 %
-% The instruction at Thunk is an unconditional jump to Function.
+% The instruction at Thunk is an unconditional jump to Function.  Adjustment describes how the
+% this-pointer is modified before the jump.  It is a signed constant delta, which is zero for an
+% ordinary thunk that passes the this-pointer through unchanged.  When the thunk instead reads a
+% vcall-offset out of the object's vftable, Adjustment is virtual(FixedDelta, SlotOffset), where
+% SlotOffset is the displacement of that slot; the total delta is then only known at run time.
 %
-initialFact(thunk/2).
+% A thunk with a non-zero adjustment retargets the callee onto a different subobject, so it is
+% deliberately not followed by eventualThunk/2 and therefore not by dethunk/2.
+%
+initialFact(thunk/3).
 
 % callingConvention(Function, Convention).
 %

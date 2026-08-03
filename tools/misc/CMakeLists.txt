@@ -12,3 +12,10 @@ target_link_libraries(prolog_test pharos)
 add_executable(partition partition.cpp)
 target_link_libraries(partition pharos)
 install(TARGETS partition DESTINATION bin)
+
+# Adjusting thunk recognition tests.  The specimen is 64-bit, so --allow-64bit is required.
+add_executable(thunktests thunktests.cpp)
+target_link_libraries(thunktests pharos gtest)
+add_test(NAME thunktests_test COMMAND thunktests ${PHAROS_TEST_OPS}
+  --allow-64bit "${CMAKE_SOURCE_DIR}/tests/itanium_thunks.exe")
+set_tests_properties(thunktests_test PROPERTIES LABELS thunktests)

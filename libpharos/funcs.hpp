@@ -119,6 +119,10 @@ class FunctionDescriptor : private Immobile {
   // only one thunk for a given function, it's possible that there could be more than one.
   FunctionDescriptorSet thunks;
 
+  // How this function adjusts the this-pointer before jumping, when it is an adjusting thunk.
+  // Empty for an ordinary thunk and for anything that is not a thunk at all.
+  boost::optional<ThunkAdjustment> thunk_adjustment;
+
   // The addresses of the call instructions that call to this function.
   CallTargetSet callers;
   // The call descriptors that are located within this function (the outgoing calls).
@@ -329,6 +333,18 @@ class FunctionDescriptor : private Immobile {
   bool is_thunk() const {
     read_guard<decltype(mutex)> guard{mutex};
     return (target_address != 0);
+  }
+
+  // How this thunk retargets the callee onto a different subobject, or boost::none if it does
+  // not.  A non-empty adjustment implies is_thunk().
+  boost::optional<ThunkAdjustment> get_thunk_adjustment() const {
+    read_guard<decltype(mutex)> guard{mutex};
+    return thunk_adjustment;
+  }
+  // A boolean convenience function for when we only want to test if we adjust the this-pointer.
+  bool is_adjusting_thunk() const {
+    read_guard<decltype(mutex)> guard{mutex};
+    return bool(thunk_adjustment);
   }
 
   // Returns true if this function is a PIC thunk (mov REG, [esp]; ret or tagged pic_thunk).

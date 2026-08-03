@@ -26,6 +26,7 @@
 #include <Rose/As.h>
 #else
 #include <Sawyer/SharedPointer.h>
+#include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <memory>
 #endif
@@ -301,6 +302,17 @@ bool insn_is_nop(const SgAsmX86Instruction* insn);
 // Is the instruction an ENDBR32/ENDBR64 CET landing pad?  ROSE decodes these as x86_nop, so
 // only a raw byte match can tell them apart from an ordinary no-op.
 bool insn_is_endbr(const SgAsmX86Instruction* insn);
+
+// How a thunk adjusts the this-pointer before jumping to its target, as the virtual and
+// non-virtual adjustor stubs emitted for multiple inheritance do.  A thunk with an adjustment is
+// not an identity function: it retargets the callee onto a different subobject.
+struct ThunkAdjustment {
+  // The signed constant added to the this-pointer.  Zero when there is no constant adjustment.
+  int64_t fixed_delta = 0;
+  // The displacement of the vcall-offset slot read out of the object's vftable, when the
+  // adjustment is virtual.  The delta that slot contributes is only known at run time.
+  boost::optional<int64_t> virtual_slot;
+};
 
 // Is the instruction a no-op whose purpose is to mark a function entry point rather than to pad
 // between functions?  Covers the CET landing pad and the MSVC "mov edi, edi" hot-patch slot.

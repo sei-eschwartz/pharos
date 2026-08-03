@@ -11952,15 +11952,15 @@ thisPtrOffset(sv_2232316455954455034, 0x4, sv_855206555015301529).
 thisPtrOffset(sv_4048115914078848051, 0xc, sv_16686543979143112349).
 thisPtrOffset(sv_7698857306352313203, 0x14, sv_5517408956912461792).
 thisPtrOffset(sv_7698857306352313203, 0x1c, sv_16714503908512073167).
-thunk(0x401080, 0x40401d).
-thunk(0x4010d0, 0x401080).
-thunk(0x401350, 0x4010d0).
-thunk(0x40212f, 0x4053fe).
-thunk(0x40360a, 0x40401d).
-thunk(0x403e8b, 0x403eac).
-thunk(0x4080b8, 0x4080c8).
-thunk(0x40bb52, 0x40bb79).
-thunk(0x411184, 0x412028).
+thunk(0x401080, 0x40401d, 0).
+thunk(0x4010d0, 0x401080, 0).
+thunk(0x401350, 0x4010d0, 0).
+thunk(0x40212f, 0x4053fe, 0).
+thunk(0x40360a, 0x40401d, 0).
+thunk(0x403e8b, 0x403eac, 0).
+thunk(0x4080b8, 0x4080c8, 0).
+thunk(0x40bb52, 0x40bb79, 0).
+thunk(0x411184, 0x412028, 0).
 uninitializedReads(0x401670).
 uninitializedReads(0x401980).
 uninitializedReads(0x401e46).

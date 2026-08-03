@@ -410,8 +410,9 @@ finalResolvedVirtualCall(Insn, VFTable, Target) :-
 % --------------------------------------------------------------------------------------------
 %:- table finalThunk/2 as incremental.
 finalThunk(From, To) :-
-    % First there needs to be a thunk.
-    thunk(From, To),
+    % First there needs to be a thunk.  Adjusting thunks are excluded here for the same reason
+    % that eventualThunk/2 excludes them: the target does not stand in for the thunk.
+    thunk(From, To, 0),
     % But it also needs to appear in a finalVFTableEntry.
     once(finalVFTableEntry(_Address, _Offset, From)),
     % And the target needs to be associated with finalClass method.

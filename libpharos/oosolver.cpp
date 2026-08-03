@@ -701,9 +701,19 @@ OOSolver::add_function_facts(const OOAnalyzer& ooa)
 
     // Turns out that we need to export thunk data to Prolog, because the presence or absence
     // of thunks can affect our logic.  For example, thunk1 and thunk2 can be assigned to
-    // different classes, even if they jump to the same function.
+    // different classes, even if they jump to the same function.  The third argument reports
+    // how the thunk adjusts the this-pointer, which is what distinguishes an ordinary thunk
+    // from an adjustor stub that retargets the callee onto a different subobject.
     if (fd.is_thunk()) {
-      session->add_fact("thunk", fdaddr, fd.get_jmp_addr());
+      auto adjustment = fd.get_thunk_adjustment();
+      int64_t fixed = adjustment ? adjustment->fixed_delta : 0;
+      if (adjustment && adjustment->virtual_slot) {
+        session->add_fact("thunk", fdaddr, fd.get_jmp_addr(),
+                          functor("virtual", fixed, *adjustment->virtual_slot));
+      }
+      else {
+        session->add_fact("thunk", fdaddr, fd.get_jmp_addr(), fixed);
+      }
     }
 
     // Report all calling conventions for all functions, filtered by the detected ABI so that
@@ -898,7 +908,7 @@ OOSolver::dump_facts_private()
   exported += session->print_predicate(facts_file, "symbolGlobalObject", 3);
   exported += session->print_predicate(facts_file, "symbolClass", 4);
   exported += session->print_predicate(facts_file, "symbolProperty", 2);
-  exported += session->print_predicate(facts_file, "thunk", 2);
+  exported += session->print_predicate(facts_file, "thunk", 3);
   exported += session->print_predicate(facts_file, "callingConvention", 2);
   exported += session->print_predicate(facts_file, "funcParameter", 3);
   exported += session->print_predicate(facts_file, "funcReturn", 3);

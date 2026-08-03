@@ -74,6 +74,6 @@
 :- index(thisPtrAllocation/5, [2]).
 :- index(thisPtrOffset/3, [3,1]).
 :- index(thisPtrUsage/4, [3,4]).
-:- index(thunk/2, [1,2]).
+:- index(thunk/3, [1,2]).
 :- index(trigger_fact/1, [1]).
 :- index(uninitializedReads/1, [1]).

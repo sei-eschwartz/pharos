@@ -77,7 +77,7 @@ possibleVBTableEntry(VBTable, NewOffset, Value) :-
 % separating plausible methods from arbitrary addresses during guessing.
 possibleMethod(Address) :-
     callingConvention(Address, _CallingConvention);
-    thunk(Address, _Target1);
+    thunk(Address, _Target1, _Adjustment1);
     noCallsAfter(Address);
     noCallsBefore(Address);
     returnsSelf(Address);
@@ -265,7 +265,7 @@ trivial(Address):-
     not(noCallsBefore(Address)),
     not(noCallsAfter(Address)),
     % No thunking to other functions.
-    not(thunk(Address, _)),
+    not(thunk(Address, _, _)),
     % No allocating memory.
     not(thisPtrAllocation(_, Address, _, _, _)),
 
@@ -301,14 +301,19 @@ possiblyReused(Function):-
 % ============================================================================================
 
 % What function does a given thunk eventually end at?
+%
+% Only non-adjusting thunks are followed.  An adjusting thunk moves the this-pointer to a
+% different subobject, so its target cannot stand in for it.  Note that the base case rejects
+% Func only when it is itself a _non-adjusting_ thunk, so that a chain of ordinary thunks ending
+% in an adjusting one correctly stops at the adjusting thunk.
 :- table eventualThunk/2 as opaque.
 eventualThunk(Thunk, Func) :-
-    thunk(Thunk, Func),
-    not(thunk(Func, _)).
+    thunk(Thunk, Func, 0),
+    not(thunk(Func, _, 0)).
 
 eventualThunk(Thunk, Func) :-
     eventualThunk(Middle, Func),
-    thunk(Thunk, Middle).
+    thunk(Thunk, Middle, 0).
 
 :- table dethunk/2 as opaque.
 dethunk(Thunk, Result) :-

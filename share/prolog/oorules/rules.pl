@@ -171,7 +171,7 @@ reasonMethod_P(Method) :-
 
 %reasonMethod_Q(Method) :-
 % Does this rule remove the need for dethunk in other reasonMethod.
-%    thunk(Method, Called),
+%    thunk(Method, Called, _),
 %    factMethod(Called).
 
 reasonMethodSet(Set) :-
