@@ -3857,6 +3857,35 @@
             "size": 4,
             "vftables": {}
         },
+        "cls_0x401720": {
+            "demangled_name": "",
+            "members": {
+                "0x0": {
+                    "base": false,
+                    "name": "mbr_0x0",
+                    "offset": "0x0",
+                    "parent": false,
+                    "size": 4,
+                    "struc": "",
+                    "type": "",
+                    "usages": [
+                        "0x401720"
+                    ]
+                }
+            },
+            "methods": {
+                "0x401720": {
+                    "demangled_name": "",
+                    "ea": "0x401720",
+                    "import": false,
+                    "name": "meth_0x401720",
+                    "type": "meth"
+                }
+            },
+            "name": "cls_0x401720",
+            "size": 4,
+            "vftables": {}
+        },
         "cls_0x401950": {
             "demangled_name": "",
             "members": {},

@@ -209,10 +209,26 @@ initialFact(symbolProperty/2).
 % thunk(Thunk, Function, Adjustment).
 %
 % The instruction at Thunk is an unconditional jump to Function.  Adjustment describes how the
-% this-pointer is modified before the jump.  It is a signed constant delta, which is zero for an
-% ordinary thunk that passes the this-pointer through unchanged.  When the thunk instead reads a
-% vcall-offset out of the object's vftable, Adjustment is virtual(FixedDelta, SlotOffset), where
-% SlotOffset is the displacement of that slot; the total delta is then only known at run time.
+% this-pointer is modified before the jump, and takes one of three shapes:
+%
+%   Delta                       A signed constant is added to the this-pointer.  Zero for an
+%                               ordinary thunk that passes the this-pointer through unchanged.
+%
+%   virtual(Delta, Slot)        The this-pointer is adjusted by Delta plus the value found at
+%                               Slot bytes from the object's vftable pointer.  This is the
+%                               Itanium ABI vcall offset, emitted by GCC and Clang for both
+%                               AMD64 and i386.  The slot lives in read-only vtable data, so
+%                               its value may be recoverable statically.
+%
+%   vtordisp(Delta, Slot)       The this-pointer is adjusted by Delta MINUS the value found at
+%                               Slot bytes from the this-pointer itself.  This is the MSVC
+%                               vtordisp field, which is written into the object during
+%                               construction, so its value is only ever known at run time.
+%
+% The two dynamic shapes are deliberately not unified: they read from different bases and
+% combine with opposite signs, so a single slot displacement could not mean the same thing on
+% both.  A rule that only cares whether the adjustment is dynamic should match both explicitly
+% rather than assume one stands in for the other.
 %
 % A thunk with a non-zero adjustment retargets the callee onto a different subobject, so it is
 % deliberately not followed by eventualThunk/2 and therefore not by dethunk/2.

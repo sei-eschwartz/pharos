@@ -307,11 +307,28 @@ bool insn_is_endbr(const SgAsmX86Instruction* insn);
 // non-virtual adjustor stubs emitted for multiple inheritance do.  A thunk with an adjustment is
 // not an identity function: it retargets the callee onto a different subobject.
 struct ThunkAdjustment {
+  // Where a thunk reads the run-time part of the adjustment from, when it adjusts for a virtual
+  // base.  The two ABIs differ in both the base of the displacement and its sign, so the two
+  // cannot be folded into a single signed slot.
+  enum class VirtualKind {
+    // Itanium vcall offset: this += *(vptr + slot), where vptr is the object's vftable pointer.
+    // The slot lives in read-only vtable data, so its value may be recoverable statically.
+    vcall_offset,
+    // MSVC vtordisp: this -= *(this + slot).  The field lives in the object itself and is
+    // written during construction, so its value is only ever known at run time.
+    vtordisp,
+  };
+
+  struct VirtualAdjustment {
+    VirtualKind kind;
+    // The displacement of the slot, relative to the base implied by kind.
+    int64_t slot;
+  };
+
   // The signed constant added to the this-pointer.  Zero when there is no constant adjustment.
   int64_t fixed_delta = 0;
-  // The displacement of the vcall-offset slot read out of the object's vftable, when the
-  // adjustment is virtual.  The delta that slot contributes is only known at run time.
-  boost::optional<int64_t> virtual_slot;
+  // The run-time part of the adjustment, absent for a purely fixed adjustor.
+  boost::optional<VirtualAdjustment> virtual_adjustment;
 };
 
 // Is the instruction a no-op whose purpose is to mark a function entry point rather than to pad

@@ -105,50 +105,24 @@ get_got_preamble_body(P2::PartitionerConstPtr const & partitioner, const P2::Fun
   return body;
 }
 
-// Returns true if the expression reads memory addressed relative to the stack or frame
-// pointer, which means the value read belongs to the caller's frame rather than to anything
-// handed to the code being examined.
-static bool
-is_stack_relative_memory_read(SgAsmExpression* expr) {
-  SgAsmMemoryReferenceExpression* mem = isSgAsmMemoryReferenceExpression(expr);
-  if (!mem) return false;
-
-  for (SgNode* node :
-         NodeQuery::querySubTree(mem->get_address(), V_SgAsmDirectRegisterExpression)) {
-    RegisterDescriptor rd = isSgAsmDirectRegisterExpression(node)->get_descriptor();
-    if (rd.majorNumber() == x86_regclass_gpr &&
-        (rd.minorNumber() == Rose::BinaryAnalysis::x86_gpr_sp ||
-         rd.minorNumber() == Rose::BinaryAnalysis::x86_gpr_bp)) {
-      return true;
-    }
-  }
-  return false;
-}
-
 // Just sort of copying and pasting from the ROSE examples here...  We're adding a pattern for
 // a common tail-call optimization case where an object pointer in loaded into ECX, then
 // adjusted by some offset into the object, and then finally a function is called with a JMP
 // instruction.  The JMP is really conceptually a CALL, which is why this code is needed.
-//
-// Splitting these off into their own functions is worthwhile regardless, but only a sequence
-// that adjusts an incoming this-pointer is really a thunk, so reject_stack_source is set when
-// the caller cares about that distinction.  See the comment on the MOV source below.
-static boost::optional<AdjustingThunk>
-analyze_x86_mov_add_jmp_thunk(P2::PartitionerConstPtr const & partitioner,
-                              const std::vector<SgAsmInstruction*> &insns,
-                              bool reject_stack_source) {
+P2::ThunkDetection
+isX86MovAddJmpThunk(P2::PartitionerConstPtr const & partitioner, const std::vector<SgAsmInstruction*> &insns) {
   if (!partitioner || insns.size() < 3)
-    return boost::none;
+    return {};
   SgAsmX86Instruction *mov = isSgAsmX86Instruction(insns[0]);
   if (!mov || mov->get_kind() != x86_mov)
-    return boost::none;
+    return {};
   const SgAsmExpressionPtrList &movArgs = mov->get_operandList()->get_operands();
   if (movArgs.size() != 2)
-    return boost::none;
+    return {};
   SgAsmDirectRegisterExpression *movArg0 = isSgAsmDirectRegisterExpression(movArgs[0]);
   if (!movArg0 || movArg0->get_descriptor().majorNumber() != x86_regclass_gpr ||
       movArg0->get_descriptor().minorNumber() != Rose::BinaryAnalysis::x86_gpr_cx)
-    return boost::none;
+    return {};
 
   // We didn't bother to restrict the type of the second operand.  It was a memory
   // dereference operation in the case that was encountered, but it's not clear what the
@@ -158,47 +132,28 @@ analyze_x86_mov_add_jmp_thunk(P2::PartitionerConstPtr const & partitioner,
   //if (!movArg1)
   //    return 0;
 
-  // ...except that reading the object pointer out of a stack frame means the value is the
-  // _caller's_, not something passed to this code.  Sequences like "mov ecx, [ebp-0x10]" are
-  // tail-call optimized fragments of a larger function rather than adjustor thunks, and the
-  // ADD below does not adjust an incoming this-pointer.
-  if (reject_stack_source && is_stack_relative_memory_read(movArgs[1])) return boost::none;
-
   SgAsmX86Instruction *add = isSgAsmX86Instruction(insns[1]);
   if (!add || add->get_kind() != x86_add)
-    return boost::none;
+    return {};
   const SgAsmExpressionPtrList &addArgs = add->get_operandList()->get_operands();
   if (addArgs.size() != 2)
-    return boost::none;
+    return {};
   SgAsmDirectRegisterExpression *addArg0 = isSgAsmDirectRegisterExpression(addArgs[0]);
   if (!addArg0 || addArg0->get_descriptor().majorNumber() != x86_regclass_gpr ||
       addArg0->get_descriptor().minorNumber() != Rose::BinaryAnalysis::x86_gpr_cx)
-    return boost::none;
+    return {};
   SgAsmIntegerValueExpression *addArg1 = isSgAsmIntegerValueExpression(addArgs[1]);
   if (!addArg1)
-    return boost::none;
+    return {};
 
-  // Validate the tail jump the same way the Itanium analyzer does, which additionally requires
-  // the target to be executable and not to land in the middle of an instruction.
+  // Validate the tail jump through the ROSE predicate, which additionally requires the target
+  // to be executable and not to land in the middle of an instruction.
   std::vector<SgAsmInstruction*> jump_insns{insns[2]};
   if (!P2::isX86JmpImmThunk(partitioner, jump_insns))
-    return boost::none;
+    return {};
 
-  AdjustingThunk thunk;
-  thunk.ninsns = 3;
-  thunk.adjustment.fixed_delta = addArg1->get_signedValue();
-  return thunk;
-}
-
-P2::ThunkDetection
-isX86MovAddJmpThunk(P2::PartitionerConstPtr const & partitioner,
-                    const std::vector<SgAsmInstruction*> &insns) {
-  // The splitter deliberately keeps its historical, broader match: splitting a tail-call
-  // fragment off into its own function is useful even though it is not a thunk.
-  auto thunk = analyze_x86_mov_add_jmp_thunk(partitioner, insns, false);
-  if (!thunk) return {};
   using namespace std::string_literals;
-  return {thunk->ninsns, "pharos::isX86MovAddJmpThunk"s};
+  return {3, "pharos::isX86MovAddJmpThunk"s};
 }
 
 // Decompose the simple memory addressing forms used by Itanium ABI virtual-adjustment thunks.
@@ -248,13 +203,27 @@ is_endbr64(const SgAsmInstruction* insn) {
     bytes[0] == 0xf3 && bytes[1] == 0x0f && bytes[2] == 0x1e && bytes[3] == 0xfa;
 }
 
-// Match a fixed Itanium ABI "this" adjustment.  The this pointer is normally in RDI, or RSI
-// when RDI holds the hidden address for an indirectly returned object.  GCC and Clang normally
-// use ADD or SUB, but LEA is equivalent and is also accepted when it preserves the data flow.
-// The signed amount added to the this pointer is reported in delta.
+// The MSVC "this" pointer register: ECX under __thiscall, RCX under the 64 bit convention.
+// Requiring a zero offset and the full register width keeps CL, CH and CX out, which a bare
+// minor number comparison would wrongly admit.
 static bool
-is_itanium_fixed_adjustment(SgAsmInstruction* insn, RegisterDescriptor& this_reg,
-                            int64_t& delta) {
+is_msvc_this_pointer_register(RegisterDescriptor reg) {
+  return reg.majorNumber() == x86_regclass_gpr &&
+    reg.minorNumber() == Rose::BinaryAnalysis::x86_gpr_cx &&
+    reg.offset() == 0 && (reg.nBits() == 32 || reg.nBits() == 64);
+}
+
+// Match a fixed "this" adjustment applied in place to whichever register the ABI passes the
+// object pointer in, as identified by is_this_reg.  ADD and SUB are the usual encodings, but
+// LEA is equivalent and is also accepted when it preserves the data flow.  The signed amount
+// added to the this pointer is reported in delta.
+//
+// Adjusting the register in place is what makes this a thunk rather than an ordinary method:
+// the pointer the callee receives is the one we were called with, offset by a constant.  A
+// sequence that first loads the register from somewhere is not an adjustment at all.
+static bool
+is_fixed_this_adjustment(SgAsmInstruction* insn, bool (*is_this_reg)(RegisterDescriptor),
+                         RegisterDescriptor& this_reg, int64_t& delta) {
   SgAsmX86Instruction* xinsn = isSgAsmX86Instruction(insn);
   if (!xinsn) return false;
 
@@ -262,7 +231,7 @@ is_itanium_fixed_adjustment(SgAsmInstruction* insn, RegisterDescriptor& this_reg
   if (args.size() != 2) return false;
 
   SgAsmDirectRegisterExpression* dst = isSgAsmDirectRegisterExpression(args[0]);
-  if (!dst || !is_amd64_this_pointer_register(dst->get_descriptor())) return false;
+  if (!dst || !is_this_reg(dst->get_descriptor())) return false;
   RegisterDescriptor candidate = dst->get_descriptor();
 
   if (xinsn->get_kind() == x86_add || xinsn->get_kind() == x86_sub) {
@@ -288,6 +257,14 @@ is_itanium_fixed_adjustment(SgAsmInstruction* insn, RegisterDescriptor& this_reg
   }
 
   return false;
+}
+
+// Match a fixed Itanium ABI "this" adjustment.  The this pointer is normally in RDI, or RSI
+// when RDI holds the hidden address for an indirectly returned object.
+static bool
+is_itanium_fixed_adjustment(SgAsmInstruction* insn, RegisterDescriptor& this_reg,
+                            int64_t& delta) {
+  return is_fixed_this_adjustment(insn, is_amd64_this_pointer_register, this_reg, delta);
 }
 
 // Match the memory-derived adjustment used for a virtual base:
@@ -386,7 +363,310 @@ analyze_x86_itanium_adjusting_thunk(P2::PartitionerConstPtr const & partitioner,
   AdjustingThunk thunk;
   thunk.ninsns = index + 1;
   if (fixed) thunk.adjustment.fixed_delta = fixed_delta;
-  if (virtual_adjustment) thunk.adjustment.virtual_slot = virtual_slot;
+  if (virtual_adjustment) {
+    thunk.adjustment.virtual_adjustment =
+      ThunkAdjustment::VirtualAdjustment{ThunkAdjustment::VirtualKind::vcall_offset,
+                                         virtual_slot};
+  }
+  return thunk;
+}
+
+// Match the MSVC vtordisp adjustment, which reads a displacement written into the object during
+// construction and subtracts it.  Two encodings, both leaving the this pointer in place:
+//
+//   sub ecx, [ecx - 4]                            32 bit
+//
+//   movsxd scratch, [rcx - 4]                     64 bit, the field is a 32 bit signed int
+//   sub    rcx, scratch
+//
+// The displacement of the vtordisp field is reported in slot.  Unlike an Itanium vcall offset
+// this is read from the object rather than from the vftable, and it is subtracted rather than
+// added, so it cannot share a representation with one.
+static bool
+is_msvc_vtordisp_adjustment(const std::vector<SgAsmInstruction*>& insns, size_t index,
+                            RegisterDescriptor& this_reg, int64_t& slot, size_t& ninsns) {
+  if (index >= insns.size()) return false;
+
+  SgAsmX86Instruction* first = isSgAsmX86Instruction(insns[index]);
+  if (!first) return false;
+
+  // The 32 bit form subtracts straight from memory.
+  if (first->get_kind() == x86_sub) {
+    const SgAsmExpressionPtrList& args = first->get_operandList()->get_operands();
+    if (args.size() != 2) return false;
+
+    SgAsmDirectRegisterExpression* dst = isSgAsmDirectRegisterExpression(args[0]);
+    if (!dst || !is_msvc_this_pointer_register(dst->get_descriptor())) return false;
+
+    RegisterDescriptor base;
+    int64_t displacement = 0;
+    if (!match_register_displacement(isSgAsmMemoryReferenceExpression(args[1]),
+                                     base, displacement) ||
+        base != dst->get_descriptor()) {
+      return false;
+    }
+
+    this_reg = dst->get_descriptor();
+    slot = displacement;
+    ninsns = 1;
+    return true;
+  }
+
+  // The 64 bit form widens the field into a scratch register first.  Match the register data
+  // flow rather than requiring the compiler's usual choice of RAX.
+  if (first->get_kind() != Rose::BinaryAnalysis::x86_movsx &&
+      first->get_kind() != Rose::BinaryAnalysis::x86_movsxd) {
+    return false;
+  }
+  if (index + 1 >= insns.size()) return false;
+
+  const SgAsmExpressionPtrList& load_args = first->get_operandList()->get_operands();
+  if (load_args.size() != 2) return false;
+
+  SgAsmDirectRegisterExpression* scratch = isSgAsmDirectRegisterExpression(load_args[0]);
+  if (!scratch) return false;
+  RegisterDescriptor scratch_reg = scratch->get_descriptor();
+  if (scratch_reg.majorNumber() != x86_regclass_gpr ||
+      scratch_reg.offset() != 0 || scratch_reg.nBits() != 64) {
+    return false;
+  }
+
+  RegisterDescriptor base;
+  int64_t displacement = 0;
+  if (!match_register_displacement(isSgAsmMemoryReferenceExpression(load_args[1]),
+                                   base, displacement) ||
+      !is_msvc_this_pointer_register(base) || scratch_reg == base) {
+    return false;
+  }
+
+  SgAsmX86Instruction* sub = isSgAsmX86Instruction(insns[index + 1]);
+  if (!sub || sub->get_kind() != x86_sub) return false;
+  const SgAsmExpressionPtrList& sub_args = sub->get_operandList()->get_operands();
+  if (sub_args.size() != 2) return false;
+
+  SgAsmDirectRegisterExpression* sub_dst = isSgAsmDirectRegisterExpression(sub_args[0]);
+  SgAsmDirectRegisterExpression* sub_src = isSgAsmDirectRegisterExpression(sub_args[1]);
+  if (!sub_dst || !sub_src || sub_dst->get_descriptor() != base ||
+      sub_src->get_descriptor() != scratch_reg) {
+    return false;
+  }
+
+  this_reg = base;
+  slot = displacement;
+  ninsns = 2;
+  return true;
+}
+
+// Is this a 32 bit general purpose register?
+static bool
+is_gpr32(RegisterDescriptor reg) {
+  return reg.majorNumber() == x86_regclass_gpr && reg.offset() == 0 && reg.nBits() == 32;
+}
+
+// The SysV i386 ABI passes the object pointer on the stack rather than in a register, so its
+// adjustor thunks rewrite the argument slot instead of a register.  On entry the return address
+// occupies [esp], which puts the this pointer at [esp+4], or at [esp+8] when [esp+4] holds the
+// hidden address for an indirectly returned object.  This mirrors the AMD64 convention of
+// passing this in RDI, or in RSI when RDI is taken by the hidden pointer.  The displacement is
+// reported in slot so that a caller can require the same one throughout.
+static bool
+is_sysv32_this_slot(SgAsmExpression* expr, int64_t& slot) {
+  RegisterDescriptor base;
+  int64_t displacement = 0;
+  if (!match_register_displacement(isSgAsmMemoryReferenceExpression(expr), base, displacement)) {
+    return false;
+  }
+  if (base.majorNumber() != x86_regclass_gpr ||
+      base.minorNumber() != Rose::BinaryAnalysis::x86_gpr_sp ||
+      base.offset() != 0 || base.nBits() != 32 ||
+      (displacement != 4 && displacement != 8)) {
+    return false;
+  }
+  slot = displacement;
+  return true;
+}
+
+// Match a fixed SysV i386 adjustment, applied directly to the argument slot:
+//
+//   sub DWORD PTR [esp+4], 8
+static bool
+is_sysv32_fixed_adjustment(SgAsmInstruction* insn, int64_t& delta) {
+  SgAsmX86Instruction* xinsn = isSgAsmX86Instruction(insn);
+  if (!xinsn || (xinsn->get_kind() != x86_add && xinsn->get_kind() != x86_sub)) return false;
+
+  const SgAsmExpressionPtrList& args = xinsn->get_operandList()->get_operands();
+  int64_t this_slot = 0;
+  if (args.size() != 2 || !is_sysv32_this_slot(args[0], this_slot)) return false;
+
+  SgAsmIntegerValueExpression* amount = isSgAsmIntegerValueExpression(args[1]);
+  if (!amount || amount->get_signedValue() == 0) return false;
+
+  delta = xinsn->get_kind() == x86_sub ? -amount->get_signedValue() : amount->get_signedValue();
+  return true;
+}
+
+// Match a SysV i386 virtual adjustment, which loads the argument slot into a register, folds in
+// the vcall offset, and writes it back:
+//
+//   mov this, [esp+4]
+//   add this, fixed          (optional, for a combined thunk)
+//   mov scratch, [this]
+//   add this, [scratch + slot]
+//   mov [esp+4], this
+//
+// As on AMD64 the slot is a displacement from the object's vftable pointer, so the value found
+// there is added, and this shares the vcall_offset representation.
+static bool
+is_sysv32_virtual_adjustment(const std::vector<SgAsmInstruction*>& insns, size_t index,
+                             int64_t& fixed_delta, int64_t& slot, size_t& ninsns) {
+  size_t start = index;
+  auto next = [&insns, &index]() -> SgAsmX86Instruction* {
+    return index < insns.size() ? isSgAsmX86Instruction(insns[index]) : nullptr;
+  };
+
+  SgAsmX86Instruction* load = next();
+  if (!load || load->get_kind() != x86_mov) return false;
+  const SgAsmExpressionPtrList& load_args = load->get_operandList()->get_operands();
+  int64_t this_slot = 0;
+  if (load_args.size() != 2 || !is_sysv32_this_slot(load_args[1], this_slot)) return false;
+  SgAsmDirectRegisterExpression* this_expr = isSgAsmDirectRegisterExpression(load_args[0]);
+  if (!this_expr || !is_gpr32(this_expr->get_descriptor())) return false;
+  RegisterDescriptor this_reg = this_expr->get_descriptor();
+  ++index;
+
+  // An optional constant adjustment, present only in a combined thunk.
+  fixed_delta = 0;
+  RegisterDescriptor fixed_reg;
+  int64_t candidate_delta = 0;
+  if (is_fixed_this_adjustment(index < insns.size() ? insns[index] : nullptr, is_gpr32,
+                               fixed_reg, candidate_delta) && fixed_reg == this_reg) {
+    fixed_delta = candidate_delta;
+    ++index;
+  }
+
+  SgAsmX86Instruction* vptr = next();
+  if (!vptr || vptr->get_kind() != x86_mov) return false;
+  const SgAsmExpressionPtrList& vptr_args = vptr->get_operandList()->get_operands();
+  if (vptr_args.size() != 2) return false;
+  SgAsmDirectRegisterExpression* scratch_expr = isSgAsmDirectRegisterExpression(vptr_args[0]);
+  if (!scratch_expr || !is_gpr32(scratch_expr->get_descriptor())) return false;
+  RegisterDescriptor scratch_reg = scratch_expr->get_descriptor();
+  RegisterDescriptor vptr_base;
+  int64_t vptr_displacement = 0;
+  if (scratch_reg == this_reg ||
+      !match_register_displacement(isSgAsmMemoryReferenceExpression(vptr_args[1]),
+                                   vptr_base, vptr_displacement) ||
+      vptr_base != this_reg || vptr_displacement != 0) {
+    return false;
+  }
+  ++index;
+
+  SgAsmX86Instruction* add = next();
+  if (!add || add->get_kind() != x86_add) return false;
+  const SgAsmExpressionPtrList& add_args = add->get_operandList()->get_operands();
+  if (add_args.size() != 2) return false;
+  SgAsmDirectRegisterExpression* add_dst = isSgAsmDirectRegisterExpression(add_args[0]);
+  RegisterDescriptor adjustment_base;
+  int64_t adjustment_displacement = 0;
+  if (!add_dst || add_dst->get_descriptor() != this_reg ||
+      !match_register_displacement(isSgAsmMemoryReferenceExpression(add_args[1]),
+                                   adjustment_base, adjustment_displacement) ||
+      adjustment_base != scratch_reg) {
+    return false;
+  }
+  ++index;
+
+  SgAsmX86Instruction* store = next();
+  if (!store || store->get_kind() != x86_mov) return false;
+  const SgAsmExpressionPtrList& store_args = store->get_operandList()->get_operands();
+  int64_t store_slot = 0;
+  if (store_args.size() != 2 || !is_sysv32_this_slot(store_args[0], store_slot) ||
+      store_slot != this_slot) {
+    return false;
+  }
+  SgAsmDirectRegisterExpression* store_src = isSgAsmDirectRegisterExpression(store_args[1]);
+  if (!store_src || store_src->get_descriptor() != this_reg) return false;
+  ++index;
+
+  slot = adjustment_displacement;
+  ninsns = index - start;
+  return true;
+}
+
+// Detect SysV i386 adjustor thunks.
+static boost::optional<AdjustingThunk>
+analyze_x86_sysv32_adjusting_thunk(P2::PartitionerConstPtr const & partitioner,
+                                   const std::vector<SgAsmInstruction*>& insns) {
+  if (!partitioner || insns.size() < 2) return boost::none;
+
+  size_t index = 0;
+  int64_t fixed_delta = 0;
+  int64_t slot = 0;
+  size_t virtual_insns = 0;
+  bool virtual_adjustment =
+    is_sysv32_virtual_adjustment(insns, index, fixed_delta, slot, virtual_insns);
+  if (virtual_adjustment) {
+    index += virtual_insns;
+  }
+  else if (is_sysv32_fixed_adjustment(insns[index], fixed_delta)) {
+    ++index;
+  }
+  else {
+    return boost::none;
+  }
+
+  if (index >= insns.size()) return boost::none;
+  std::vector<SgAsmInstruction*> jump_insns{insns[index]};
+  if (!P2::isX86JmpImmThunk(partitioner, jump_insns)) return boost::none;
+
+  AdjustingThunk thunk;
+  thunk.ninsns = index + 1;
+  thunk.adjustment.fixed_delta = fixed_delta;
+  if (virtual_adjustment) {
+    thunk.adjustment.virtual_adjustment =
+      ThunkAdjustment::VirtualAdjustment{ThunkAdjustment::VirtualKind::vcall_offset, slot};
+  }
+  return thunk;
+}
+
+// Detect MSVC adjustor thunks, which adjust ECX or RCX in place before tail jumping.  A vtordisp
+// adjustment for a virtual base may be followed by a fixed adjustment, in that order.
+static boost::optional<AdjustingThunk>
+analyze_x86_msvc_adjusting_thunk(P2::PartitionerConstPtr const & partitioner,
+                                 const std::vector<SgAsmInstruction*>& insns) {
+  if (!partitioner || insns.size() < 2) return boost::none;
+
+  size_t index = 0;
+  RegisterDescriptor vtordisp_this_reg;
+  RegisterDescriptor fixed_this_reg;
+  int64_t vtordisp_slot = 0;
+  int64_t fixed_delta = 0;
+  size_t vtordisp_insns = 0;
+  bool vtordisp = is_msvc_vtordisp_adjustment(insns, index, vtordisp_this_reg, vtordisp_slot,
+                                              vtordisp_insns);
+  if (vtordisp) index += vtordisp_insns;
+
+  bool fixed = index < insns.size() &&
+    is_fixed_this_adjustment(insns[index], is_msvc_this_pointer_register, fixed_this_reg,
+                             fixed_delta);
+  if (fixed) {
+    if (vtordisp && fixed_this_reg != vtordisp_this_reg) return boost::none;
+    ++index;
+  }
+
+  if (!vtordisp && !fixed) return boost::none;
+  if (index >= insns.size()) return boost::none;
+
+  std::vector<SgAsmInstruction*> jump_insns{insns[index]};
+  if (!P2::isX86JmpImmThunk(partitioner, jump_insns)) return boost::none;
+
+  AdjustingThunk thunk;
+  thunk.ninsns = index + 1;
+  if (fixed) thunk.adjustment.fixed_delta = fixed_delta;
+  if (vtordisp) {
+    thunk.adjustment.virtual_adjustment =
+      ThunkAdjustment::VirtualAdjustment{ThunkAdjustment::VirtualKind::vtordisp, vtordisp_slot};
+  }
   return thunk;
 }
 
@@ -399,12 +679,38 @@ isX86ItaniumAdjustingThunk(P2::PartitionerConstPtr const & partitioner,
   return {thunk->ninsns, "pharos::isX86ItaniumAdjustingThunk"s};
 }
 
+P2::ThunkDetection
+isX86Sysv32AdjustingThunk(P2::PartitionerConstPtr const & partitioner,
+                          const std::vector<SgAsmInstruction*>& insns) {
+  auto thunk = analyze_x86_sysv32_adjusting_thunk(partitioner, insns);
+  if (!thunk) return {};
+  using namespace std::string_literals;
+  return {thunk->ninsns, "pharos::isX86Sysv32AdjustingThunk"s};
+}
+
+P2::ThunkDetection
+isX86MsvcAdjustingThunk(P2::PartitionerConstPtr const & partitioner,
+                        const std::vector<SgAsmInstruction*>& insns) {
+  auto thunk = analyze_x86_msvc_adjusting_thunk(partitioner, insns);
+  if (!thunk) return {};
+  using namespace std::string_literals;
+  return {thunk->ninsns, "pharos::isX86MsvcAdjustingThunk"s};
+}
+
+// Only shapes that adjust the incoming this pointer in place belong here.  The MOV/ADD/JMP
+// pattern deliberately does not: its MOV overwrites the this register before the ADD, so the
+// value it adjusts is some other object rather than the one handed to us.  "mov ecx, [ecx]; add
+// ecx, 0x18; jmp" is std::locale::c_str() forwarding to a member, not an adjustor, and treating
+// it as a thunk discards that method's own this pointer and members.  See isX86MovAddJmpThunk,
+// which still uses that pattern for the only thing it can support, function splitting.
 boost::optional<AdjustingThunk>
 detect_adjusting_thunk(P2::PartitionerConstPtr const & partitioner,
                        const std::vector<SgAsmInstruction*> & insns) {
   auto thunk = analyze_x86_itanium_adjusting_thunk(partitioner, insns);
   if (thunk) return thunk;
-  return analyze_x86_mov_add_jmp_thunk(partitioner, insns, true);
+  thunk = analyze_x86_sysv32_adjusting_thunk(partitioner, insns);
+  if (thunk) return thunk;
+  return analyze_x86_msvc_adjusting_thunk(partitioner, insns);
 }
 
 // ===============================================================================================
@@ -1995,6 +2301,8 @@ CERTEngine::createTunedPartitioner() {
   }
   new_thunk_splitters->predicates().push_back(isX86MovAddJmpThunk);
   new_thunk_splitters->predicates().push_back(isX86ItaniumAdjustingThunk);
+  new_thunk_splitters->predicates().push_back(isX86Sysv32AdjustingThunk);
+  new_thunk_splitters->predicates().push_back(isX86MsvcAdjustingThunk);
   functionSplittingThunks(new_thunk_splitters);
 
   // Register a basic block callback that will track jumps to prologues.

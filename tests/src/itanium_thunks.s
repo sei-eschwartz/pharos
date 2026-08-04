@@ -179,3 +179,21 @@ target_wrong_scratch:
 target_zero_adjustment:
   mov eax, 13
   ret
+
+// A one-line forwarding method, not an adjustor.  The MOV overwrites the this pointer, so the
+// ADD does not adjust the pointer we were called with: the callee operates on a different
+// object reached through a member.  This is the shape of std::locale::c_str(), which is
+// "mov ecx, [ecx]; add ecx, 0x18; jmp std::_Yarn<char>::c_str()" at 0x401720 in
+// ooex_vs2010/Lite/ooex7, rendered here in the specimen's 64-bit register width.  Promoting it
+// to a thunk discards the method's own this pointer and its member at offset zero.
+.global not_thunk_mov_add_jmp
+.type not_thunk_mov_add_jmp, @function
+not_thunk_mov_add_jmp:
+  mov rcx, [rcx]
+  add rcx, 24
+  jmp target_mov_add_jmp
+.size not_thunk_mov_add_jmp, .-not_thunk_mov_add_jmp
+
+target_mov_add_jmp:
+  mov eax, 14
+  ret

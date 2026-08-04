@@ -707,9 +707,15 @@ OOSolver::add_function_facts(const OOAnalyzer& ooa)
     if (fd.is_thunk()) {
       auto adjustment = fd.get_thunk_adjustment();
       int64_t fixed = adjustment ? adjustment->fixed_delta : 0;
-      if (adjustment && adjustment->virtual_slot) {
+      if (adjustment && adjustment->virtual_adjustment) {
+        // The two ABIs read the run-time part of the adjustment from different places and
+        // combine it with opposite signs, so each gets its own functor rather than a shared
+        // one that would mean different things on different binaries.
+        auto const & virt = *adjustment->virtual_adjustment;
+        const char* name = virt.kind == ThunkAdjustment::VirtualKind::vcall_offset
+          ? "virtual" : "vtordisp";
         session->add_fact("thunk", fdaddr, fd.get_jmp_addr(),
-                          functor("virtual", fixed, *adjustment->virtual_slot));
+                          functor(name, fixed, virt.slot));
       }
       else {
         session->add_fact("thunk", fdaddr, fd.get_jmp_addr(), fixed);
