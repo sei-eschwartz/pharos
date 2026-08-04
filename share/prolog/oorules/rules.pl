@@ -2475,16 +2475,26 @@ reasonClassCallsMethod_B(Class1, Method2) :-
 
 % Because one method calls another method on the same this-pointer.  This rule is direction
 % safe because we know what class Method1 is associated with, and if that conclusion was
-% correct, this rule will be correct as well.  Does require the methodCallAtOffset offset to be
-% zero.
+% correct, this rule will be correct as well.
 % PAPER: Call-3
 reasonClassCallsMethod_C(Class1, Method2) :-
-    validMethodCallAtOffset(_Insn, Method1, Method2, 0),
+    validMethodCallAtOffset(_Insn, Method1, Method2, Offset),
     iso_dif(Method1, Method2),
     find(Method1, Class1),
     % Don't propose assignments we already know.
     find(Method2, Class2),
     iso_dif(Class1, Class2),
+
+    % ejs 8/31/22 So this rule is not as simple as it seems.  Because Method2 could live on an
+    % embedded object.  To make matters worse, there could be a more complicated chain like
+    % inheritance and embedding that we don't see because of inlining. For example, we might
+    % have C0 --inherits--> Middle --embeds--> C1.
+
+    % So what we really want to know is, for all objects that start at Offset, do they all come
+    % from inheritance?
+    forall(reasonClassAtOffset(Class1, Offset, _AnyInnerClass, Seq),
+           sequenceAreAllDerived(Seq)),
+
     % Debugging
     logtraceln('~@~Q.', [not(factClassCallsMethod(Class1, Method2)),
                          reasonClassCallsMethod_C(Method1, Class1, Method2)]).
