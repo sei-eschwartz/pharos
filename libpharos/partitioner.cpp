@@ -11,6 +11,7 @@
 #include <Rose/BinaryAnalysis/BinaryLoader.h>
 
 #include "partitioner.hpp"
+#include "descriptors.hpp"
 #include "masm.hpp"
 #include "util.hpp"
 #include "limit.hpp"
@@ -917,6 +918,21 @@ P2::PartitionerPtr create_partitioner(const ProgOptVarMap& vm, P2::Engine* engin
   // Create a partitioner that's tuned for a certain architecture, and then tune it even more
   // depending on our command-line.
   P2::PartitionerPtr partitioner = engine->createPartitioner();
+
+  // Tell the partitioner not to give a call to a non-returning function a call-return edge.
+  // The "nonreturn" tags are the single source of truth, and users extend them through
+  // pharos.function_tags.  ROSE names PLT stubs "NAME@plt" while everything else uses the bare
+  // symbol, so configure both spellings.
+  //
+  // This only reaches functions that ROSE has already attached and named when it decides the
+  // edge, which in practice excludes imports: a PLT stub is still an unnamed placeholder at
+  // that point, and its indirect jump reads as "returns by virtue of having only an
+  // indeterminate successor".  FunctionDescriptor::get_pharos_cfg() is what actually removes
+  // those edges, using our own never-returns answer.
+  for (auto const & name : DescriptorSet::create_tag_manager(vm)->names_with_tag("nonreturn")) {
+    partitioner->configuration().insertMaybeFunction(name).mayReturn(false);
+    partitioner->configuration().insertMaybeFunction(name + "@plt").mayReturn(false);
+  }
 
   // Enable our Monitor (previously for CFG debugging, now for timeout limit checking).
   partitioner->cfgAdjustmentCallbacks().append(Monitor::instance());
@@ -2270,11 +2286,9 @@ CERTEngine::createTunedPartitioner() {
   //OINFO << "Creating custom partitioner!" << LEND;
   auto partitioner = P2Engine::createTunedPartitioner();
 
-  // The unwinder transfers control to an exception handler and cannot return to the
-  // instruction following the call.
-  partitioner->configuration()
-    .insertMaybeFunction("_Unwind_Resume@plt")
-    .mayReturn(false);
+  // Non-returning functions (including the unwinder, which transfers control to an exception
+  // handler rather than returning) are configured from the "nonreturn" tags in
+  // create_partitioner(), so that every engine gets them.
 
   // We're building out own list of Prolog matchers because MatchRetPadPush does things that we
   // did not find helpful (like skipping "mov edi,edi" instructions as padding).

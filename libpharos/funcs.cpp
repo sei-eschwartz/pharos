@@ -1207,6 +1207,22 @@ const std::string& FunctionDescriptor::get_pic_hash() const {
 // remaining code was not literally a thunk.  More investigation is needed.
 CFG const & FunctionDescriptor::get_pharos_cfg() const
 {
+  {
+    read_guard<decltype(mutex)> guard{mutex};
+    if (pharos_control_flow_graph_cached) return pharos_control_flow_graph;
+  }
+
+  // A call that cannot return has no fall-through, and compilers rely on that: exception
+  // cleanup code is emitted after such a call precisely because nothing reaches it on the
+  // normal path.  ROSE adds the call-return edge anyway, because when it decides, the callee
+  // is still an unnamed PLT stub whose indirect jump looks like it returns.  Our own
+  // never-returns answer is better, so collect the offending blocks and drop their edges
+  // below, letting the unreachable-block pruning discard the cleanup code.
+  //
+  // This runs before the write lock because get_never_returns() locks the callee's function
+  // descriptor, and for a recursive function that is our own.
+  AddrMap nonreturning_calls = _nonreturning_call_blocks();
+
   write_guard<decltype(mutex)> guard{mutex};
 
   // If we've already done the work, just return the answer.
@@ -1217,6 +1233,21 @@ CFG const & FunctionDescriptor::get_pharos_cfg() const
   CFG const & rose_cfg = _get_rose_cfg();
   t.pharos_control_flow_graph = rose_cfg;
   t.pharos_control_flow_graph_cached = true;
+
+  CFG & cfg = t.pharos_control_flow_graph;
+  for (auto vertex : cfg_vertices(cfg)) {
+    SgAsmBlock *block = get(boost::vertex_name, cfg, vertex);
+    auto finder = nonreturning_calls.find(block->get_address());
+    if (finder == nonreturning_calls.end()) continue;
+    rose_addr_t fallthru = finder->second;
+    SDEBUG << "Removing fall-through " << addr_str(fallthru) << " of non-returning call in block "
+           << addr_str(block->get_address()) << " in function " << _address_string()
+           << " from control flow graph." << LEND;
+    remove_out_edge_if(vertex, [&cfg, fallthru](const CFGEdge & edge) {
+      SgAsmBlock *target = get(boost::vertex_name, cfg, boost::target(edge, cfg));
+      return target && target->get_address() == fallthru;
+    }, cfg);
+  }
 
   // Decide which blocks are bad code.  Because bad block analysis could be expensive, we
   // should probably be saving this somewhere (rather than in a local variable).  For now,
@@ -1264,6 +1295,24 @@ CFG const & FunctionDescriptor::get_pharos_cfg() const
   }
 
   return t.pharos_control_flow_graph;
+}
+
+// Map each block ending in a call that never returns to the fall-through address that the call
+// therefore cannot reach.  Uses the ROSE CFG, because the Pharos CFG is what this answer builds.
+FunctionDescriptor::AddrMap FunctionDescriptor::_nonreturning_call_blocks() const
+{
+  AddrMap blocks;
+  CFG const & cfg = get_rose_cfg();
+  for (auto vertex : cfg_vertices(cfg)) {
+    const SgAsmBlock *block = convert_vertex_to_bblock(cfg, vertex);
+    if (!block) continue;
+    const SgAsmInstruction *last = last_insn_in_block(block);
+    if (!last) continue;
+    const CallDescriptor *call = ds.get_call(last->get_address());
+    if (!call || !call->get_never_returns()) continue;
+    blocks[block->get_address()] = insn_get_fallthru(const_cast<SgAsmInstruction*>(last));
+  }
+  return blocks;
 }
 
 CFG const & FunctionDescriptor::get_rose_cfg() const {

@@ -112,8 +112,6 @@ class DescriptorSet
 
   void init();
 
-  static std::shared_ptr<TagManager> create_tag_manager(ProgOptVarMap const & vm);
-
   template <typename... Args>
   FunctionDescriptor *add_function_descriptor(rose_addr_t addr, Args &&... args);
 
@@ -167,6 +165,10 @@ class DescriptorSet
   TagManager const & tags() const {
     return *tag_manager;
   }
+
+  // The tag manager is process-global and built from the options alone, so this is also usable
+  // before a DescriptorSet exists.  create_partitioner() needs it that early.
+  static std::shared_ptr<TagManager> create_tag_manager(ProgOptVarMap const & vm);
 
   // Mostly in calls.cpp for updating callers, set_delete_method() in ooanalyzer.cpp
   FunctionDescriptor* get_rw_func(rose_addr_t a) {

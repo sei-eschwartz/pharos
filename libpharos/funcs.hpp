@@ -242,6 +242,11 @@ class FunctionDescriptor : private Immobile {
 
   CFG const & _get_rose_cfg() const;
 
+  // Blocks ending in a call that never returns, mapped to the unreachable fall-through address.
+  // Takes no lock of its own; see get_pharos_cfg().
+  using AddrMap = std::map<rose_addr_t, rose_addr_t>;
+  AddrMap _nonreturning_call_blocks() const;
+
   // Update the return value fields in the parameter list.  Only called while generating
   // the PDG.
   void update_return_values();
