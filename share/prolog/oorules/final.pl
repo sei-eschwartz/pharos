@@ -115,6 +115,18 @@ classIdentifier(Method, ID) :-
     -> ID is MinimumMethod).
 
 % --------------------------------------------------------------------------------------------
+% An adjusting thunk retargets the this-pointer onto a different subobject before jumping, so
+% the implementation it reaches belongs to some other class.  Under the Itanium ABI the virtual
+% base slice of a derived class's vftable is full of these, and the class owning that vptr slot
+% is the base -- so reporting them as methods makes every derived override look like a method of
+% the virtual base.  We do not currently know how to attribute them, so leave them out of the
+% results rather than claim an owner we know is wrong.  eventualThunk/2 and finalThunk/2 exclude
+% them for the same underlying reason: the target does not stand in for the thunk.
+:- table adjustingThunk/1 as opaque.
+adjustingThunk(Thunk) :-
+    once((thunk(Thunk, _Target, Adjustment), Adjustment \= 0)).
+
+% --------------------------------------------------------------------------------------------
 % A helper for identifying "worthless" classes to reduce noise in the output.
 :- table worthlessClass/1 as opaque.
 
@@ -197,7 +209,8 @@ finalClass(ClassID, VFTableOrNull, CSize, LSize, RealDestructorOrNull, MethodLis
       factRealDestructor(RealDestructor))
      -> RealDestructorOrNull=RealDestructor; RealDestructorOrNull=0),
     findallMethods(Class, UnsortedMethodList),
-    sort(UnsortedMethodList, MethodList).
+    exclude(adjustingThunk, UnsortedMethodList, ReportableMethodList),
+    sort(ReportableMethodList, MethodList).
 
 % --------------------------------------------------------------------------------------------
 % This final result defines the properties of a VFTable.   More details in results.txt.
@@ -387,7 +400,10 @@ finalMethodProperty(Method, virtual, certain) :-
     knownVirtualMethod(Method),
     find(Method, Class),
     not(worthlessClass(Class)),
-    not(purecall(Method)).
+    not(purecall(Method)),
+    % An adjusting thunk is not reported as a method of the class, so do not report properties
+    % for it either.
+    not(adjustingThunk(Method)).
 
 % Unimplemented rule: There might be a reasoning rule about transferring knowledge from one
 % virtual function to another.  Specifically that the virtual function table of a Derived class
