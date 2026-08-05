@@ -2491,13 +2491,25 @@ reasonClassCallsMethod_C(Class1, Method2) :-
     % have C0 --inherits--> Middle --embeds--> C1.
 
     % So what we really want to know is, for all objects that start at Offset, do they all come
-    % from inheritance?
+    % from inheritance?  Wait until we know what is there; the forall/2 alone is not a check.
+    not(mayHavePendingObjectInObject(Class1, Offset)),
     forall(reasonClassAtOffset(Class1, Offset, _AnyInnerClass, Seq),
            sequenceAreAllDerived(Seq)),
 
     % Debugging
     logtraceln('~@~Q.', [not(factClassCallsMethod(Class1, Method2)),
                          reasonClassCallsMethod_C(Method1, Class1, Method2)]).
+
+% True when something is expected at Offset within Class but we have not concluded what it is.
+% reasonClassAtOffset/4 is grounded in factObjectInObject, so before that fact exists it has no
+% solutions and a forall/2 over it succeeds vacuously, waving through the cases it should
+% reject.  In ooex1 that merged Composite::func3 into Derived before the embedded object at
+% offset 4 was concluded, which then blocked it forever.  A non-zero call offset is itself
+% evidence of a subobject, so treat it as pending until decided.  Compare
+% mayHavePendingOverwrites/1.
+mayHavePendingObjectInObject(Class, Offset) :-
+    iso_dif(Offset, 0),
+    not(reasonClassAtOffset(Class, Offset, _, _)).
 
 % This predicate is used to see if the object at the listed offset is a Class, and if so, which
 % one.  It's notable in that it is recursive however, so it can cover multiple levels.  It
@@ -3334,9 +3346,9 @@ reasonNOTMergeClasses_P(Class1Sorted, Class2Sorted) :-
     factMethod(Caller),
     factMethod(Method),
     iso_dif(Method, Caller),
-    (factConstructor(Method);
-     (factDeletingDestructor(Method), not(factRealDestructor(Caller)));
-     factRealDestructor(Method)),
+    % Containment does not care what kind of method this is, so restricting to constructors and
+    % destructors was leaving the ordinary case unblocked.
+    (not(factDeletingDestructor(Method)); not(factRealDestructor(Caller))),
     % Handle symmetry
     sort_tuple((Class1, Class2), (Class1Sorted, Class2Sorted)),
     % Debugging
