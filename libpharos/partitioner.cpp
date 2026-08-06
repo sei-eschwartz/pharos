@@ -1903,10 +1903,116 @@ CERTEngine::runPartitionerRecursive(P2::PartitionerPtr const & partitioner) {
 
   P2Engine::runPartitionerRecursive(partitioner);
 
-  // Merge GOT preambles when we are finally done
+  // Merge entry-marker and GOT preambles when we are finally done.  Do not run the prologue
+  // matchers again after these passes or they will recreate the body functions we remove.
+  merge_endbr_preambles(partitioner);
   merge_got_preambles(partitioner);
 
   GDEBUG << "Custom partitioner 2 recursive pass complete." << LEND;
+}
+
+// ROSE decodes ENDBR32/ENDBR64 as a NOP.  In stripped binaries its standard prologue matcher
+// can consequently create a speculative function at the following PUSH/MOV while references
+// to the function still point at the ENDBR four bytes earlier.  Coalesce that prologue-only
+// body back into the real CET entry point.  A body with any independent discovery reason is a
+// legitimate alternate entry and must remain separate.
+void
+CERTEngine::merge_endbr_preambles(P2::PartitionerPtr const & partitioner) {
+  struct Merge {
+    rose_addr_t entry;
+    P2::Function::Ptr body;
+    P2::Function::Ptr canonical;
+  };
+
+  std::vector<Merge> merges;
+  for (const P2::Function::Ptr & body : partitioner->functions()) {
+    rose_addr_t body_addr = body->address();
+    if (body_addr < 4 || !body->name().empty()) continue;
+
+    // Only a function created by speculative instruction-pattern/graph discovery is safe to
+    // fold.  FUNC_GRAPH can be added when the overlapping entries converge on the same body.
+    // In particular, preserve symbols, exports, exception metadata, imports, thunk targets,
+    // and user-defined entries.  Direct calls and jumps are checked explicitly below.
+    unsigned reasons = body->reasons();
+    const unsigned speculative_reasons =
+      SgAsmFunction::FUNC_PATTERN | SgAsmFunction::FUNC_GRAPH;
+    if ((reasons & SgAsmFunction::FUNC_PATTERN) == 0 ||
+        (reasons & ~speculative_reasons) != 0) {
+      continue;
+    }
+
+    rose_addr_t entry_addr = body_addr - 4;
+    SgAsmX86Instruction* marker =
+      isSgAsmX86Instruction(partitioner->discoverInstruction(entry_addr));
+    if (!insn_is_endbr(marker) || marker->get_address() + marker->get_size() != body_addr) {
+      continue;
+    }
+
+    // Function reasons alone are insufficient here: ROSE can retain FUNC_PATTERN as the only
+    // reason even when a direct edge also targets the matched prologue.  The only incoming CFG
+    // edge that is compatible with a split ENDBR preamble is the marker's own fall-through.
+    // A call, jump, or any other predecessor makes B an independently addressable entry.
+    P2::ControlFlowGraph::ConstVertexIterator vertex = partitioner->findPlaceholder(body_addr);
+    if (vertex == partitioner->cfg().vertices().end()) continue;
+
+    bool independently_referenced = false;
+    for (const P2::ControlFlowGraph::Edge & edge : vertex->inEdges()) {
+      const P2::ControlFlowGraph::Vertex & source = *edge.source();
+      if (source.value().type() != P2::V_BASIC_BLOCK) {
+        independently_referenced = true;
+        break;
+      }
+      P2::BasicBlock::Ptr source_block = source.value().bblock();
+      if (!source_block || source_block->instructions().empty()) {
+        independently_referenced = true;
+        break;
+      }
+
+      // ROSE can label this fall-through as E_FUNCTION_XFER solely because its current
+      // function ownership is split.  Identify the permissible edge by its instruction,
+      // not by that derived edge label.
+      SgAsmX86Instruction* predecessor =
+        isSgAsmX86Instruction(source_block->instructions().back());
+      if (!predecessor || predecessor->get_address() != entry_addr ||
+          !insn_is_endbr(predecessor) || insn_get_fallthru(predecessor) != body_addr) {
+        independently_referenced = true;
+        break;
+      }
+    }
+    if (independently_referenced) continue;
+
+    P2::Function::Ptr canonical = partitioner->functionExists(entry_addr);
+    merges.push_back({entry_addr, body, canonical});
+  }
+
+  for (const Merge & merge : merges) {
+    // An earlier merge can change function ownership.  Confirm that this body is still the
+    // attached function selected above before mutating the partitioner.
+    if (partitioner->functionExists(merge.body->address()) != merge.body) continue;
+
+    GINFO << "Merging ENDBR entry at " << addr_str(merge.entry)
+          << " with speculative body at " << addr_str(merge.body->address()) << LEND;
+
+    partitioner->detachFunction(merge.body);
+
+    P2::Function::Ptr canonical = merge.canonical;
+    if (canonical) {
+      if (partitioner->functionExists(canonical->address()) == canonical) {
+        partitioner->detachFunction(canonical);
+      }
+      canonical->insertReasons(merge.body->reasons());
+    }
+    else {
+      canonical = P2::Function::instance(merge.entry, merge.body->reasons());
+    }
+
+    // A vtable-only function can have no incoming CFG edge.  Detaching its two overlapping
+    // function objects may therefore remove the entry placeholder along with the last owner.
+    // discoverFunctionBasicBlocks() requires that placeholder to exist.
+    partitioner->insertPlaceholder(merge.entry);
+    partitioner->discoverFunctionBasicBlocks(canonical);
+    partitioner->attachFunction(canonical);
+  }
 }
 
 // In 32-bit PIC ELF code GCC emits a GOT preamble (call <pic_thunk>; add REG, IMM) at the
