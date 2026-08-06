@@ -15,10 +15,24 @@ possibleVFTableWrite(Insn, Function, ThisPtr, Offset, VFTable) :-
 possibleVBTableWrite(Insn, Function, ThisPtr, Offset, VBTable) :-
   possibleVBTableWrite(Insn, Function, ThisPtr, Offset, _ExpandedThisPtr, VBTable).
 
+% The evidence that a method could be a constructor.  Returning the this-pointer counts under any
+% ABI -- MSVC specifies it, and while the Itanium C++ ABI (3.1.3.5) says constructors return void,
+% a constructor may still leave the this-pointer in rax incidentally, for instance when it ends in
+% a memset or memcpy of the object.  But the Itanium ABI does not require it, so returnsSelf
+% cannot be a prerequisite for candidacy there; a vftable write is accepted in its place.
+:- table constructorABIEvidence/1 as opaque.
+
+constructorABIEvidence(M) :-
+    returnsSelf(M).
+
+constructorABIEvidence(M) :-
+    itaniumABI,
+    possibleVFTableWrite(_Insn, M, _ThisPtr, _Offset, _VFTable).
+
 :- table possibleConstructor/1 as opaque.
 
 possibleConstructor(M) :-
-    (returnsSelf(M), noCallsBefore(M));
+    (constructorABIEvidence(M), noCallsBefore(M));
     symbolProperty(M, constructor).
 
 :- table possibleDestructor/1 as opaque.
@@ -31,7 +45,7 @@ possibleDestructor(M) :-
 
 % --------------------------------------------------------------------------------------------
 
-% Hack togetther compatability with the old system.
+% Hack together compatability with the old system.
 :- table possibleVFTableEntry/3 as opaque.
 :- table possibleVBTableEntry/3 as opaque.
 

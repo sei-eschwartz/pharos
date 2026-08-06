@@ -167,6 +167,13 @@ genericThisPtrABIParam(rcx) :- fileInfo(_, _, 'MSVC_64', _).
 genericThisPtrABIParam(rdi) :- fileInfo(_, _, 'SYSV_64', _).
 genericThisPtrABIParam(0)   :- fileInfo(_, _, 'SYSV_32', _).
 
+% itaniumABI
+% True when the analyzed file follows the Itanium C++ ABI, which differs from the MSVC one in
+% ways that matter to reasoning -- most notably that constructors return void.
+:- table itaniumABI/0 as opaque.
+itaniumABI :- fileInfo(_, _, 'SYSV_32', _).
+itaniumABI :- fileInfo(_, _, 'SYSV_64', _).
+
 % explicitThisCallConvention(Method)
 % True when Method's calling convention is an explicitly identified OO this-call convention.
 % '__thiscall', '__x64call', '__sysv32call', '__sysv64call' are confirmed by the convention matcher.
