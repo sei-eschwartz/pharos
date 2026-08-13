@@ -25,6 +25,8 @@ using ProcessedAddresses = std::map<rose_addr_t, bool>;
 using VirtualTableInstallationMap = std::map<rose_addr_t, VirtualTableInstallationPtr>;
 using VirtualFunctionCallMap = std::map<rose_addr_t, VirtualFunctionCallVector>;
 using MethodMap = std::map<rose_addr_t, std::unique_ptr<ThisCallMethod>>;
+using ItaniumVTTMap = std::map<rose_addr_t, std::vector<rose_addr_t>>;
+using ItaniumVFTableMap = std::map<rose_addr_t, size_t>;
 
 class OOAnalyzer : public BottomUpAnalyzer {
  private:
@@ -38,6 +40,18 @@ class OOAnalyzer : public BottomUpAnalyzer {
   VBTableAddrMap vbtables;
   VirtualFunctionCallMap vcalls;
   MethodMap methods;
+
+  // Itanium ABI virtual table tables (VTTs), mapping the address of the VTT to the vftable
+  // address points that it references, in table order.
+  ItaniumVTTMap itanium_vtts;
+
+  // Vftables that are only reachable through a VTT, mapped to their size in entries.  These
+  // are the Itanium construction vtables, which no instruction ever names as a constant, so
+  // find_vtable_installations() cannot see them.  They are kept separate from vftables
+  // because their sizes are measured rather than discovered by walking, and because
+  // VirtualFunctionTable cannot represent them (it stops at the first NULL entry, and a
+  // construction vtable begins with the zeroed destructor slots).
+  ItaniumVFTableMap itanium_vftables;
 
   // Map of call addresses to the symbolic values of the this-pointers at the time of the call.
   std::map<rose_addr_t, SymbolicValuePtr> callptrs;
@@ -70,6 +84,10 @@ class OOAnalyzer : public BottomUpAnalyzer {
   bool analyze_possible_vtable(rose_addr_t address, bool allow_base = true);
   // Find possible virtual tables in a given function.
   void find_vtable_installations(FunctionDescriptor const & fd);
+
+  // Find Itanium ABI VTTs, and through them the construction vtables that no instruction
+  // references as a constant.  Populates itanium_vtts and itanium_vftables.
+  void find_itanium_vtts();
 
   // Find heap allocations?
   void find_heap_allocs();
@@ -128,6 +146,8 @@ class OOAnalyzer : public BottomUpAnalyzer {
   const VFTableAddrMap& get_vftables() const { return vftables; }
   const VBTableAddrMap& get_vbtables() const { return vbtables; }
   const VirtualFunctionCallMap& get_vcalls() const { return vcalls; }
+  const ItaniumVTTMap& get_itanium_vtts() const { return itanium_vtts; }
+  const ItaniumVFTableMap& get_itanium_vftables() const { return itanium_vftables; }
 
   // Is the provided address a new(), delete(), or purecall() method?
   bool is_new_method(rose_addr_t addr) const {

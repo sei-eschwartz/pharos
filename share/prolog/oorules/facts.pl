@@ -158,6 +158,31 @@ initialFact(possibleVFTableWrite/6).
 %
 initialFact(possibleVBTableWrite/6).
 
+% possibleVTTEntry(VTT, Offset, VFTable).
+%
+% The Itanium ABI virtual table table (VTT) at address VTT holds a pointer to the address point
+% of VFTable at byte Offset within the VTT.  A VTT is the array of address points that a
+% complete-object constructor passes down to the base-object constructors of its base
+% subobjects, so that each base installs the construction vtable appropriate to the stage of
+% construction it is in.  Entry zero is always the address point of the most-derived class' own
+% virtual function table.
+%
+% A construction vtable is a private copy of a base class' vtable with the virtual base offsets
+% adjusted for the most-derived object's layout.  Its entries therefore name the base class'
+% methods rather than the most-derived class' overrides.  Because no instruction ever names a
+% construction vtable as a constant, appearing in a VTT is the only evidence that it exists.
+% Those tables can be told apart from the most-derived class' own secondary tables, which also
+% appear in the VTT, because only the latter have a possibleVFTableWrite.
+%
+% Note that VTT slots are deliberately not also reported as initialMemory facts.  A VTT is
+% stored adjacent to the tables it describes, and treating its slots as ordinary initialized
+% memory would let possibleVFTableEntry/3 walk out of the end of the preceding table and absorb
+% the VTT slots as though they were virtual function pointers.
+%
+% These facts are only produced for the Itanium ABI.
+%
+initialFact(possibleVTTEntry/3).
+
 % initialMemory(Address, Value).
 %
 % The Address contains the Value in the program's initialized memory.  Typically, the value is

@@ -362,6 +362,17 @@ void OOAnalyzer::finish() {
 
   //analyze_vftables_in_all_fds();
 
+  // Itanium construction vtables are only reachable through a VTT.  Restricted to the System V
+  // ABIs so that the MSVC path is completely unaffected.
+  switch (ds.get_abi()) {
+   case DescriptorSet::ABI::SYSV_32:
+   case DescriptorSet::ABI::SYSV_64:
+    find_itanium_vtts();
+    break;
+   default:
+    break;
+  }
+
   OOSolver oosolver = OOSolver(ds, vm);
   oosolver.analyze(*this);
   // The OO Classes are the classes from prolog. Should these be the pure output classes?
@@ -525,6 +536,143 @@ bool OOAnalyzer::analyze_possible_vtable(rose_addr_t address, bool allow_base) {
 
   // If we made it to here, the address was not really a virtual table (as far as we know).
   return false;
+}
+
+// Under the Itanium ABI a class with virtual bases gets a VTT: an array of vftable address
+// points that the complete-object constructor passes down to the base-object constructors of
+// its base subobjects, so that each base installs the construction vtable appropriate to the
+// stage of construction it is in.  A construction vtable is therefore never named as a
+// constant by any instruction, and find_vtable_installations() cannot see it.
+//
+// A VTT is recognizable structurally, without any RTTI, because its first entry is always the
+// address point of the most-derived class' own vftable -- which the complete-object
+// constructor does install from a constant, so we have already found it.  That gives us an
+// anchor: a run of pointers into read-only data, one of which we already recognize, is a VTT,
+// and its other entries are the address points we are missing.
+void OOAnalyzer::find_itanium_vtts() {
+  size_t arch_bytes = ds.get_arch_bytes();
+
+  AddressIntervalSet executable;
+  for (const MemoryMap::Node & node : ds.memory.get_memmap()->nodes()) {
+    GDEBUG << "Considering segment " << addr_str(node.key().least()) << "-"
+           << addr_str(node.key().greatest()) << " for Itanium VTTs, accessibility "
+           << node.value().accessibility() << LEND;
+    if ((node.value().accessibility() & MemoryMap::EXECUTABLE) != 0) {
+      executable.insert(node.key());
+    }
+  }
+
+  auto is_code = [&](rose_addr_t v) {
+    if (v == 0 || !ds.memory.is_mapped(v)) return false;
+    return ds.get_func(v) != NULL || ds.get_import(v) != NULL || executable.contains(v);
+  };
+
+  // A pointer into non-executable mapped memory, i.e. a candidate VTT entry.
+  auto is_data_ptr = [&](rose_addr_t v) {
+    if (v == 0 || (v % arch_bytes) != 0) return false;
+    return ds.memory.is_mapped(v) && !executable.contains(v);
+  };
+
+  // Every entry of a VTT is a vftable address point, so it must begin with either a function
+  // pointer or a NULL slot.  This is what keeps us from mistaking the two adjacent pointers
+  // inside an Itanium __si_class_type_info (its name and its base) for a VTT.
+  auto plausible_address_point = [&](rose_addr_t v) {
+    if (!is_data_ptr(v)) return false;
+    rose_addr_t first = ds.memory.read_address(v);
+    return first == 0 || is_code(first);
+  };
+
+  // Accept a run of data pointers as a VTT if it is anchored by a vftable we already found.
+  auto consider_vtt = [&](rose_addr_t start, std::vector<rose_addr_t> const & entries) {
+    if (entries.size() < 2) return;
+    if (vftables.find(entries[0]) == vftables.end()) return;
+    for (rose_addr_t entry : entries) {
+      if (!plausible_address_point(entry)) return;
+    }
+    GINFO << "Found Itanium VTT at " << addr_str(start) << " with "
+          << entries.size() << " entries." << LEND;
+    itanium_vtts[start] = entries;
+  };
+
+  // Only bother with the segments that contain a vftable we already know about; a VTT is
+  // always stored alongside the tables it describes.
+  AddressIntervalSet scan;
+  for (rose_addr_t known : boost::adaptors::keys(vftables)) {
+    for (const MemoryMap::Node & node : ds.memory.get_memmap()->nodes()) {
+      if (node.key().contains(AddressInterval(known))) scan.insert(node.key());
+    }
+  }
+
+  for (const AddressInterval & interval : scan.intervals()) {
+    std::vector<rose_addr_t> run;
+    rose_addr_t run_start = 0;
+    // Stop arch_bytes short so that the final read cannot run off the end of the segment.
+    for (rose_addr_t addr = interval.least();
+         addr + arch_bytes - 1 <= interval.greatest(); addr += arch_bytes) {
+      rose_addr_t value = ds.memory.read_address(addr);
+      if (is_data_ptr(value)) {
+        if (run.empty()) run_start = addr;
+        run.push_back(value);
+      }
+      else {
+        consider_vtt(run_start, run);
+        run.clear();
+      }
+    }
+    consider_vtt(run_start, run);
+  }
+
+  // Collect the address points we now know about, so that measuring one table cannot run into
+  // the next one, or into a VTT.
+  std::set<rose_addr_t> boundaries;
+  for (rose_addr_t known : boost::adaptors::keys(vftables)) boundaries.insert(known);
+  for (auto const & vtt : itanium_vtts) {
+    boundaries.insert(vtt.first);
+    boundaries.insert(vtt.second.begin(), vtt.second.end());
+  }
+
+  for (auto const & vtt : boost::adaptors::values(itanium_vtts)) {
+    for (rose_addr_t addr_point : vtt) {
+      // Tables we already found are exported by the normal path.
+      if (vftables.find(addr_point) != vftables.end()) continue;
+      if (itanium_vftables.find(addr_point) != itanium_vftables.end()) continue;
+
+      rose_addr_t limit = ds.memory.get_memmap()->hull().greatest();
+      auto next = boundaries.upper_bound(addr_point);
+      if (next != boundaries.end()) limit = *next;
+
+      // Walk forward over the entries.  A NULL slot is only part of the table before we have
+      // seen a real function pointer: GCC zeroes the complete-object and deleting destructor
+      // slots of a construction vtable, and those always come first.  Anything else ends the
+      // table, including a pointer into data, which is how we stop when a table butts up
+      // against the VTT that follows it.
+      size_t entries = 0;
+      bool seen_function = false;
+      for (rose_addr_t addr = addr_point; addr < limit; addr += arch_bytes) {
+        rose_addr_t value = ds.memory.read_address(addr);
+        if (value == 0 && !seen_function) {
+          ++entries;
+          continue;
+        }
+        if (!is_code(value)) break;
+        seen_function = true;
+        ++entries;
+      }
+      while (entries > 0 && ds.memory.read_address(addr_point + (entries - 1) * arch_bytes) == 0) {
+        --entries;
+      }
+
+      if (!seen_function || entries == 0) {
+        GDEBUG << "Rejected Itanium vftable at " << addr_str(addr_point)
+               << ", no function pointers." << LEND;
+        continue;
+      }
+
+      GINFO << "Found Itanium construction vftable at " << addr_str(addr_point)
+            << " with " << entries << " entries." << LEND;
+      itanium_vftables[addr_point] = entries;
+    }
+  }
 }
 
 // Find the value of ECX at the time of the call, by inspecting the state that was saved when

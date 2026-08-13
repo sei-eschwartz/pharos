@@ -394,6 +394,24 @@ OOSolver::add_vftable_facts(const OOAnalyzer& ooa)
       session->add_fact("initialMemory", eaddr, value);
     }
   }
+
+  // Itanium construction vtables.  Unlike the loops above, which discover the extent of a
+  // table by walking it, these sizes were measured when the table was found, so a NULL entry
+  // (a zeroed destructor slot) does not end the table and an already exported address must
+  // not either.
+  for (auto const & vft : ooa.get_itanium_vftables()) {
+    for (size_t e = 0; e < vft.second; e++) {
+      rose_addr_t eaddr = vft.first + (e * arch_bytes);
+      if (!exported.insert(eaddr).second) continue;
+      session->add_fact("initialMemory", eaddr, ooa.ds.memory.read_address(eaddr));
+    }
+  }
+
+  for (auto const & vtt : ooa.get_itanium_vtts()) {
+    for (size_t e = 0; e < vtt.second.size(); e++) {
+      session->add_fact("possibleVTTEntry", vtt.first, e * arch_bytes, vtt.second[e]);
+    }
+  }
 }
 
 void
@@ -902,6 +920,7 @@ OOSolver::dump_facts_private()
   exported += session->print_predicate(facts_file, "methodMemberAccess", 4);
   exported += session->print_predicate(facts_file, "possibleVFTableWrite", 6);
   exported += session->print_predicate(facts_file, "possibleVBTableWrite", 6);
+  exported += session->print_predicate(facts_file, "possibleVTTEntry", 3);
   exported += session->print_predicate(facts_file, "initialMemory", 2);
   exported += session->print_predicate(facts_file, "rTTICompleteObjectLocator", 6);
   exported += session->print_predicate(facts_file, "rTTITypeDescriptor", 4);
