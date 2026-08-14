@@ -548,6 +548,16 @@ OOSolver::add_usage_facts(const OOAnalyzer& ooa)
 void
 OOSolver::add_call_facts(const OOAnalyzer& ooa)
 {
+  // The addresses of every slot of every Itanium VTT we found.  A constant argument landing on
+  // one of these is a VTT slice being handed to a base-object constructor or destructor.
+  size_t arch_bytes = ooa.ds.get_arch_bytes();
+  std::set<rose_addr_t> vtt_slices;
+  for (auto const & vtt : ooa.get_itanium_vtts()) {
+    for (size_t e = 0; e < vtt.second.size(); e++) {
+      vtt_slices.insert(vtt.first + (e * arch_bytes));
+    }
+  }
+
   const CallDescriptorMap& call_map = ooa.ds.get_call_map();
   for (const CallDescriptor& cd : boost::adaptors::values(call_map)) {
 
@@ -607,7 +617,17 @@ OOSolver::add_call_facts(const OOAnalyzer& ooa)
       // If the expression is a constant and not a global variable we do not want to export it.
       if (expr->isIntegerConstant()) {
         if (expr->nBits() > 64) continue;
-        if (ooa.ds.get_global(*expr->toUnsigned()) == NULL) continue;
+        rose_addr_t constant = *expr->toUnsigned();
+        if (vtt_slices.find(constant) != vtt_slices.end()) {
+          // An Itanium base-object constructor is handed its vtables through a VTT slice
+          // instead of naming them as constants, so the caller's argument is the only place
+          // the tables are visible.  The hash that callParameter reports is opaque, so the
+          // value has to be stated separately for Prolog to index it into the VTT.  The
+          // definer is null because the constant is materialized by an earlier lea, not by
+          // the call that passes it.
+          expanded_thisptrs.insert(ExpandedTreeNodePtr{expr, 0, callfunc->get_address()});
+        }
+        else if (ooa.ds.get_global(constant) == NULL) continue;
       }
 
       // If the expression is of the form ite(cond value 0), extract just the non-NULL part of

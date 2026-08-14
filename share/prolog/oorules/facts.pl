@@ -204,6 +204,16 @@ initialFact(thisPtrOffset/3).
 % The main part of this fact is ThisPtrExpression, which allows reasoning of relative thisptr
 % relationships beyond simply a constant offset.  This is important for virtual inheritance,
 % which may cause thisptrs to be accessed via a vbtable lookup.
+%
+% ThisPtrExpression is a compound term such as sv(sv_1234, rdi_0) for a symbolic value, but a
+% plain integer when the value is a constant.  Any rule that does arithmetic on it must guard
+% with integer/1 first, because a compound term raises a type error rather than failing.
+%
+% Not every value reported here is an object pointer.  Under the Itanium ABI a base-object
+% constructor or destructor receives its virtual function tables through a VTT slice passed by
+% the complete-object constructor, rather than naming them as constants, so those slice
+% arguments are reported here as well to make the constant available.  Such a fact has a null
+% definer, and its ThisPtr can be matched to the call that passed it through callParameter.
 initialFact(thisPtrDefinition/4).
 
 % symbolGlobalObject(Address, ClassName, VariableName).
