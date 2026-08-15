@@ -24,6 +24,9 @@ using ProcessedAddresses = std::map<rose_addr_t, bool>;
 using VirtualTableInstallationMap = std::map<rose_addr_t, VirtualTableInstallationPtr>;
 using VirtualFunctionCallMap = std::map<rose_addr_t, VirtualFunctionCallVector>;
 using MethodMap = std::map<rose_addr_t, std::unique_ptr<ThisCallMethod>>;
+// An Itanium ABI virtual table table (VTT), mapping its address to the vftable address points
+// that it references, in table order.
+using ItaniumVTTMap = std::map<rose_addr_t, std::vector<rose_addr_t>>;
 
 class OOAnalyzer : public BottomUpAnalyzer {
  private:
@@ -39,6 +42,9 @@ class OOAnalyzer : public BottomUpAnalyzer {
   MethodMap methods;
 
   ProcessedAddresses virtual_tables;
+
+  // The Itanium ABI virtual table tables, which are how the construction vtables get found.
+  ItaniumVTTMap itanium_vtts;
 
   // This entire new/delete/purecall system needs a major rewrite.  The new design is to have a
   // FunctionFinder() class that get initialized with some properties (names, hashes, etc.),
@@ -66,6 +72,8 @@ class OOAnalyzer : public BottomUpAnalyzer {
   bool analyze_possible_vtable(rose_addr_t address, bool allow_base = true);
   // Find possible virtual tables in a given function.
   void find_vtable_installations(FunctionDescriptor const & fd);
+  // Find the Itanium ABI VTTs, and through them the vtables that no instruction names.
+  void find_itanium_vtts();
 
   // Find heap allocations?
   void find_heap_allocs();
@@ -122,6 +130,7 @@ class OOAnalyzer : public BottomUpAnalyzer {
   const VFTableAddrMap& get_vftables() const { return vftables; }
   const VBTableAddrMap& get_vbtables() const { return vbtables; }
   const VirtualFunctionCallMap& get_vcalls() const { return vcalls; }
+  const ItaniumVTTMap& get_itanium_vtts() const { return itanium_vtts; }
 
   // Is the provided address a new(), delete(), or purecall() method?
   bool is_new_method(rose_addr_t addr) const {

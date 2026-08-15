@@ -62,6 +62,7 @@
 :- index(noCallsBefore/1, [1]).
 :- index(possibleVBTableWrite/5, [4+5,4,5]).
 :- index(possibleVFTableWrite/5, [2,5]).
+:- index(possibleVTTEntry/3, [1,3]).
 :- index(possibleVirtualFunctionCall/5, [1]).
 :- index(rTTIBaseClassDescriptor/8, [1,2]).
 :- index(rTTIClassHierarchyDescriptor/3, [1]).

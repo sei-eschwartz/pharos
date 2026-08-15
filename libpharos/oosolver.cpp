@@ -348,6 +348,7 @@ OOSolver::add_vftable_facts(const OOAnalyzer& ooa)
 
   size_t arch_bytes = ooa.ds.get_arch_bytes();
   const VFTableAddrMap& vftables = ooa.get_vftables();
+  const ItaniumVTTMap& vtts = ooa.get_itanium_vtts();
 
   // How far a table extends is decided here rather than during analysis, because this is the only
   // place that needs the answer.  Two knobs, both fixed by the ABI: what counts as a table entry,
@@ -397,8 +398,11 @@ OOSolver::add_vftable_facts(const OOAnalyzer& ooa)
 
       // Another table starts here, so this one has ended.  Only the starting address has to be
       // right for Prolog's benefit: possibleVFTableEntry/3 refuses to step onto the start of
-      // another table and works out the extent for itself.
-      if (e != 0 && vftables.find(eaddr) != vftables.end()) break;
+      // another table and works out the extent for itself.  A VTT bounds a table the same way,
+      // and while the tolerance below would usually stop the walk anyway, a two entry VTT
+      // followed by the next table's two word header is exactly at the limit.
+      if (e != 0 && (vftables.find(eaddr) != vftables.end()
+                     || vtts.find(eaddr) != vtts.end())) break;
 
       // Skip this entry if it's already been proccessed.
       if (exported.find(eaddr) != exported.end()) break;
@@ -442,6 +446,18 @@ OOSolver::add_vftable_facts(const OOAnalyzer& ooa)
       exported.insert(eaddr);
 
       session->add_fact("initialMemory", eaddr, value);
+    }
+  }
+
+  // The tables a VTT names have already been exported above, since discovering a VTT is what
+  // put them in vftables.  What is left is the shape of the VTT itself, which is what says
+  // which tables belong to the same construction sequence.  Its slots are deliberately not
+  // also reported as initialMemory: a VTT sits adjacent to the tables it describes, and
+  // possibleVFTableEntry/3 would walk out of the end of the preceding table and absorb them as
+  // though they were virtual function pointers.
+  for (auto const & vtt : vtts) {
+    for (size_t e = 0; e < vtt.second.size(); e++) {
+      session->add_fact("possibleVTTEntry", vtt.first, e * arch_bytes, vtt.second[e]);
     }
   }
 }
@@ -917,6 +933,7 @@ OOSolver::dump_facts_private()
   exported += session->print_predicate(facts_file, "methodMemberAccess", 4);
   exported += session->print_predicate(facts_file, "possibleVFTableWrite", 6);
   exported += session->print_predicate(facts_file, "possibleVBTableWrite", 6);
+  exported += session->print_predicate(facts_file, "possibleVTTEntry", 3);
   exported += session->print_predicate(facts_file, "initialMemory", 2);
   exported += session->print_predicate(facts_file, "rTTICompleteObjectLocator", 6);
   exported += session->print_predicate(facts_file, "rTTITypeDescriptor", 4);
