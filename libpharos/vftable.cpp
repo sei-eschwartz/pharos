@@ -158,8 +158,7 @@ bool VirtualFunctionTable::valid() const {
 
 // Cory's not convinced that a "map" is the right data structure to store the mapping.  It
 // seems like it would be better for this to be more dynamic at a very slight performance
-// loss for reading the memory image each time.  Thus I propose the following (currently
-// unused) interface:
+// loss for reading the memory image each time.
 rose_addr_t VirtualFunctionTable::read_entry(unsigned int entry) const {
   // Get the address of an entry in table.
   size_t arch_bytes = ds.get_arch_bytes();
@@ -167,13 +166,6 @@ rose_addr_t VirtualFunctionTable::read_entry(unsigned int entry) const {
   // Read the function address value in that memory location...
   rose_addr_t fptr = ds.memory.read_address(taddr);
   return fptr;
-}
-
-// A convenience version of the above interface when you expect a fully valid function
-// descriptor object pointer.
-const FunctionDescriptor * VirtualFunctionTable::read_entry_fd(unsigned int entry) const {
-  rose_addr_t fptr = read_entry(entry);
-  return ds.get_func(fptr);
 }
 
 // Look for RTTI structures, which should be situated directly above the vtable start

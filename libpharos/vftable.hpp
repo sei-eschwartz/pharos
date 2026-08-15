@@ -106,15 +106,6 @@ class VirtualFunctionTable {
   // The confidence is based on the technique used to identify RTTI.
   GenericConfidence rtti_confidence;
 
-  // This constructor should be deprecated in favor of the one that requires an address if
-  // that's not a problem.
-  VirtualFunctionTable(const DescriptorSet& ds_) : ds(ds_) {
-    addr = 0;
-    non_function = 0;
-    has_entries = false;
-    rtti_confidence = ConfidenceNone;
-  }
-
   VirtualFunctionTable(const DescriptorSet& ds_, rose_addr_t a) : ds(ds_) {
     addr = a;
     non_function = 0;
@@ -127,10 +118,6 @@ class VirtualFunctionTable {
 
   // Read an entry from the table.
   rose_addr_t read_entry(unsigned int entry) const;
-
-  // A convenience version of the above interface when you expect a fully valid function
-  // descriptor object pointer.
-  const FunctionDescriptor * read_entry_fd(unsigned int entry) const;
 
   // This method updates the fields describing the virtual function table based on analyzing
   // the contents of the memory at the address of the table.  Returns true if the table is

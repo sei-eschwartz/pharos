@@ -249,13 +249,6 @@ initialFact(callingConvention/2).
 %
 initialFact(funcParameter/3).
 
-% funcReturn(Function, Position, SVHash).
-%
-% The Function returns the symbolic value represented by SVHash in Position.  Position is
-% always a register name, and is typically 'eax'.
-%
-initialFact(funcReturn/3).
-
 % callParameter(Instruction, Function, Position, SVHash).
 %
 % The call Instruction in Function passes the symbolic value SVHash in Position. The Position
@@ -263,13 +256,6 @@ initialFact(funcReturn/3).
 % register for register parameters.
 %
 initialFact(callParameter/4).
-
-% callReturn(Instruction, Function, Position, SVHash).
-%
-% The call Instruction in Function returns the symbolic value represented by SVHash in
-% Position.  Position is always a register name, and is typically 'eax'.
-%
-initialFact(callReturn/4).
 
 % callTarget(Instruction, Function, Target).
 %

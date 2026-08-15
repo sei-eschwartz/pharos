@@ -20,7 +20,6 @@
 #include "pdg.hpp"
 #include "util.hpp"
 #include "misc.hpp"
-#include "method.hpp"
 #include "masm.hpp"
 #include "badcode.hpp"
 #include "partitioner.hpp"

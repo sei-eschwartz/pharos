@@ -19,7 +19,6 @@
 #include "pdg.hpp"
 #include "apidb.hpp"
 #include "partitioner.hpp"
-#include "vftable.hpp"
 #include "imports.hpp"
 #include "masm.hpp"
 #include "threads.hpp"

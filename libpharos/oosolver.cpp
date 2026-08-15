@@ -658,24 +658,6 @@ OOSolver::add_call_facts(const OOAnalyzer& ooa)
       }
     }
 
-    // Report all parameters for every function (in the future we'll try using an OO subset)
-    auto creturns = call_params.get_returns();
-    for (const ParameterDefinition& cpd : creturns) {
-      if (!cpd.get_value()) continue;
-      TreeNodePtr expr = cpd.get_value()->get_expression();
-      if (!expr) continue;
-      // If the expression is a constant and not a global variable we do not want to export it.
-      if (expr->isIntegerConstant()) {
-        if (expr->nBits() > 64) continue;
-        if (ooa.ds.get_global(*expr->toUnsigned()) == NULL) continue;
-      }
-      std::string term = "sv_" + std::to_string(expr->hash());
-      if (cpd.is_reg()) {
-        std::string regname = unparseX86Register(cpd.get_register(), {});
-        session->add_fact("callReturn", cd.get_address(), callfunc->get_address(), regname, term);
-      }
-    }
-
     // From here on, we're only interested in virtual calls.
     const VirtualFunctionCallMap& vcalls = ooa.get_vcalls();
     if (vcalls.find(cd.get_address()) == vcalls.end()) continue;
@@ -803,23 +785,6 @@ OOSolver::add_function_facts(const OOAnalyzer& ooa)
       }
     }
 
-    // Report all parameters for every function (in the future we'll try using an OO subset)
-    auto freturns = func_params.get_returns();
-    for (const ParameterDefinition& fpd : freturns) {
-      if (!fpd.get_value()) continue;
-      TreeNodePtr expr = fpd.get_value()->get_expression();
-      if (!expr) continue;
-      // If the expression is a constant and not a global variable we do not want to export it.
-      if (expr->isIntegerConstant()) {
-        if (expr->nBits() > 64) continue;
-        if (ooa.ds.get_global(*expr->toUnsigned()) == NULL) continue;
-      }
-      std::string term = "sv_" + std::to_string(expr->hash());
-      if (fpd.is_reg()) {
-        std::string regname = unparseX86Register(fpd.get_register(), {});
-        session->add_fact("funcReturn", fdaddr, regname, term);
-      }
-    }
   }
 }
 
@@ -967,9 +932,7 @@ OOSolver::dump_facts_private()
   exported += session->print_predicate(facts_file, "thunk", 3);
   exported += session->print_predicate(facts_file, "callingConvention", 2);
   exported += session->print_predicate(facts_file, "funcParameter", 3);
-  exported += session->print_predicate(facts_file, "funcReturn", 3);
   exported += session->print_predicate(facts_file, "callParameter", 4);
-  exported += session->print_predicate(facts_file, "callReturn", 4);
   exported += session->print_predicate(facts_file, "callTarget", 3);
 
   facts_file << "% Object fact exporting complete." << std::endl;

@@ -73,7 +73,6 @@ using CallTargetSet = Rose::BinaryAnalysis::AddressSet;
 using TokenSet = std::vector<std::string>;
 
 // Forward declaration of object-oriented analysis data structure.
-class ThisCallMethod;
 
 class FunctionDescriptor : private Immobile {
 

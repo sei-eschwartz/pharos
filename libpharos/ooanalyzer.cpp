@@ -16,12 +16,6 @@
 
 namespace pharos {
 
-// Some of these should probably be methods on OOAnalyzer, and others might be best just local
-// to this file.  Since the original objdigger.cpp design didn't have a master class, we'll
-// just prototype all of the functions here for now.
-// OOSolver
-void analyze_vtable_overlap();
-
 OOAnalyzer::OOAnalyzer(DescriptorSet& ds_, const ProgOptVarMap& vm_) :
   BottomUpAnalyzer(ds_, vm_) {
   user_new_addrs = option_addr_list(vm, "new-method");
@@ -301,8 +295,7 @@ void OOAnalyzer::visit(FunctionDescriptor* fd) {
   // Experimental new memory reduction undiscussed major design revision. ;-) ;-)
   fd->free_pdg();
 
-  // Record the symbolic value of the possible this-pointer at each call.
-  record_this_ptrs_for_calls(fd);
+  discard_call_states(fd);
 }
 
 void OOAnalyzer::start() {
@@ -343,11 +336,6 @@ void OOAnalyzer::finish() {
   // reads and writes for each function with a virtual call in it.
   // ds.update_vf_call_descriptors();
 
-  // Look for methods that pass their this-pointers to other methods.
-  for (auto & tcm : boost::adaptors::values(methods)) {
-    tcm->find_passed_func_offsets(*this);
-  }
-
   // Test virtual base tables and virtual function tables for overlaps.  This is the new Prolog
   // compatible approach, and it may not actually modify function tables yet.
   // For every virtual base table...
@@ -359,8 +347,6 @@ void OOAnalyzer::finish() {
   //for (const VirtualFunctionTable* vft : boost::adaptors::values(vftables)) {
   //  vft->analyze_overlaps(vftables, vbtables);
   //}
-
-  //analyze_vftables_in_all_fds();
 
   OOSolver oosolver = OOSolver(ds, vm);
   oosolver.analyze(*this);
@@ -520,30 +506,8 @@ bool OOAnalyzer::analyze_possible_vtable(rose_addr_t address, bool allow_base) {
   return false;
 }
 
-// Find the value of ECX at the time of the call, by inspecting the state that was saved when
-// the call was evaluated.  Uses the state from the call descriptor!  The FunctionDescriptor is
-// non-const, because we're going to free the states in each CallDescriptor that we visit.
-void OOAnalyzer::record_this_ptrs_for_calls(FunctionDescriptor* fd) {
+void OOAnalyzer::discard_call_states(FunctionDescriptor* fd) {
   for (const CallDescriptor* cd : fd->get_outgoing_calls()) {
-    SymbolicStatePtr state = cd->get_state();
-    if (state == NULL) {
-      // Customize this message a little to account for known failure modes.,
-      if (cd->is_tail_call()) {
-        GINFO << "Tail call at " << cd->address_string() << " was not analyzed correctly for OO usages." << LEND;
-      }
-      else {
-        GINFO << "Call at " << cd->address_string() << " was not analyzed correctly for OO usages." << LEND;
-      }
-      continue;
-    }
-    write_guard<decltype(mutex)> guard{mutex};
-    SymbolicValuePtr this_ptr = pharos::get_this_ptr_for_call(cd);
-    if (this_ptr->is_valid()) {
-      callptrs[cd->get_address()] = this_ptr;
-    }
-    // Now that we've saved a copy of the this-pointer value, we don't need the the rest of the
-    // state anymore, and we can free a lot of memory simply by removing the reference to the
-    // state from the call descriptor.
     CallDescriptor* nccd = ds.get_rw_call(cd->get_address());
     nccd->discard_state();
   }
