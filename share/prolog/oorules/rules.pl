@@ -851,6 +851,16 @@ reasonVFTable(VFTable) :-
 reasonVFTable(VFTable) :-
     factVirtualFunctionCall(_Insn, _Method, _ObjectOffset, VFTable, _VFTableOffset).
 
+% Because a VTT names the table, and that VTT is corroborated by its own entry zero already
+% being a known table.  Per the Itanium ABI, entry zero of a VTT is the most-derived class' own
+% primary table, which its complete-object constructor installs from a constant, so a real
+% vtable group always has a write for it.
+reasonVFTable(VFTable) :-
+    possibleVTTEntry(VTT, _Offset, VFTable),
+    possibleVTTEntry(VTT, 0, PrimaryVFTable),
+    factVFTable(PrimaryVFTable),
+    logtraceln('~Q.', reasonVFTable2(VFTable)).
+
 % Implement: Derived/Base class relationships validate the virtual function tables at the same
 % offsets in oteher class?  Is it possible to conclude the derived class relationship without
 % the being certain of the VFTables (if there are VFTables)?
@@ -1233,6 +1243,16 @@ reasonVFTableEntry(VFTable, Offset, Entry) :-
 reasonVFTableEntry(VFTable, 0, Entry) :-
     factVFTable(VFTable),
     possibleVFTableEntry(VFTable, 0, Entry).
+
+% Because the first entry of a VTT-named table is valid.  A construction vtable opens with the
+% zeroed destructor slots the ABI leaves unused, so its first entry is not at offset zero, and
+% the lowest slot holding a method takes the place of the offset zero anchor above.
+reasonVFTableEntry(VFTable, Offset, Entry) :-
+    factVFTable(VFTable),
+    possibleVTTEntry(_VTT, _VTTOffset, VFTable),
+    possibleVFTableEntry(VFTable, Offset, Entry),
+    not((possibleVFTableEntry(VFTable, SmallerOffset, _OtherEntry),
+         SmallerOffset < Offset)).
 
 % Because there is a larger valid VFTable entry in the same VFTable.
 % PAPER: Larger-VFTableEntry

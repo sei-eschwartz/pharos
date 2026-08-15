@@ -65,10 +65,42 @@ possibleVFTableEntry(VFTable, NewOffset, Entry) :-
     NewOffset is Offset + PtrSize,
     Address is VFTable + NewOffset,
     not(possibleVFTableWrite(_Insn, _Func, _ThisPtr, _Offset, Address)),
+    % The write guard above stops the walk at the start of an installed table.  A construction
+    % vtable has no write, so a VTT naming the address is the complementary boundary.
+    not(possibleVTTEntry(_VTT, _VTTOffset, Address)),
     initialMemory(Address, Entry),
     % Now that initialMemory facts also include virtual base table entries, we need some
     % additional validation to prevent adding base table entries as methods.
     Entry > 0x1000.
+
+% A construction vtable is named only by a VTT slot -- no instruction stores its address as a
+% constant, so the write-seeded clauses above never reach it.  Only the slots holding a code
+% pointer become entries: a construction vtable opens with the two destructor slots that GCC
+% zeroes, and reporting one would eventually reach reasonMethod_G and make address zero a
+% method.  Stepping over them is why the reachable slots are walked separately below.
+possibleVFTableEntry(VFTable, Offset, Entry) :-
+    vTTTableSlot(VFTable, Offset),
+    Address is VFTable + Offset,
+    initialMemory(Address, Entry),
+    Entry > 0x1000.
+
+% The slots of a table a VTT names.  A base-object destructor is never dispatched virtually
+% while the base is under construction, so the ABI leaves those leading slots unused and the
+% value of a slot cannot decide whether the next slot exists.  Only adjacency can.
+:- table vTTTableSlot/2 as opaque.
+
+vTTTableSlot(VFTable, 0) :-
+    possibleVTTEntry(_VTT, _Offset, VFTable),
+    initialMemory(VFTable, _Value).
+
+vTTTableSlot(VFTable, NewOffset) :-
+    vTTTableSlot(VFTable, Offset),
+    pointerSize(PtrSize),
+    NewOffset is Offset + PtrSize,
+    Address is VFTable + NewOffset,
+    not(possibleVFTableWrite(_Insn, _Func, _ThisPtr, _WriteOffset, Address)),
+    not(possibleVTTEntry(_VTT, _VTTOffset, Address)),
+    initialMemory(Address, _NextValue).
 
 possibleVBTableEntry(VBTable, Offset, Value) :-
     possibleVBTableWrite(_Insn, _Func, _ThisPtr, _ObjectOffset, VBTable),
