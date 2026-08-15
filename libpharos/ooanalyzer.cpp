@@ -364,13 +364,6 @@ void OOAnalyzer::finish() {
 
   OOSolver oosolver = OOSolver(ds, vm);
   oosolver.analyze(*this);
-  // The OO Classes are the classes from prolog. Should these be the pure output classes?
-  ooclasses = oosolver.get_classes();
-}
-
-std::vector<OOClassDescriptorPtr>
-OOAnalyzer::get_result_classes() {
-  return ooclasses;
 }
 
 void OOAnalyzer::handle_heap_allocs(const rose_addr_t saddr) {

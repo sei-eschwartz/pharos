@@ -28,12 +28,7 @@ set(PHAROS_SOURCES
   method.cpp
   misc.cpp
   ooanalyzer.cpp
-  ooclass.cpp
-  ooelement.cpp
-  oomember.cpp
-  oomethod.cpp
   oosolver.cpp
-  oovftable.cpp
   options.cpp
   path.cpp
   pdg.cpp

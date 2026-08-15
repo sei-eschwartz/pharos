@@ -4,10 +4,26 @@
 
 #include "vftable.hpp"
 #include "descriptors.hpp"
-#include "oovftable.hpp" // For the new read_RTTI
 
 namespace pharos {
 
+TypeRTTICompleteObjectLocatorPtr
+read_RTTI(const DescriptorSet& ds, rose_addr_t addr)
+{
+  try {
+    rose_addr_t rptr = ds.memory.read_address(addr);
+    TypeRTTICompleteObjectLocatorPtr rtti =
+      std::make_shared<TypeRTTICompleteObjectLocator>(ds.memory, rptr);
+    if (rtti && rtti->signature.value == 0 && rtti->class_desc.signature.value == 0) {
+      return rtti;
+    }
+  }
+  catch (...) {
+    GDEBUG << "RTTI was bad at " << addr_str(addr) << LEND;
+  }
+
+  return nullptr;
+}
 
 VirtualTableInstallation::VirtualTableInstallation(
   SgAsmInstruction* i, FunctionDescriptor const * f, rose_addr_t a,

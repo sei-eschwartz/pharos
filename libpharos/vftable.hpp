@@ -73,6 +73,8 @@ class VirtualBaseTable {
 
 using TypeRTTICompleteObjectLocatorPtr = std::shared_ptr<TypeRTTICompleteObjectLocator>;
 
+TypeRTTICompleteObjectLocatorPtr read_RTTI(const DescriptorSet& ds, rose_addr_t addr);
+
 class VirtualFunctionTable {
 
   const DescriptorSet& ds;

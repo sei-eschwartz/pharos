@@ -13,7 +13,6 @@
 #include "defuse.hpp"
 #include "method.hpp"
 #include "usage.hpp"
-#include "ooclass.hpp"
 #include "vftable.hpp"
 #include "vcall.hpp"
 #include "bua.hpp"
@@ -84,8 +83,6 @@ class OOAnalyzer : public BottomUpAnalyzer {
   bool identify_delete_method(FunctionDescriptor const & fd);
   bool identify_purecall_method(FunctionDescriptor const & fd);
   bool identify_nonreturn_method(FunctionDescriptor & fd);
-
-  std::vector<OOClassDescriptorPtr> ooclasses;
 
   // Mark methods as new(), delete(), and purecall() respectively.
   void set_new_method(rose_addr_t addr) {
@@ -207,7 +204,6 @@ class OOAnalyzer : public BottomUpAnalyzer {
   // A map of object uses.  Populated in analyze_functions_for_object_uses().
   ObjectUseMap object_uses;
 
-  std::vector<OOClassDescriptorPtr> get_result_classes();
   void visit(FunctionDescriptor* fd) override;
   void start() override;
   void finish() override;
