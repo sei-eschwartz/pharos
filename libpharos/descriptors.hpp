@@ -261,6 +261,16 @@ class DescriptorSet
 
   // Return the detected ABI.
   ABI get_abi() const { return abi_; }
+  // True for the ABIs that pair with the Itanium C++ ABI.  Mirrors itaniumABI/0 in util.pl.
+  bool is_itanium_abi() const {
+    switch (abi_) {
+      case ABI::SYSV_32:
+      case ABI::SYSV_64: return true;
+      case ABI::MSVC_32:
+      case ABI::MSVC_64: return false;
+      default:           ASSERT_not_reachable("ABI was not detected");
+    }
+  }
   // Return the register that holds the this-pointer, or boost::none for ABIs that pass
   // the this-pointer on the stack (SYSV_32).
   boost::optional<RegisterDescriptor> get_this_ptr_reg() const;

@@ -78,7 +78,7 @@ void VirtualBaseTable::analyze_overlaps(const VFTableAddrMap& vftables, const VB
   for (auto const & vft : boost::adaptors::values(vftables)) {
     if (vft->addr > addr) {
       // Don't bound ourselves by other vftables if we know that they are invalid.
-      if (vft->best_size < 1) continue;
+      if (!vft->has_entries) continue;
 
       if (vft->rtti != NULL) {
         limit = ((vft->addr - 4) - addr) / arch_bytes;
@@ -129,7 +129,7 @@ bool VirtualBaseTable::valid() const {
 bool VirtualFunctionTable::valid() const {
   // The address can only truly be a virtual function table if it passes some basic tests,
   // such as having at least one function pointer.
-  if (max_size < 1) {
+  if (!has_entries) {
     // If there were no pointer at all, just reject the table outright.
     if (non_function == 0) {
       GDEBUG << "Possible virtual function table at " << addr_str(addr)
@@ -138,57 +138,6 @@ bool VirtualFunctionTable::valid() const {
     }
   }
   return true;
-}
-
-// This method updates the minimum size of the vtable based on new information (typically a
-// known virtual function call using the table).  This value always grows, because we're
-// supposed to be making sound assertions about the minimum size.
-void VirtualFunctionTable::update_minimum_size(size_t new_size) {
-  if (new_size > max_size && max_size != 0) {
-    GERROR << "Confusion about the minimum size of vtable at " << addr_str(addr)
-           << ", " << new_size << ">" << max_size << LEND;
-  }
-  else if (min_size < new_size) min_size = new_size;
-}
-
-// This method updates the maximum size of the vtable based on new information (typically by
-// walking the memory of the vtable looking for valid function pointers).  This value always
-// shrinks, because we're supposed to be making sound assertions about the maximum size.
-void VirtualFunctionTable::update_maximum_size(size_t new_size) {
-  if (new_size < min_size) {
-    GERROR << "Confusion about the maximum size of vtable at " << addr_str(addr)
-           << ", " << new_size << "<" << min_size << LEND;
-  }
-  else if (max_size == 0 || max_size > new_size) max_size = new_size;
-}
-
-// directly update the best size
-void VirtualFunctionTable::update_best_size(size_t besty) {
-  best_size = besty;
-}
-
-// Take a "guess" at the correct vtable size, and update our confidence appropriately.
-void VirtualFunctionTable::update_size_guess() {
-
-  // if the confidence is set by the user, then trust it. Currently, this will only happen when
-  // applying the RTTI structures *appears* to make sense.
-  if (size_confidence == ConfidenceUser) {
-    return;
-  }
-  // Cory's not sure what the correct logic is here, but this seems like a reasonable first
-  // attempt.  If the minimum and maximum match, I figure we're pretty confident.
-  if (min_size == max_size && min_size != 0) {
-    best_size = min_size;
-    size_confidence = ConfidenceConfident;
-  }
-  // Otherwise use the maximum possible value, and set the confidence to "Guess".
-  else {
-    best_size = max_size;
-    size_confidence = ConfidenceGuess;
-  }
-  // There are probably some other heuristics to use here, but this is a start.  In
-  // particular, the complete lack of code to increase the minimum beyond one will ensure
-  // that only the second heuristic has any significance currently.
 }
 
 // Cory's not convinced that a "map" is the right data structure to store the mapping.  It
@@ -249,8 +198,6 @@ bool VirtualFunctionTable::analyze(VFTableAddrMap& vftables) {
     if (!ds.memory.is_mapped(taddr)) {
       GERROR << "Failed to read invalid virtual function table address " << addr_str(taddr) << LEND;
       // There is no virtual function table if the address is invalid.
-      // Reinforce this by setting size confidence to wrong.
-      size_confidence = ConfidenceWrong;
       break;
     }
 
@@ -261,6 +208,20 @@ bool VirtualFunctionTable::analyze(VFTableAddrMap& vftables) {
     // error as mentioned above.  Perhaps we should change the API for read_addr to make this
     // clearer?
     if (fptr == 0) {
+      // Under the Itanium ABI a NULL is not the end of the table.  A construction vtable has
+      // zeroed destructor slots, because a base-object destructor is never dispatched virtually
+      // while the base subobject is under construction, and the ABI orders virtual functions by
+      // declaration, so those slots can sit anywhere in the table.  Without this a construction
+      // vtable would be rejected outright rather than merely mismeasured.  Treat the slot as a
+      // miss instead; the tolerance below still ends a run of them.  They deliberately do not
+      // count towards non_function, so that a region of nothing but zeros still fails valid().
+      if (ds.is_itanium_abi()) {
+        entry++;
+        failures++;
+        if (failures >= 3) break;
+        continue;
+      }
+
       // Reading a NULL value is expected, just so long as it's not the first entry.
       if (entry == 0) {
         GTRACE << "Read NULL function pointer in first entry of vftable at "
@@ -303,7 +264,7 @@ bool VirtualFunctionTable::analyze(VFTableAddrMap& vftables) {
         // This call could be recursive, but it's not obvious that's a problem.
         next_vftable->analyze(vftables);
         //OINFO << "Found an new VFTable at " << addr_str(next_taddr)
-        //      << " with " << next_vftable->best_size << " entries." << LEND;
+        //      << " with " << next_vftable->non_function << " non-functions." << LEND;
         vftables[next_taddr] = std::move(next_vftable);
       }
       // An RTTI data structure is never a valid entry in a VFTable.
@@ -333,14 +294,6 @@ bool VirtualFunctionTable::analyze(VFTableAddrMap& vftables) {
       GDEBUG << "Validated virtual function at " << addr_str(taddr)
              << " points to function at " << addr_str(fptr) << LEND;
 
-      // As a special case, finding a valid function pointer at entry zero confirms that we
-      // are in fact a virtual function table, and moves our minimum size to one.  The same
-      // cannot be said for finding entries at entry greater than zero because they might
-      // not be part of THIS virtual function table, but instead an adjacent one.
-      if (entry == 0) {
-        update_minimum_size(1);
-      }
-
     }
     // It's unclear if our disassembly is accurate enough currently to require this for every
     // entry.  For right now, we're going to only going to break after several adjacent
@@ -366,15 +319,15 @@ bool VirtualFunctionTable::analyze(VFTableAddrMap& vftables) {
     }
   }
 
-  // At this point, we've finished walking through memory for one of several reasons.  We
-  // should attempt to update the size limits on the table based on what we've learned.
-
-  // The maximum size can't possibly be more than the current offset, but we also ought to
-  // subtract any trailing failures, since there's no reason to believe that they're
-  // legitimate.
+  // At this point we've finished walking through memory for one of several reasons.  How many
+  // entries the table really has is not decided here -- OOSolver works that out when it exports
+  // the entries, because that is the only place that needs an answer.  All we record is whether
+  // the walk got as far as a single entry, which is the question the virtual base table trimmer
+  // asks.  Trailing failures do not count, since there's no reason to believe they're legitimate.
   unsigned int msize = entry - failures;
+  has_entries = (msize > 0);
 
-  if (msize < 1) {
+  if (!has_entries) {
     GTRACE << "Virtual function table at " << addr_str(addr)
            << " failed to validate at least one function pointer." << LEND;
   }
@@ -384,14 +337,6 @@ bool VirtualFunctionTable::analyze(VFTableAddrMap& vftables) {
     GINFO << "The entries are:";
     for (unsigned int x = 0; x < msize; x++) GINFO << " " << addr_str(read_entry(x));
     GINFO << LEND;
-  }
-
-  // Avoid passing ridiculously small values of maximum, since that won't help anybody.
-  if (msize > 0) {
-    update_maximum_size(msize);
-
-    // If we've got a reasonable maximum, we should also use that to update our best guess.
-    update_size_guess();
   }
 
   return valid();

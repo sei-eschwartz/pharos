@@ -350,29 +350,81 @@ OOSolver::add_vftable_facts(const OOAnalyzer& ooa)
 
   size_t arch_bytes = ooa.ds.get_arch_bytes();
   const VFTableAddrMap& vftables = ooa.get_vftables();
+
+  // How far a table extends is decided here rather than during analysis, because this is the only
+  // place that needs the answer.  Two knobs, both fixed by the ABI: what counts as a table entry,
+  // and how many consecutive slots may fail that test before the table has ended.
+  //
+  // MSVC keeps its long standing rule, where any mapped value is an entry and the first unmapped
+  // one ends the table.  Being generous here is deliberate: reasonVFTableSizeGTE and
+  // reasonVFTableSizeLTE work out the real size in Prolog, and they can only do that from entries
+  // we exported.
+  //
+  // The Itanium ABI cannot use that rule.  A construction vtable has zeroed destructor slots in
+  // the middle of it, so an unmapped value cannot end a table; and the type information records
+  // that follow the last table alternate unmapped and mapped words, so a tolerance counted over
+  // unmapped values never runs out.  Requiring an entry to be a function pointer solves both,
+  // because the zeroed slots are covered by the tolerance while the pointers into those records
+  // are not functions and do end the walk.  Three is the right tolerance because the next table's
+  // header is always at least that many non-function words: the virtual call and base offsets, the
+  // offset to the top of the object, and the type information pointer, which is itself zero when
+  // the binary was built without RTTI.
+  //
+  // "Function pointer" has to mean any address in executable memory, not just one we successfully
+  // partitioned into a function.  Requiring a known function loses the last entry of a table
+  // whenever its target went unpartitioned, which is what happens in the stripped builds: the
+  // adjusting thunk for the final method of five separate tables goes unrecognized, lands as a
+  // trailing failure and is trimmed away.  Nothing that has to end a walk is executable -- the
+  // offsets in the next table's header are small integers, and the type information pointers are
+  // in read only data -- so accepting all of .text costs nothing.
+  const bool itanium = ooa.ds.is_itanium_abi();
+  auto is_entry = [&ooa, itanium](rose_addr_t value) {
+    if (!itanium) return ooa.ds.memory.is_mapped(value);
+    if (ooa.ds.get_func(value) != NULL || ooa.ds.get_import(value) != NULL) return true;
+    uint8_t byte;
+    return ooa.ds.memory.get_memmap()->at(value).limit(1)
+      .require(MemoryMap::EXECUTABLE).read(&byte).size() == size_t(1);
+  };
+  const size_t tolerance = itanium ? 3 : 0;
+
   for (auto const & vft : boost::adaptors::values(vftables)) {
-    size_t e = 0;
-    while (true) {
-      rose_addr_t value = vft->read_entry(e);
-      if (!(ooa.ds.memory.is_mapped(value))) {
-        break;
-      }
+    // Collect before emitting, because a slot that failed the test can still turn out to be inside
+    // the table.  Only the failures the table ends on should be dropped.
+    std::vector<rose_addr_t> slots;
+    size_t entries = 0;
+    size_t strikes = 0;
+    for (size_t e = 0; ; e++) {
       rose_addr_t eaddr = vft->addr + (e * arch_bytes);
+      if (!ooa.ds.memory.is_mapped(eaddr)) break;
+
+      // Another table starts here, so this one has ended.  Only the starting address has to be
+      // right for Prolog's benefit: possibleVFTableEntry/3 refuses to step onto the start of
+      // another table and works out the extent for itself.
+      if (e != 0 && vftables.find(eaddr) != vftables.end()) break;
 
       // Skip this entry if it's already been proccessed.
-      auto finder = exported.find(eaddr);
-      if (finder != exported.end()) break;
+      if (exported.find(eaddr) != exported.end()) break;
+
+      rose_addr_t value = vft->read_entry(e);
+      if (is_entry(value)) strikes = 0;
+      else if (++strikes > tolerance) break;
+
+      slots.push_back(value);
+      if (strikes == 0) entries = slots.size();
+    }
+    slots.resize(entries);
+
+    // We used to follow thunks and export the dethunked entry, but it turns out that thunks
+    // sometimes play an important role if differentiating functions, especially in vftable
+    // entries.  A common scenario is for the compiler to create two different thunks jumping
+    // to the same method implementation, and to put the distinct thunks in the vftable.  If
+    // we've exported thunk facts to Prolog, we can sort that out correctly, and identify
+    // that the single implementation is a shared implementation.
+
+    for (size_t e = 0; e < slots.size(); e++) {
+      rose_addr_t eaddr = vft->addr + (e * arch_bytes);
       exported.insert(eaddr);
-
-      // We used to follow thunks and export the dethunked entry, but it turns out that thunks
-      // sometimes play an important role if differentiating functions, especially in vftable
-      // entries.  A common scenario is for the compiler to create two different thunks jumping
-      // to the same method implementation, and to put the distinct thunks in the vftable.  If
-      // we've exported thunk facts to Prolog, we can sort that out correctly, and identify
-      // that the single implementation is a shared implementation.
-
-      session->add_fact("initialMemory", eaddr, value);
-      e++;
+      session->add_fact("initialMemory", eaddr, slots[e]);
     }
 
     if (vft->rtti) {

@@ -84,17 +84,15 @@ class VirtualFunctionTable {
   // The address in memory where the virtual function table is located.
   rose_addr_t addr;
 
-  // Known minimum size, in entries (not bytes)
-  size_t min_size;
-  // Known maximum size, in entries (not bytes)
-  size_t max_size;
   // Non-function pointers found.  This field was added because legitimate virtual function
   // tables were being rejected because none of the pointers were to recognized functions.
   unsigned int non_function;
-  // Best guess at size given current information, in entries (not bytes)
-  size_t best_size;
-  // Confidence in the best guess at size
-  GenericConfidence size_confidence;
+
+  // Whether analyze() got as far as one entry.  This is not the same question as valid(), since
+  // a table made entirely of pointers that we could not identify as functions has no entries but
+  // is still accepted.  How many entries a table really has is decided in OOSolver, which is the
+  // only place that needs to know.
+  bool has_entries;
 
   // RTTI information is stored directly above the virtual function table. It can be saved here
   // for later usage (if it is present).
@@ -110,41 +108,20 @@ class VirtualFunctionTable {
   // that's not a problem.
   VirtualFunctionTable(const DescriptorSet& ds_) : ds(ds_) {
     addr = 0;
-    min_size = 0;
-    max_size = 0;
     non_function = 0;
-    best_size = 0;
-    size_confidence = ConfidenceNone;
+    has_entries = false;
     rtti_confidence = ConfidenceNone;
   }
 
   VirtualFunctionTable(const DescriptorSet& ds_, rose_addr_t a) : ds(ds_) {
     addr = a;
-    min_size = 0;
-    max_size = 0;
     non_function = 0;
-    best_size = 0;
-    size_confidence = ConfidenceNone;
+    has_entries = false;
     rtti_confidence = ConfidenceNone;
   }
 
   // Determine if RTTI is present with this virtual function table
   void analyze_rtti(const rose_addr_t address);
-
-  // This method updates the minimum size of the table based on new information (typically a
-  // known virtual function call using the table).  This value always grows, because we're
-  // supposed to be making sound assertions about the minimum size.
-  void update_minimum_size(size_t new_size);
-
-  // This method updates the maximum size of the table based on new information (typically by
-  // walking the memory of the vtable looking for valid function pointers).  This value always
-  // shrinks, because we're supposed to be making sound assertions about the maximum size.
-  void update_maximum_size(size_t new_size);
-
-  void update_best_size(size_t besty);
-
-  // Take a "guess" at the correct table size, and update our confidence appropriately.
-  void update_size_guess();
 
   // Read an entry from the table.
   rose_addr_t read_entry(unsigned int entry) const;
