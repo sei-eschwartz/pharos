@@ -79,7 +79,7 @@ possibleVFTableEntry(VFTable, NewOffset, Entry) :-
 % zeroes, and reporting one would eventually reach reasonMethod_G and make address zero a
 % method.  Stepping over them is why the reachable slots are walked separately below.
 possibleVFTableEntry(VFTable, Offset, Entry) :-
-    vTTTableSlot(VFTable, Offset),
+    itaniumVTableSlot(VFTable, Offset),
     Address is VFTable + Offset,
     initialMemory(Address, Entry),
     Entry > 0x1000.
@@ -87,14 +87,14 @@ possibleVFTableEntry(VFTable, Offset, Entry) :-
 % The slots of a table a VTT names.  A base-object destructor is never dispatched virtually
 % while the base is under construction, so the ABI leaves those leading slots unused and the
 % value of a slot cannot decide whether the next slot exists.  Only adjacency can.
-:- table vTTTableSlot/2 as opaque.
+:- table itaniumVTableSlot/2 as opaque.
 
-vTTTableSlot(VFTable, 0) :-
+itaniumVTableSlot(VFTable, 0) :-
     possibleVTTEntry(_VTT, _Offset, VFTable),
     initialMemory(VFTable, _Value).
 
-vTTTableSlot(VFTable, NewOffset) :-
-    vTTTableSlot(VFTable, Offset),
+itaniumVTableSlot(VFTable, NewOffset) :-
+    itaniumVTableSlot(VFTable, Offset),
     pointerSize(PtrSize),
     NewOffset is Offset + PtrSize,
     Address is VFTable + NewOffset,
