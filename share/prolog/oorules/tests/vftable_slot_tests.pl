@@ -1,6 +1,6 @@
 % Copyright 2026 Carnegie Mellon University.
 
-:- ensure_loaded(setup).
+:- ensure_loaded('../setup').
 
 % NULL slots reach Prolog through the ordinary write-seeded path, not just through a VTT: GCC
 % zeroes the destructor pair of any abstract class, whose table its own constructor installs.

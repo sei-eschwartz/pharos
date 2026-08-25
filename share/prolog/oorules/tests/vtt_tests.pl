@@ -1,6 +1,6 @@
 % Copyright 2026 Carnegie Mellon University.
 
-:- ensure_loaded(setup).
+:- ensure_loaded('../setup').
 
 % One VTT at 0x20000 naming three tables:
 %
