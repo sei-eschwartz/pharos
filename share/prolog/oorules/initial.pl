@@ -46,61 +46,53 @@ possibleDestructor(M) :-
 % --------------------------------------------------------------------------------------------
 
 % Hack together compatability with the old system.
+:- table possibleVFTableSlot/2 as opaque.
 :- table possibleVFTableEntry/3 as opaque.
 :- table possibleVBTableEntry/3 as opaque.
 
-possibleVFTableEntry(VFTable, 0, Entry) :-
-    possibleVFTableWrite(_Insn, _Func, _ThisPtr, _ObjectOffset, VFTable),
-    initialMemory(VFTable, Entry).
+% A slot is any word in the table, including the NULLs GCC leaves for an abstract class'
+% destructor pair, a construction vtable's, and displaced primary slots.  They sit wherever the
+% destructor was declared and can run to three, so only adjacency can decide where a table ends.
+% possibleVFTableEntry below filters the slots down to plausible code pointers.
 
-possibleVFTableEntry(VFTable, 0, Entry) :-
+possibleVFTableSlot(VFTable, 0) :-
+    possibleVFTableWrite(_Insn, _Func, _ThisPtr, _ObjectOffset, VFTable),
+    initialMemory(VFTable, _Value).
+
+possibleVFTableSlot(VFTable, 0) :-
     rTTICompleteObjectLocator(Pointer, _Address, _TDAddress, _CHAddress, _Offset, _CDOffset),
     pointerSize(PtrSize),
     VFTable is Pointer + PtrSize,
-    initialMemory(VFTable, Entry).
+    initialMemory(VFTable, _Value).
 
-possibleVFTableEntry(VFTable, NewOffset, Entry) :-
-    possibleVFTableEntry(VFTable, Offset, _),
-    pointerSize(PtrSize),
-    NewOffset is Offset + PtrSize,
-    Address is VFTable + NewOffset,
-    not(possibleVFTableWrite(_Insn, _Func, _ThisPtr, _Offset, Address)),
-    % The write guard above stops the walk at the start of an installed table.  A construction
-    % vtable has no write, so a VTT naming the address is the complementary boundary.
-    not(possibleVTTEntry(_VTT, _VTTOffset, Address)),
-    initialMemory(Address, Entry),
-    % Now that initialMemory facts also include virtual base table entries, we need some
-    % additional validation to prevent adding base table entries as methods.
-    Entry > 0x1000.
-
-% A construction vtable is named only by a VTT slot -- no instruction stores its address as a
-% constant, so the write-seeded clauses above never reach it.  Only the slots holding a code
-% pointer become entries: a construction vtable opens with the two destructor slots that GCC
-% zeroes, and reporting one would eventually reach reasonMethod_G and make address zero a
-% method.  Stepping over them is why the reachable slots are walked separately below.
-possibleVFTableEntry(VFTable, Offset, Entry) :-
-    itaniumVTableSlot(VFTable, Offset),
-    Address is VFTable + Offset,
-    initialMemory(Address, Entry),
-    Entry > 0x1000.
-
-% The slots of a table a VTT names.  A base-object destructor is never dispatched virtually
-% while the base is under construction, so the ABI leaves those leading slots unused and the
-% value of a slot cannot decide whether the next slot exists.  Only adjacency can.
-:- table itaniumVTableSlot/2 as opaque.
-
-itaniumVTableSlot(VFTable, 0) :-
+% A construction vtable is usually named only by a VTT slot, since the constructor reads its
+% address point from the VTT rather than naming it as a constant.
+% XXX this will change soon
+possibleVFTableSlot(VFTable, 0) :-
     possibleVTTEntry(_VTT, _Offset, VFTable),
     initialMemory(VFTable, _Value).
 
-itaniumVTableSlot(VFTable, NewOffset) :-
-    itaniumVTableSlot(VFTable, Offset),
+possibleVFTableSlot(VFTable, NewOffset) :-
+    possibleVFTableSlot(VFTable, Offset),
     pointerSize(PtrSize),
     NewOffset is Offset + PtrSize,
     Address is VFTable + NewOffset,
     not(possibleVFTableWrite(_Insn, _Func, _ThisPtr, _WriteOffset, Address)),
+    % The start of another table ends this one, whether it is installed or named by a VTT.
     not(possibleVTTEntry(_VTT, _VTTOffset, Address)),
-    initialMemory(Address, _NextValue).
+    initialMemory(Address, Value),
+    % NULL slots are Itanium-only, and add_vftable_facts already fixed the extent there, so the
+    % gap it leaves between tables is what stops the walk.  Elsewhere the first implausible value
+    % ends it, keeping it out of the virtual base table entries initialMemory also carries.
+    (itaniumABI; Value > 0x1000).
+
+% Only a slot holding a plausible code pointer is an entry, and every seed reaches this one
+% test.  Reporting a NULL would reach reasonMethod_G and make address zero a method.
+possibleVFTableEntry(VFTable, Offset, Entry) :-
+    possibleVFTableSlot(VFTable, Offset),
+    Address is VFTable + Offset,
+    initialMemory(Address, Entry),
+    Entry > 0x1000.
 
 possibleVBTableEntry(VBTable, Offset, Value) :-
     possibleVBTableWrite(_Insn, _Func, _ThisPtr, _ObjectOffset, VBTable),

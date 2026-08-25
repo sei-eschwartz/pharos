@@ -1230,6 +1230,23 @@ reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
     ).
 
 % --------------------------------------------------------------------------------------------
+% The first entry in a table, and the nearest entry below an offset.  Both skip NULL slots,
+% which are not entries, so a gap in the middle of a table does not break the chain.
+:- table firstVFTableEntry/3 as opaque.
+firstVFTableEntry(VFTable, Offset, Entry) :-
+    possibleVFTableEntry(VFTable, Offset, Entry),
+    not((possibleVFTableEntry(VFTable, SmallerOffset, _OtherEntry),
+         SmallerOffset < Offset)).
+
+:- table precedingVFTableEntry/4 as opaque.
+precedingVFTableEntry(VFTable, Offset, PrevOffset, PrevEntry) :-
+    possibleVFTableSlot(VFTable, Offset),
+    possibleVFTableEntry(VFTable, PrevOffset, PrevEntry),
+    PrevOffset < Offset,
+    not((possibleVFTableEntry(VFTable, BetweenOffset, _MidEntry),
+         BetweenOffset < Offset, BetweenOffset > PrevOffset)).
+
+% --------------------------------------------------------------------------------------------
 % The offset in the VFTable is a valid VFTable entry.
 :- table reasonVFTableEntry/3 as incremental.
 
@@ -1238,21 +1255,12 @@ reasonVFTableBelongsToClass(VFTable, Offset, Class, Rule, VFTableWrite) :-
 reasonVFTableEntry(VFTable, Offset, Entry) :-
     factVFTableEntry(VFTable, Offset, Entry).
 
-% Because the first entry in the VFTable is always valid (they are no zero size VFTables).
+% Because the first valid entry in the VFTable is always valid (there are no zero size
+% VFTables).  Usually that is offset zero, but an Itanium table can open with NULL slots.
 % PAPER: VFTable-VFTableEntry
-reasonVFTableEntry(VFTable, 0, Entry) :-
-    factVFTable(VFTable),
-    possibleVFTableEntry(VFTable, 0, Entry).
-
-% Because the first entry of a VTT-named table is valid.  A construction vtable opens with the
-% zeroed destructor slots the ABI leaves unused, so its first entry is not at offset zero, and
-% the lowest slot holding a method takes the place of the offset zero anchor above.
 reasonVFTableEntry(VFTable, Offset, Entry) :-
     factVFTable(VFTable),
-    possibleVTTEntry(_VTT, _VTTOffset, VFTable),
-    possibleVFTableEntry(VFTable, Offset, Entry),
-    not((possibleVFTableEntry(VFTable, SmallerOffset, _OtherEntry),
-         SmallerOffset < Offset)).
+    firstVFTableEntry(VFTable, Offset, Entry).
 
 % Because there is a larger valid VFTable entry in the same VFTable.
 % PAPER: Larger-VFTableEntry
@@ -1312,11 +1320,8 @@ reasonNOTVFTableEntry_B(VFTableAddress, Offset, Entry) :-
 reasonNOTVFTableEntry_C(VFTable, Offset, Entry) :-
     factVFTable(VFTable),
     possibleVFTableEntry(VFTable, Offset, Entry),
-    Offset \= 0,
-    pointerSize(PtrSize),
-    ComputedOffset is Offset - PtrSize,
-    possibleVFTableEntry(VFTable, ComputedOffset, OtherEntry),
-    factNOTVFTableEntry(VFTable, ComputedOffset, OtherEntry).
+    precedingVFTableEntry(VFTable, Offset, PrevOffset, PrevEntry),
+    factNOTVFTableEntry(VFTable, PrevOffset, PrevEntry).
 
 % Because the address is already used for the RTTI data structure of a confirmed VFTable.
 % PAPER: rTTI-NotVFTableEntry

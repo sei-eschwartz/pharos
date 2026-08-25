@@ -164,16 +164,17 @@ initialFact(possibleVBTableWrite/6).
 % VFTable at Offset bytes into it.  A VTT belongs to a class with virtual bases, and holds the
 % address points that the complete-object constructor passes down to the base-object
 % constructors of its base subobjects, so that each base installs the table appropriate to the
-% stage of construction it is in.  This is the only evidence that the construction vtables
-% exist at all, since no instruction ever names one as a constant.
+% stage of construction it is in.  Usually this is the only evidence that the construction
+% vtables exist at all, since the constructor reads the address point from the VTT.
 %
 % Entry zero is always the most-derived class' own primary table.  The other entries are a
-% mixture of that class' secondary tables and the construction vtables of its bases; only the
-% former have a possibleVFTableWrite, which is how the two can be told apart.
+% mixture of that class' secondary tables and the construction vtables of its bases.  A
+% possibleVFTableWrite usually tells the two apart, but not reliably: inlining can fold the VTT
+% load into a constant, giving the construction vtable a write of its own.
 %
 % The slots of the VTT itself are not reported as initialMemory facts.  A VTT is stored
 % adjacent to the tables it describes, and treating its slots as ordinary initialized memory
-% would let possibleVFTableEntry/3 walk out of the end of the preceding table and absorb them
+% would let possibleVFTableSlot/2 walk out of the end of the preceding table and absorb them
 % as though they were virtual function pointers.
 %
 initialFact(possibleVTTEntry/3).
