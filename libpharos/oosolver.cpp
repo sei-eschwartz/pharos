@@ -592,10 +592,28 @@ OOSolver::add_usage_facts(const OOAnalyzer& ooa)
   }
 }
 
+// Is Address one of the slots of a VTT we found?  Under the Itanium ABI a complete-object
+// constructor hands each base-object constructor a slice of its VTT to load a vptr from, and the
+// slice address is the only evidence of which construction vtable the callee installs.  Empty for
+// MSVC, which has no VTTs.
+static bool
+on_vtt_slot(const ItaniumVTTMap& vtts, size_t arch_bytes, rose_addr_t address)
+{
+  // The greatest VTT at or below the address, if there is one.
+  auto vtt = vtts.upper_bound(address);
+  if (vtt == vtts.begin()) return false;
+  --vtt;
+  rose_addr_t offset = address - vtt->first;
+  return (offset % arch_bytes) == 0 && (offset / arch_bytes) < vtt->second.size();
+}
+
 // Dump facts primarily associated with each call instruction in the program.
 void
 OOSolver::add_call_facts(const OOAnalyzer& ooa)
 {
+  const ItaniumVTTMap& vtts = ooa.get_itanium_vtts();
+  size_t arch_bytes = ooa.ds.get_arch_bytes();
+
   const CallDescriptorMap& call_map = ooa.ds.get_call_map();
   for (const CallDescriptor& cd : boost::adaptors::values(call_map)) {
 
@@ -653,14 +671,26 @@ OOSolver::add_call_facts(const OOAnalyzer& ooa)
       TreeNodePtr expr = cpd.get_expression();
       if (!expr) continue;
       // If the expression is a constant and not a global variable we do not want to export it.
+      // A VTT slice is neither, but it names the construction vtable a base-object constructor
+      // installs, which nothing else records, so let that one kind of constant through too.
+      bool vtt_slice = false;
       if (expr->isIntegerConstant()) {
         if (expr->nBits() > 64) continue;
-        if (ooa.ds.get_global(*expr->toUnsigned()) == NULL) continue;
+        vtt_slice = on_vtt_slot(vtts, arch_bytes, *expr->toUnsigned());
+        if (!vtt_slice && ooa.ds.get_global(*expr->toUnsigned()) == NULL) continue;
       }
 
       // If the expression is of the form ite(cond value 0), extract just the non-NULL part of
       // the value.  See additional commentary in usage.cpp for more background.
       expr = pick_non_null_expr(expr);
+
+      // Prolog needs the slice's value, not just its identity, to work out which VTT entry the
+      // callee loads.  callParameter carries only a hash, so report the expression through
+      // thisPtrDefinition as well, where an integer constant is exported as an integer.
+      if (vtt_slice) {
+        expanded_thisptrs.insert(
+          ExpandedTreeNodePtr{expr, cd.get_address(), callfunc->get_address()});
+      }
 
       std::string term = "sv_" + std::to_string(expr->hash());
       if (cpd.is_reg()) {
