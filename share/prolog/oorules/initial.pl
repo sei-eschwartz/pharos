@@ -12,6 +12,14 @@
 % For now, ignore the ExpandedThisPtr argument.
 possibleVFTableWrite(Insn, Function, ThisPtr, Offset, VFTable) :-
   possibleVFTableWrite(Insn, Function, ThisPtr, Offset, _ExpandedThisPtr, VFTable).
+
+% A base-object constructor loads its vptr from the VTT slice its caller hands it rather than
+% naming a constant, so no fact reports the write it makes.  See vttSlice below.
+possibleVFTableWrite(Insn, Callee, ThisPtr, 0, VFTable) :-
+  vttSlice(_CallInsn, Callee, VFTable),
+  vttSliceVptrStore(Callee, Insn),
+  thisParamFuncParameter(Callee, ThisPtr).
+
 possibleVBTableWrite(Insn, Function, ThisPtr, Offset, VBTable) :-
   possibleVBTableWrite(Insn, Function, ThisPtr, Offset, _ExpandedThisPtr, VBTable).
 
@@ -241,6 +249,31 @@ thisPtrUsage(Insn, Function, ThisPtr, Method) :-
     callParameter(Insn, Function, Param, ThisPtr),
     %loginfoln('~Q.', thisPtrUsage(Insn, Function, ThisPtr, Method)),
     true.
+
+% The hidden VTT argument a base-object constructor or destructor receives.  Only those variants
+% take one, and the VTT slot it points at names the table the callee installs at offset zero.
+:- table vttSlice/3 as opaque.
+
+vttSlice(Insn, Callee, VFTable) :-
+    callTarget(Insn, Caller, Thunk),
+    dethunk(Thunk, Callee),
+    thisPtrParam(Callee, ThisParam),
+    callParameter(Insn, Caller, Param, SV),
+    iso_dif(Param, ThisParam),
+    thisPtrDefinition(SV, Slice, _DefInsn, _DefFunc),
+    integer(Slice),
+    possibleVTTEntry(VTT, Offset, VFTable),
+    Slice =:= VTT + Offset.
+
+% ejs 8/26/26 Hack Alert!!!
+% possibleVFTableWrite needs the address of an instruction doing a store.  We don't have it because it's not being stored as a constant.  So instead we'll use the member access at 0.  This is a huge hack.  The address is not used for too much, but it is used for ConstructorDestructorSpecial and overwriting.  These are probably not always going to work right.
+:- table vttSliceVptrStore/2 as opaque.
+
+vttSliceVptrStore(Callee, Insn) :-
+    vttSlice(_CallInsn, Callee, _VFTable),
+    pointerSize(PtrSize),
+    methodMemberAccess(Insn, Callee, 0, PtrSize),
+    not((methodMemberAccess(Earlier, Callee, 0, PtrSize), Earlier < Insn)).
 
 % Here's an example of how we can use the "invalid" offsets to our advantage.  Defining an
 % invalid access as an offset greater than 100,000 allows us to subsequently observe that

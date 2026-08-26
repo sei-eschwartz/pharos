@@ -18,6 +18,7 @@ install(PROGRAMS ooprolog.pl DESTINATION bin RENAME ooprolog)
 # for reasoning the MSVC corpus cannot reach.
 set(PROLOG_UNIT_TESTS
   tests/vtt_tests.pl
+  tests/vtt_slice_tests.pl
   tests/vftable_slot_tests.pl
   tests/constructor_tests.pl)
 
