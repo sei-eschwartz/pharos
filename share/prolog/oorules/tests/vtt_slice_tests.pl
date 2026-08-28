@@ -52,12 +52,31 @@ setupSliceTests(ABI, vtt) :-
     assertz(possibleVTTEntry(0x20000, 8, 0x10040)),
     assertz(possibleVTTEntry(0x20000, 0x10, 0x10060)).
 
+setupSliceTests(ABI, notmerge) :-
+    setupSliceTests(ABI),
+    setupNotMergeWrites.
+
 % certainConstructorOrDestructor and possibleConstructor need the conclusions that the write
 % itself would otherwise have to earn through the whole forward reasoning pass.
 setupSliceTests(ABI, vtt, proven) :-
     setupSliceTests(ABI, vtt),
     assertz(factVFTableWrite(0x1000, test_ctor, 0, 0x10040)),
     assertz(noCallsBefore(test_ctor)).
+
+setupSliceTests(ABI, vtt, notmerge) :-
+    setupSliceTests(ABI, vtt),
+    setupNotMergeWrites.
+
+% Three offset zero writes of three different tables: test_ctor's comes from a VTT slice, the
+% other two are ordinary constant stores.  Each method is its own class to start with, so the
+% classes reasonNOTMergeClasses_E reports are the methods themselves.
+setupNotMergeWrites :-
+    make(test_ctor),
+    make(test_other_ctor),
+    make(test_third_ctor),
+    assertz(factVFTableWrite(0x1000, test_ctor, 0, 0x10040)),
+    assertz(factVFTableWrite(0x5000, test_other_ctor, 0, 0x10000)),
+    assertz(factVFTableWrite(0x6000, test_third_ctor, 0, 0x10080)).
 
 cleanupSliceTests :-
     retractall(fileInfo(_, test_file, _, _)),
@@ -70,6 +89,7 @@ cleanupSliceTests :-
     retractall(possibleVTTEntry(_, _, _)),
     retractall(factVFTableWrite(_, _, _, _)),
     retractall(noCallsBefore(_)),
+    retractall(findint(_, _)),
     abolish_all_tables.
 
 vFTableWrites(Method, Writes) :-
@@ -120,6 +140,28 @@ test(slice_receiver_is_a_constructor_candidate) :-
 
 :- end_tests(vtt_slice_reasoning).
 
+% The classes reasonNOTMergeClasses_E pairs with the write named by Insn, Method and VFTable.
+notMergeClasses(Insn, Method, VFTable, Classes) :-
+    findall(Class2,
+            reasonNOTMergeClasses_E(_Class1, Class2, Insn, Method, 0, VFTable),
+            Unsorted),
+    msort(Unsorted, Classes).
+
+:- begin_tests(vtt_slice_notmerge,
+               [setup(setupSliceTests('SYSV_64', vtt, notmerge)),
+                cleanup(cleanupSliceTests)]).
+
+% A base-object constructor installs whichever table its caller's VTT slice names, so the table
+% is evidence about the object being built and not about the callee's class.
+test(slice_write_is_not_class_evidence) :-
+    assertion(notMergeClasses(0x1000, test_ctor, 0x10040, [])).
+
+% Withheld from the other direction too, but still concluded between the ordinary writes.
+test(slice_receiver_is_not_separated_from_ordinary_classes) :-
+    assertion(notMergeClasses(0x5000, test_other_ctor, 0x10000, [test_third_ctor])).
+
+:- end_tests(vtt_slice_notmerge).
+
 % MSVC has no VTTs, so the exporter emits no possibleVTTEntry and the clause cannot fire.  The
 % same call sites and member accesses are asserted here to show that nothing else carries it.
 :- begin_tests(vtt_slice_msvc,
@@ -133,6 +175,21 @@ test(no_vtt_means_no_write, [fail]) :-
     possibleVFTableWrite(_Insn, _Method, _ThisPtr, _Offset, _VFTable).
 
 :- end_tests(vtt_slice_msvc).
+
+% And without a VTT the exemption cannot fire, so all three writes separate all three classes.
+:- begin_tests(vtt_slice_msvc_notmerge,
+               [setup(setupSliceTests('MSVC_32', notmerge)),
+                cleanup(cleanupSliceTests)]).
+
+test(no_vtt_means_the_write_is_class_evidence) :-
+    assertion(notMergeClasses(0x1000, test_ctor, 0x10040,
+                              [test_other_ctor, test_third_ctor])).
+
+test(no_vtt_separates_in_both_directions) :-
+    assertion(notMergeClasses(0x5000, test_other_ctor, 0x10000,
+                              [test_ctor, test_third_ctor])).
+
+:- end_tests(vtt_slice_msvc_notmerge).
 
 /* Local Variables:   */
 /* mode: prolog       */

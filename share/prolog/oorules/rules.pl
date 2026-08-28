@@ -3193,6 +3193,12 @@ reasonNOTMergeClasses_E(Class1, Class2, Insn1, Method1, 0, VFTable1) :-
     % the complications of caring which value overwrote which other value.
     not((factVFTableWrite(_Insn3, Method1, 0, VFTable2))),
     not((factVFTableWrite(_Insn4, Method2, 0, VFTable1))),
+    % A second counter example, from the Itanium ABI.  A base-object constructor or destructor
+    % does not name the table it installs.  Its caller hands it a slice of the caller's VTT, so
+    % the table records the complete object type being built rather than the class of the
+    % callee.  See vttSlice and the synthetic write it feeds in initial.pl.
+    not(vttSlice(_CallInsn1, Method1, VFTable1)),
+    not(vttSlice(_CallInsn2, Method2, VFTable2)),
     % Debugging
     logtraceln('~@~Q.', [not(dynFactNOTMergeClasses(Class1, Class2)),
                          reasonNOTMergeClasses_E(Class1, Class2)]).
