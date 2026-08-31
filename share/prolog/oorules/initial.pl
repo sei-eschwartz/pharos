@@ -8,17 +8,26 @@
 
 :- table possibleVFTableWrite/5 as opaque.
 :- table possibleVBTableWrite/5 as opaque.
+:- table possibleConstantVFTableWrite/5 as opaque.
+:- table possibleVTTVFTableWrite/5 as opaque.
 
-% For now, ignore the ExpandedThisPtr argument.
-possibleVFTableWrite(Insn, Function, ThisPtr, Offset, VFTable) :-
+% An instruction names the table as a constant.  Only a write of this kind says that the
+% writer's own class owns the table.  For now, ignore the ExpandedThisPtr argument.
+possibleConstantVFTableWrite(Insn, Function, ThisPtr, Offset, VFTable) :-
   possibleVFTableWrite(Insn, Function, ThisPtr, Offset, _ExpandedThisPtr, VFTable).
 
 % A base-object constructor loads its vptr from the VTT slice its caller hands it rather than
 % naming a constant, so no fact reports the write it makes.  See vttSlice below.
-possibleVFTableWrite(Insn, Callee, ThisPtr, 0, VFTable) :-
+possibleVTTVFTableWrite(Insn, Callee, ThisPtr, 0, VFTable) :-
   vttSlice(_CallInsn, Callee, VFTable),
   vttSliceVptrStore(Callee, Insn),
   thisParamFuncParameter(Callee, ThisPtr).
+
+possibleVFTableWrite(Insn, Function, ThisPtr, Offset, VFTable) :-
+  possibleConstantVFTableWrite(Insn, Function, ThisPtr, Offset, VFTable).
+
+possibleVFTableWrite(Insn, Function, ThisPtr, Offset, VFTable) :-
+  possibleVTTVFTableWrite(Insn, Function, ThisPtr, Offset, VFTable).
 
 possibleVBTableWrite(Insn, Function, ThisPtr, Offset, VBTable) :-
   possibleVBTableWrite(Insn, Function, ThisPtr, Offset, _ExpandedThisPtr, VBTable).
@@ -274,6 +283,18 @@ vttSliceVptrStore(Callee, Insn) :-
     pointerSize(PtrSize),
     methodMemberAccess(Insn, Callee, 0, PtrSize),
     not((methodMemberAccess(Earlier, Callee, 0, PtrSize), Earlier < Insn)).
+
+% A construction vtable exists only to be handed to a base-object constructor through a VTT, so
+% no instruction names it as a constant.  Every other table a VTT names -- entry zero, which is
+% the owner's own primary table, and the owner's secondary components -- is installed directly
+% by the owner's complete-object constructor.  It remains "possible" because inlining can fold
+% the VTT load into a constant, giving the construction vtable a write of its own; it then reads
+% as an ordinary base class table installed by the inlining constructor.
+:- table possibleConstructionVFTable/1 as opaque.
+
+possibleConstructionVFTable(VFTable) :-
+    possibleVTTEntry(_VTT, _Offset, VFTable),
+    not(possibleConstantVFTableWrite(_Insn, _Func, _ThisPtr, _WriteOffset, VFTable)).
 
 % Here's an example of how we can use the "invalid" offsets to our advantage.  Defining an
 % invalid access as an offset greater than 100,000 allows us to subsequently observe that

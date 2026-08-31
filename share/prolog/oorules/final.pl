@@ -43,6 +43,10 @@ reasonPrimaryVFTableForClassFinal(V, C) :-
     nonvar(C),
     % Hey we found one!
     findVFTable(V, 0, C),
+    % A construction vtable is not one of them.  It is installed only while a base subobject is
+    % under construction, and it names the complete object being built rather than the class it
+    % is on, so it cannot stand for that class' identity.
+    not(possibleConstructionVFTable(V)),
     !,
     % No one else better also claim it
     forall(findVFTable(V, 0, OC), C = OC).
@@ -77,6 +81,7 @@ classIdentifier(Method, ID) :-
     % VFTable.
     (
         once((findVFTable(VFTable, Class),
+              not(possibleConstructionVFTable(VFTable)),
               forall(findVFTable(OtherVFTable, Class),
                      VFTable = OtherVFTable),
               logtraceln('Setting classID of ~Q to only vftable ~Q', [Class, VFTable])))

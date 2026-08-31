@@ -56,6 +56,10 @@ setupSliceTests(ABI, notmerge) :-
     setupSliceTests(ABI),
     setupNotMergeWrites.
 
+setupSliceTests(ABI, notconstructor) :-
+    setupSliceTests(ABI),
+    setupVariantClass.
+
 % certainConstructorOrDestructor and possibleConstructor need the conclusions that the write
 % itself would otherwise have to earn through the whole forward reasoning pass.
 setupSliceTests(ABI, vtt, proven) :-
@@ -66,6 +70,24 @@ setupSliceTests(ABI, vtt, proven) :-
 setupSliceTests(ABI, vtt, notmerge) :-
     setupSliceTests(ABI, vtt),
     setupNotMergeWrites.
+
+setupSliceTests(ABI, vtt, notconstructor) :-
+    setupSliceTests(ABI, vtt),
+    setupVariantClass.
+
+% The class #354 asks for, with both constructor variants on it: test_complete_ctor installs the
+% class' own table with a constant store, and test_ctor installs the construction vtable that the
+% VTT slice names.  test_opeq is on the class and installs nothing at all.
+setupVariantClass :-
+    maplist(make, [test_complete_ctor, test_ctor, test_opeq, 0x10000, 0x10040]),
+    maplist(assertFactMethod, [test_complete_ctor, test_ctor, test_opeq]),
+    maplist(assertFactVFTable, [0x10000, 0x10040]),
+    assertz(possibleVFTableWrite(0x7000, test_complete_ctor, test_complete_this, 0,
+                                 test_complete_this, 0x10000)),
+    maplist(union(test_complete_ctor), [test_ctor, test_opeq, 0x10000, 0x10040]).
+
+assertFactMethod(Method) :- assertz(factMethod(Method)).
+assertFactVFTable(VFTable) :- assertz(factVFTable(VFTable)).
 
 % Three offset zero writes of three different tables: test_ctor's comes from a VTT slice, the
 % other two are ordinary constant stores.  Each method is its own class to start with, so the
@@ -88,6 +110,9 @@ cleanupSliceTests :-
     retractall(methodMemberAccess(_, _, _, _)),
     retractall(possibleVTTEntry(_, _, _)),
     retractall(factVFTableWrite(_, _, _, _)),
+    retractall(possibleVFTableWrite(_, _, _, _, _, _)),
+    retractall(factMethod(_)),
+    retractall(factVFTable(_)),
     retractall(noCallsBefore(_)),
     retractall(findint(_, _)),
     abolish_all_tables.
@@ -161,6 +186,56 @@ test(slice_receiver_is_not_separated_from_ordinary_classes) :-
     assertion(notMergeClasses(0x5000, test_other_ctor, 0x10000, [test_third_ctor])).
 
 :- end_tests(vtt_slice_notmerge).
+
+:- begin_tests(vtt_slice_construction,
+               [setup(setupSliceTests('SYSV_64', vtt, notconstructor)),
+                cleanup(cleanupSliceTests)]).
+
+% Only a constant store says the writer's own class owns the table, so the tables a VTT names
+% and no instruction writes are the construction vtables.
+test(vtt_named_table_without_a_constant_write_is_a_construction_vftable) :-
+    assertion(possibleConstructionVFTable(0x10040)),
+    assertion(possibleConstructionVFTable(0x10060)).
+
+test(vtt_entry_zero_is_the_owners_own_table, [fail]) :-
+    possibleConstructionVFTable(0x10000).
+
+:- end_tests(vtt_slice_construction).
+
+:- begin_tests(vtt_slice_notconstructor,
+               [setup(setupSliceTests('SYSV_64', vtt, notconstructor)),
+                cleanup(cleanupSliceTests)]).
+
+% The base-object variant installs whatever its caller's VTT names, and never the class' own
+% complete-object table.  Missing that table is the ABI, not evidence against being a
+% constructor.
+test(base_object_variant_may_miss_the_complete_object_table, [fail]) :-
+    reasonNOTConstructor_H(test_ctor).
+
+% And the complete-object variant never installs the construction vtable.
+test(complete_object_variant_may_miss_the_construction_table, [fail]) :-
+    reasonNOTConstructor_H(test_complete_ctor).
+
+% Withheld from the variants, not disabled: a method on the class that installs nothing at all
+% is still rejected, which is what the rule was written for.
+test(a_method_installing_nothing_is_still_not_a_constructor) :-
+    assertion(reasonNOTConstructor_H(test_opeq)).
+
+:- end_tests(vtt_slice_notconstructor).
+
+% And without a VTT there are no construction vtables, so the base-object variant has no write
+% at all and the rule reaches its ordinary conclusion.
+:- begin_tests(vtt_slice_msvc_notconstructor,
+               [setup(setupSliceTests('MSVC_32', notconstructor)),
+                cleanup(cleanupSliceTests)]).
+
+test(no_vtt_means_no_construction_vftable, [fail]) :-
+    possibleConstructionVFTable(_VFTable).
+
+test(no_vtt_means_the_missing_write_is_evidence) :-
+    assertion(reasonNOTConstructor_H(test_ctor)).
+
+:- end_tests(vtt_slice_msvc_notconstructor).
 
 % MSVC has no VTTs, so the exporter emits no possibleVTTEntry and the clause cannot fire.  The
 % same call sites and member accesses are asserted here to show that nothing else carries it.

@@ -340,15 +340,27 @@ reasonNOTConstructor_G(Method) :-
     logtraceln('~@~Q.', [not(factNOTConstructor(Method)),
                          reasonNOTConstructor_G(Caller, Method)]).
 
+installsConstructionVFTable(Method) :-
+    possibleVFTableWrite(_Insn, Method, _ThisPtr, _Offset, VFTable),
+    possibleConstructionVFTable(VFTable).
+
 % If we know which VFTable is associated with this class, and the method does not install it,
 % it's NOT a constructor.
 reasonNOTConstructor_H(Method) :-
     % There is a VFTable on a class
     findVFTable(VFTable, Class),
+    % But not a construction vtable.  Under the Itanium ABI a class' complete-object and
+    % base-object constructors install disjoint sets of tables: the complete-object variant
+    % installs the class' own tables, and the base-object variant installs whichever
+    % construction vtables its caller's VTT names.  Neither installs the other's, so once both
+    % variants are on the class, this rule must not read that division of labor as evidence.
+    not(possibleConstructionVFTable(VFTable)),
     % There is a method on the class
     findMethod(Method, Class),
     % The method does not install the vftable
     not(possibleVFTableWrite(_Insn, Method, _ThisPtr, _, VFTable)),
+    % And the method is not the base-object variant, which never installs the class' own tables.
+    not(installsConstructionVFTable(Method)),
     % Since we don't have visibility into VFTable writes from imported constructors and
     % destructors this rule does not apply to imported methods.
     not(symbolClass(Method, _, _, _)),
