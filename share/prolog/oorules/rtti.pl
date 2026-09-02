@@ -18,7 +18,7 @@ rTTIName(TDA, Name) :-
 :- table rTTITDA2VFTable/2 as opaque.
 rTTITDA2VFTable(TDA, VFTable) :-
     rTTITypeDescriptor(TDA, _TIVTable, _Name, _DName),
-    rTTICompleteObjectLocator(Pointer, _COLA, TDA, _CHDA, _Offset, _O2),
+    rTTIMSVCCompleteObjectLocator(Pointer, _COLA, TDA, _CHDA, _Offset, _O2),
     pointerSize(PtrSize),
     VFTable is Pointer + PtrSize.
 
@@ -38,12 +38,12 @@ rTTITDA2Class(TDA, Class) :-
 :- table rTTISelfRef/6 as opaque.
 rTTISelfRef(TDA, COLA, CHDA, BCDA, VFTable, Name) :-
     rTTITypeDescriptor(TDA, _TIVTable, Name, _DName),
-    rTTICompleteObjectLocator(Pointer, COLA, TDA, CHDA, _O1, _CDOffset),
+    rTTIMSVCCompleteObjectLocator(Pointer, COLA, TDA, CHDA, _O1, _CDOffset),
     % CDOffset is usually zero, but we've found at least one case (mysqld) where it was 4.  It
     % appears that this rule is too strict if it limits the CDOffset to zero.
     pointerSize(PtrSize),
     VFTable is Pointer + PtrSize,
-    rTTIClassHierarchyDescriptor(CHDA, _HierarchyAttributes, Bases),
+    rTTIMSVCClassHierarchyDescriptor(CHDA, _HierarchyAttributes, Bases),
     member(BCDA, Bases),
 
     %logtraceln('Evaluating TDA=~Q COLA=~Q CHDA=~Q BCDA=~Q', [TDA, COLA, CHDA, BCDA]),
@@ -51,7 +51,7 @@ rTTISelfRef(TDA, COLA, CHDA, BCDA, VFTable, Name) :-
     % We're primarly checking that TDA points back to the original type descriptor.  But also,
     % if (and only if) BaseAttributes is has the bcd_has_CHD_pointer bit set, then the optional
     % BCHDA field should also point to the same class hierarchy descriptor.
-    rTTIBaseClassDescriptor(BCDA, TDA, _NumBases, 0, 0xffffffff, 0, BaseAttributes, BCHDA),
+    rTTIMSVCBaseClassDescriptor(BCDA, TDA, _NumBases, 0, 0xffffffff, 0, BaseAttributes, BCHDA),
     bcd_has_CHD_pointer(BitMask),
     (bitmask_check(BaseAttributes, BitMask) -> BCHDA is CHDA; true),
 
@@ -65,14 +65,14 @@ rTTISelfRef(TDA, COLA, CHDA, BCDA, VFTable, Name) :-
 :- table rTTINoBase/1 as opaque.
 rTTINoBase(TDA) :-
     rTTITypeDescriptor(TDA, _TIVTable, _Name, _DName),
-    rTTIBaseClassDescriptor(_BCDA, TDA, 0, _M, _P, _V, _BaseAttributes, _ECHDA).
+    rTTIMSVCBaseClassDescriptor(_BCDA, TDA, 0, _M, _P, _V, _BaseAttributes, _ECHDA).
 
 :- table rTTIAncestorOf/2 as opaque.
 rTTIAncestorOf(DerivedTDA, AncestorTDA) :-
-    rTTICompleteObjectLocator(_Pointer, _COLA, DerivedTDA, CHDA, _Offset, _O2),
-    rTTIClassHierarchyDescriptor(CHDA, _HierarchyAttributes, Bases),
+    rTTIMSVCCompleteObjectLocator(_Pointer, _COLA, DerivedTDA, CHDA, _Offset, _O2),
+    rTTIMSVCClassHierarchyDescriptor(CHDA, _HierarchyAttributes, Bases),
     member(BCDA, Bases),
-    rTTIBaseClassDescriptor(BCDA, AncestorTDA, _NumBases, _M, _P, _V, _BaseAttributes, _ECHDA),
+    rTTIMSVCBaseClassDescriptor(BCDA, AncestorTDA, _NumBases, _M, _P, _V, _BaseAttributes, _ECHDA),
     AncestorTDA \= DerivedTDA.
 
 :- table rTTIInheritsIndirectlyFrom/2 as opaque.
@@ -87,10 +87,10 @@ rTTIInheritsDirectlyFrom(DerivedTDA, AncestorTDA, Attributes, M, P, V) :-
     % coincide when M=0, i.e., when the vftable is at the start of the object (no vbptr before
     % the vftable).  Classes that directly virtually inherit something have a vbptr-first layout,
     % putting the vftable at a non-zero offset, so _ColM != M for their direct non-virtual bases.
-    rTTICompleteObjectLocator(_Pointer, _COLA, DerivedTDA, CHDA, _ColM, _O2),
-    rTTIClassHierarchyDescriptor(CHDA, Attributes, Bases),
+    rTTIMSVCCompleteObjectLocator(_Pointer, _COLA, DerivedTDA, CHDA, _ColM, _O2),
+    rTTIMSVCClassHierarchyDescriptor(CHDA, Attributes, Bases),
     member(BCDA, Bases),
-    rTTIBaseClassDescriptor(BCDA, AncestorTDA, _NumBases, M, P, V, AttrValue, _ECHDA),
+    rTTIMSVCBaseClassDescriptor(BCDA, AncestorTDA, _NumBases, M, P, V, AttrValue, _ECHDA),
     % Check that virtual inheritance attribute flag is NOT set.
     bcd_virtual_base_of_contained_object(BitMask),
     not(bitmask_check(AttrValue, BitMask)),
@@ -109,10 +109,10 @@ rTTIInheritsDirectlyFrom(DerivedTDA, AncestorTDA, Attributes, M, P, V) :-
 :- table rTTIInheritsVirtuallyFrom/6 as opaque.
 rTTIInheritsVirtuallyFrom(DerivedTDA, AncestorTDA, Attributes, M, P, V) :-
     % Same reasoning as rTTIInheritsDirectlyFrom: _ColM is the vftable pointer offset, not mdisp.
-    rTTICompleteObjectLocator(_Pointer, _COLA, DerivedTDA, CHDA, _ColM, _O2),
-    rTTIClassHierarchyDescriptor(CHDA, Attributes, Bases),
+    rTTIMSVCCompleteObjectLocator(_Pointer, _COLA, DerivedTDA, CHDA, _ColM, _O2),
+    rTTIMSVCClassHierarchyDescriptor(CHDA, Attributes, Bases),
     member(BCDA, Bases),
-    rTTIBaseClassDescriptor(BCDA, AncestorTDA, _NumBases, M, P, V, AttrValue, _ECHDA),
+    rTTIMSVCBaseClassDescriptor(BCDA, AncestorTDA, _NumBases, M, P, V, AttrValue, _ECHDA),
     % Check that virtual inheritance attribute flag is set.
     bcd_virtual_base_of_contained_object(BitMask),
     bitmask_check(AttrValue, BitMask),
@@ -157,7 +157,7 @@ rTTIDerivedClass(DerivedVFTable, BaseVFTable, Offset) :-
 % rewritten.
 % PAPER: XXX
 reasonRTTIInformation(VFTableAddress, Pointer, RTTIName) :-
-    rTTICompleteObjectLocator(Pointer, _COLAddress, TDAddress, _CHDAddress, _O1, _O2),
+    rTTIMSVCCompleteObjectLocator(Pointer, _COLAddress, TDAddress, _CHDAddress, _O1, _O2),
     rTTITypeDescriptor(TDAddress, _VFTableCheck, RTTIName, _DName),
     pointerSize(PtrSize),
     VFTableAddress is Pointer + PtrSize,
@@ -196,7 +196,7 @@ rttiwarninvalid(Message, Args) :-
     logwarn('RTTI Information is invalid because ~@~n', format(Message, Args)).
 
 rTTIInvalidBaseAttributes :-
-    rTTIBaseClassDescriptor(BCDA, _TDA, _NumBases, _M, _P, _V, Attributes, _CHDA),
+    rTTIMSVCBaseClassDescriptor(BCDA, _TDA, _NumBases, _M, _P, _V, Attributes, _CHDA),
     % See Base Class Descriptor (BCD) attribute flags above for details of each bit.
     (Attributes >= 0x80; Attributes < 0x0),
     rttiwarninvalid('BaseClassDescriptor at ~Q has attributes = ~Q', [BCDA, Attributes]).
@@ -212,7 +212,7 @@ rTTIInvalidDirectInheritanceV :-
     rttiwarninvalid('InheritsDirectlyFrom V = ~Q', [V]).
 
 rTTIInvalidHierarchyAttributes :-
-    rTTIClassHierarchyDescriptor(CHDA, HierarchyAttributes, _Bases),
+    rTTIMSVCClassHierarchyDescriptor(CHDA, HierarchyAttributes, _Bases),
 
     % Attributes 0x0 means a normal inheritance (non multiple/virtual)
     HierarchyAttributes \= 0x0,
@@ -237,7 +237,7 @@ rTTIInvalidHierarchyAttributes :-
 :- table rTTIShouldHaveSelfRef/1 as opaque.
 rTTIShouldHaveSelfRef(TDA) :-
     rTTITypeDescriptor(TDA, _VFTableCheck, _RTTIName, _DName),
-    rTTICompleteObjectLocator(_Pointer, _COLA, TDA, _CHDA, _O1, _O2).
+    rTTIMSVCCompleteObjectLocator(_Pointer, _COLA, TDA, _CHDA, _O1, _O2).
 
 :- table rTTIHasSelfRef/1 as opaque.
 rTTIHasSelfRef(TDA) :-
@@ -250,10 +250,10 @@ rTTIAllTypeDescriptors(TDA) :-
     rTTITypeDescriptor(TDA, _VFTableCheck, _RTTIName, _DName).
 
 rTTIAllTypeDescriptors(TDA) :-
-    rTTICompleteObjectLocator(_Pointer, _Address, TDA, _CHDAddress, _Offset, _CDOffset).
+    rTTIMSVCCompleteObjectLocator(_Pointer, _Address, TDA, _CHDAddress, _Offset, _CDOffset).
 
 rTTIAllTypeDescriptors(TDA) :-
-    rTTIBaseClassDescriptor(_Address, TDA, _NumBases, _M, _P, _V, _Attr, _CHDA).
+    rTTIMSVCBaseClassDescriptor(_Address, TDA, _NumBases, _M, _P, _V, _Attr, _CHDA).
 
 :- table rTTIHasTypeDescriptor/1 as opaque.
 rTTIHasTypeDescriptor(TDA) :-
@@ -329,9 +329,9 @@ rTTISolve(X) :-
 
 rTTIPresent(Count) :-
     aggregate_all(count, rTTITypeDescriptor(_, _, _, _), Count1),
-    aggregate_all(count, rTTICompleteObjectLocator(_, _, _, _, _, _), Count2),
-    aggregate_all(count, rTTIBaseClassDescriptor(_, _, _, _, _, _, _, _), Count3),
-    aggregate_all(count, rTTIClassHierarchyDescriptor(_, _, _), Count4),
+    aggregate_all(count, rTTIMSVCCompleteObjectLocator(_, _, _, _, _, _), Count2),
+    aggregate_all(count, rTTIMSVCBaseClassDescriptor(_, _, _, _, _, _, _, _), Count3),
+    aggregate_all(count, rTTIMSVCClassHierarchyDescriptor(_, _, _), Count4),
     Count is Count1 + Count2 + Count3 + Count4.
 
 reportRTTIResults :-

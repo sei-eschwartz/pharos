@@ -77,7 +77,7 @@ possibleVFTableSlot(VFTable, 0) :-
     initialMemory(VFTable, _Value).
 
 possibleVFTableSlot(VFTable, 0) :-
-    rTTICompleteObjectLocator(Pointer, _Address, _TDAddress, _CHAddress, _Offset, _CDOffset),
+    rTTIMSVCCompleteObjectLocator(Pointer, _Address, _TDAddress, _CHAddress, _Offset, _CDOffset),
     pointerSize(PtrSize),
     VFTable is Pointer + PtrSize,
     initialMemory(VFTable, _Value).

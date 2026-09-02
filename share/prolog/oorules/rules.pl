@@ -923,19 +923,19 @@ reasonNOTVFTable_D(Address) :-
 reasonNOTVFTable_E(Address) :-
     rTTIEnabled,
     rTTIValid,
-    rTTICompleteObjectLocator(Address, _, _, _, _, _),
+    rTTIMSVCCompleteObjectLocator(Address, _, _, _, _, _),
     logtraceln('~Q.', reasonNOTVFTable_E(Address)).
 
 reasonNOTVFTable_F(Address) :-
     rTTIEnabled,
     rTTIValid,
-    rTTIClassHierarchyDescriptor(Address, _, _),
+    rTTIMSVCClassHierarchyDescriptor(Address, _, _),
     logtraceln('~Q.', reasonNOTVFTable_F(Address)).
 
 reasonNOTVFTable_G(Address) :-
     rTTIEnabled,
     rTTIValid,
-    rTTIBaseClassDescriptor(Address, _, _, _, _, _, _, _),
+    rTTIMSVCBaseClassDescriptor(Address, _, _, _, _, _, _, _),
     logtraceln('~Q.', reasonNOTVFTable_G(Address)).
 
 reasonNOTVFTable_H(Address) :-
@@ -1341,7 +1341,7 @@ reasonNOTVFTableEntry_D(VFTable, Offset, Entry) :-
     factVFTable(VFTable),
     possibleVFTableEntry(VFTable, Offset, Entry),
     ComputedAddress is VFTable + Offset,
-    rTTICompleteObjectLocator(ComputedAddress, _Address, _TDAddress, _CHDAddress, _O1, _O2).
+    rTTIMSVCCompleteObjectLocator(ComputedAddress, _Address, _TDAddress, _CHDAddress, _O1, _O2).
 
 % Because the method it points to is certain to be a constructor.  This rule is suspicious.
 % Are we really sure that the method is a constructor?  Why does it appear to be in the virtual

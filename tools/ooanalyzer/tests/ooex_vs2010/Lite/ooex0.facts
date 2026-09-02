@@ -3315,15 +3315,15 @@ returnsSelf(0x402cb5).
 returnsSelf(0x402cf5).
 returnsSelf(0x402d1c).
 returnsSelf(0x402d51).
-rTTIBaseClassDescriptor(0x40a21c, 0x40b000, 0x1, 0, 0xffffffff, 0, 0x40, 0x40a200).
-rTTIBaseClassDescriptor(0x40a238, 0x40b01c, 0, 0, 0xffffffff, 0, 0x40, 0x40a254).
-rTTIBaseClassDescriptor(0x40a2ac, 0x40b450, 0, 0, 0xffffffff, 0, 0x40, 0x40a294).
-rTTIClassHierarchyDescriptor(0x40a200, 0, [0x40a21c, 0x40a238]).
-rTTIClassHierarchyDescriptor(0x40a254, 0, [0x40a238]).
-rTTIClassHierarchyDescriptor(0x40a294, 0, [0x40a2ac]).
-rTTICompleteObjectLocator(0x40816c, 0x40a1ec, 0x40b000, 0x40a200, 0, 0).
-rTTICompleteObjectLocator(0x408244, 0x40a26c, 0x40b01c, 0x40a254, 0, 0).
-rTTICompleteObjectLocator(0x408264, 0x40a280, 0x40b450, 0x40a294, 0, 0).
+rTTIMSVCBaseClassDescriptor(0x40a21c, 0x40b000, 0x1, 0, 0xffffffff, 0, 0x40, 0x40a200).
+rTTIMSVCBaseClassDescriptor(0x40a238, 0x40b01c, 0, 0, 0xffffffff, 0, 0x40, 0x40a254).
+rTTIMSVCBaseClassDescriptor(0x40a2ac, 0x40b450, 0, 0, 0xffffffff, 0, 0x40, 0x40a294).
+rTTIMSVCClassHierarchyDescriptor(0x40a200, 0, [0x40a21c, 0x40a238]).
+rTTIMSVCClassHierarchyDescriptor(0x40a254, 0, [0x40a238]).
+rTTIMSVCClassHierarchyDescriptor(0x40a294, 0, [0x40a2ac]).
+rTTIMSVCCompleteObjectLocator(0x40816c, 0x40a1ec, 0x40b000, 0x40a200, 0, 0).
+rTTIMSVCCompleteObjectLocator(0x408244, 0x40a26c, 0x40b01c, 0x40a254, 0, 0).
+rTTIMSVCCompleteObjectLocator(0x408264, 0x40a280, 0x40b450, 0x40a294, 0, 0).
 rTTITypeDescriptor(0x40b000, 0x408268, '.?AVbad_alloc@std@@', 'std::bad_alloc').
 rTTITypeDescriptor(0x40b01c, 0x408268, '.?AVexception@std@@', 'std::exception').
 rTTITypeDescriptor(0x40b450, 0x408268, '.?AVtype_info@@', type_info).

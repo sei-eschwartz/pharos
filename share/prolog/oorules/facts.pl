@@ -75,7 +75,7 @@ initialFact(insnCallsNew/3).
 %
 initialFact(purecall/1).
 
-% rTTICompleteObjectLocator(Pointer, Address, TDAddress, CHDAddress, Offset, CDOffset)
+% rTTIMSVCCompleteObjectLocator(Pointer, Address, TDAddress, CHDAddress, Offset, CDOffset)
 %
 % There's a pointer to an RTTI Complete Object Locator data structure at Pointer which points
 % to Address which is where the RTTI Complete Object Locator data structure is located in
@@ -85,7 +85,7 @@ initialFact(purecall/1).
 % occurs once per VFTable (not once per class), and the VFTable being described occurs one
 % pointer length (typically 4 or 8 bytes) beyond the address of pointer.
 %
-initialFact(rTTICompleteObjectLocator/6).
+initialFact(rTTIMSVCCompleteObjectLocator/6).
 
 % rTTITypeDescriptor(Address, VFTable, Name, DemangledName)
 %
@@ -95,15 +95,15 @@ initialFact(rTTICompleteObjectLocator/6).
 %
 initialFact(rTTITypeDescriptor/4).
 
-% rTTIClassHierarchyDescriptor(Address, Attributes, BaseClasses)
+% rTTIMSVCClassHierarchyDescriptor(Address, Attributes, BaseClasses)
 %
 % There's an RTTI Class Hierarchy Descriptor at Address. The Attributes are reported to be two
 % individual bits.  If bit zero is set there is multiple inheritance.  If bit one set, there is
 % virtual inheritance.  BaseClasses is a list of RTTI Base Class Descriptor addresses.
 %
-initialFact(rTTIClassHierarchyDescriptor/3).
+initialFact(rTTIMSVCClassHierarchyDescriptor/3).
 
-% rTTIBaseClassDescriptor(Address, TypeDescriptorAddress, NumBases, WhereM, WhereP, WhereV,
+% rTTIMSVCBaseClassDescriptor(Address, TypeDescriptorAddress, NumBases, WhereM, WhereP, WhereV,
 %                         Attributes, ClassHierarchyDescriptor)
 %
 % There's an RTTI Base Class Descriptor at Address. The type of the base class is described by
@@ -113,7 +113,7 @@ initialFact(rTTIClassHierarchyDescriptor/3).
 % hierarchy descriptor parameter is an undocumented extension that appears to describe this
 % particular base class' hierarchy.
 %
-initialFact(rTTIBaseClassDescriptor/8).
+initialFact(rTTIMSVCBaseClassDescriptor/8).
 
 % thisPtrAllocation(Insn, Function, ThisPtr, Type, Size).
 %

@@ -73,7 +73,7 @@ class VirtualBaseTable {
 
 using TypeRTTICompleteObjectLocatorPtr = std::shared_ptr<TypeRTTICompleteObjectLocator>;
 
-TypeRTTICompleteObjectLocatorPtr read_RTTI(const DescriptorSet& ds, rose_addr_t addr);
+TypeRTTICompleteObjectLocatorPtr read_msvc_rtti(const DescriptorSet& ds, rose_addr_t addr);
 
 class VirtualFunctionTable {
 
@@ -98,23 +98,23 @@ class VirtualFunctionTable {
 
   // RTTI information is stored directly above the virtual function table. It can be saved here
   // for later usage (if it is present).
-  TypeRTTICompleteObjectLocatorPtr rtti;
+  TypeRTTICompleteObjectLocatorPtr msvc_rtti;
 
   // the address of the rtti structures
-  rose_addr_t rtti_addr;
+  rose_addr_t msvc_rtti_addr;
 
   // The confidence is based on the technique used to identify RTTI.
-  GenericConfidence rtti_confidence;
+  GenericConfidence msvc_rtti_confidence;
 
   VirtualFunctionTable(const DescriptorSet& ds_, rose_addr_t a) : ds(ds_) {
     addr = a;
     non_function = 0;
     has_entries = false;
-    rtti_confidence = ConfidenceNone;
+    msvc_rtti_confidence = ConfidenceNone;
   }
 
   // Determine if RTTI is present with this virtual function table
-  void analyze_rtti(const rose_addr_t address);
+  void analyze_msvc_rtti(const rose_addr_t address);
 
   // Read an entry from the table.
   rose_addr_t read_entry(unsigned int entry) const;

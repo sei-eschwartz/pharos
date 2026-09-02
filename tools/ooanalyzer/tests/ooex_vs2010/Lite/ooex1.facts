@@ -3210,18 +3210,18 @@ possibleVFTableWrite(0x402007, 0x401fff, sv_4901797749143146808, 0, sv_490179774
 possibleVFTableWrite(0x402bd9, 0x402bc9, sv_8843709106931987139, 0, sv_8843709106931987139, 0x4071f0).
 possibleVirtualFunctionCall(0x402ca1, 0x402be6, sv_7904701211269506120, 0x1c, 0x8).
 possibleVirtualFunctionCall(0x402fb1, 0x402f9a, sv_8729513227688880378, 0x4, 0).
-rTTIBaseClassDescriptor(0x409124, 0x40a000, 0x1, 0, 0xffffffff, 0, 0x40, 0x409108).
-rTTIBaseClassDescriptor(0x409140, 0x40a01c, 0, 0, 0xffffffff, 0, 0x40, 0x40915c).
-rTTIBaseClassDescriptor(0x4091b4, 0x40a044, 0, 0, 0xffffffff, 0, 0x40, 0x40919c).
-rTTIBaseClassDescriptor(0x409200, 0x40a064, 0x1, 0, 0xffffffff, 0, 0x40, 0x4091e4).
-rTTIClassHierarchyDescriptor(0x409108, 0, [0x409124, 0x409140]).
-rTTIClassHierarchyDescriptor(0x40915c, 0, [0x409140]).
-rTTIClassHierarchyDescriptor(0x40919c, 0, [0x4091b4]).
-rTTIClassHierarchyDescriptor(0x4091e4, 0, [0x409200, 0x409140]).
-rTTICompleteObjectLocator(0x40713c, 0x4090f4, 0x40a000, 0x409108, 0, 0).
-rTTICompleteObjectLocator(0x407158, 0x409174, 0x40a01c, 0x40915c, 0, 0).
-rTTICompleteObjectLocator(0x407178, 0x409188, 0x40a044, 0x40919c, 0, 0).
-rTTICompleteObjectLocator(0x4071ec, 0x4091d0, 0x40a064, 0x4091e4, 0, 0).
+rTTIMSVCBaseClassDescriptor(0x409124, 0x40a000, 0x1, 0, 0xffffffff, 0, 0x40, 0x409108).
+rTTIMSVCBaseClassDescriptor(0x409140, 0x40a01c, 0, 0, 0xffffffff, 0, 0x40, 0x40915c).
+rTTIMSVCBaseClassDescriptor(0x4091b4, 0x40a044, 0, 0, 0xffffffff, 0, 0x40, 0x40919c).
+rTTIMSVCBaseClassDescriptor(0x409200, 0x40a064, 0x1, 0, 0xffffffff, 0, 0x40, 0x4091e4).
+rTTIMSVCClassHierarchyDescriptor(0x409108, 0, [0x409124, 0x409140]).
+rTTIMSVCClassHierarchyDescriptor(0x40915c, 0, [0x409140]).
+rTTIMSVCClassHierarchyDescriptor(0x40919c, 0, [0x4091b4]).
+rTTIMSVCClassHierarchyDescriptor(0x4091e4, 0, [0x409200, 0x409140]).
+rTTIMSVCCompleteObjectLocator(0x40713c, 0x4090f4, 0x40a000, 0x409108, 0, 0).
+rTTIMSVCCompleteObjectLocator(0x407158, 0x409174, 0x40a01c, 0x40915c, 0, 0).
+rTTIMSVCCompleteObjectLocator(0x407178, 0x409188, 0x40a044, 0x40919c, 0, 0).
+rTTIMSVCCompleteObjectLocator(0x4071ec, 0x4091d0, 0x40a064, 0x4091e4, 0, 0).
 rTTITypeDescriptor(0x40a000, 0x40717c, '.?AVbad_alloc@std@@', 'std::bad_alloc').
 rTTITypeDescriptor(0x40a01c, 0x40717c, '.?AVexception@std@@', 'std::exception').
 rTTITypeDescriptor(0x40a044, 0x40717c, '.?AVtype_info@@', type_info).

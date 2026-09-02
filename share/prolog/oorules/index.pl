@@ -64,9 +64,9 @@
 :- index(possibleVFTableWrite/5, [2,5]).
 :- index(possibleVTTEntry/3, [1,3]).
 :- index(possibleVirtualFunctionCall/5, [1]).
-:- index(rTTIBaseClassDescriptor/8, [1,2]).
-:- index(rTTIClassHierarchyDescriptor/3, [1]).
-:- index(rTTICompleteObjectLocator/6, [1,3,5]).
+:- index(rTTIMSVCBaseClassDescriptor/8, [1,2]).
+:- index(rTTIMSVCClassHierarchyDescriptor/3, [1]).
+:- index(rTTIMSVCCompleteObjectLocator/6, [1,3,5]).
 :- index(rTTITypeDescriptor/4, [1]).
 :- index(reportPredicate/1, [1]).
 :- index(returnsSelf/1, [1]).

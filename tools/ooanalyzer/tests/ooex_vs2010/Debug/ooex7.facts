@@ -2951,14 +2951,14 @@ possibleVirtualFunctionCall(0x415fea, 0x415d80, sv_3481113089070436233, 0, 0x70)
 possibleVirtualFunctionCall(0x416018, 0x415d80, sv_3481113089070436233, 0, 0x40).
 possibleVirtualFunctionCall(0x416022, 0x415d80, sv_9279370716226200713, 0, 0x38).
 possibleVirtualFunctionCall(0x41602c, 0x415d80, sv_11006239356962419203, 0, 0x28).
-rTTIBaseClassDescriptor(0x41a774, 0x41c000, 0x1, 0, 0xffffffff, 0, 0x40, 0x41a754).
-rTTIBaseClassDescriptor(0x41a798, 0x41c024, 0, 0, 0xffffffff, 0, 0x40, 0x41a7bc).
-rTTIBaseClassDescriptor(0x41a80c, 0x41c050, 0, 0, 0xffffffff, 0, 0x40, 0x41a7f0).
-rTTIClassHierarchyDescriptor(0x41a754, 0, [0x41a774, 0x41a798]).
-rTTIClassHierarchyDescriptor(0x41a7bc, 0, [0x41a798]).
-rTTIClassHierarchyDescriptor(0x41a7f0, 0, [0x41a80c]).
-rTTICompleteObjectLocator(0x41993c, 0x41a73c, 0x41c000, 0x41a754, 0, 0).
-rTTICompleteObjectLocator(0x41994c, 0x41a7d8, 0x41c050, 0x41a7f0, 0, 0).
+rTTIMSVCBaseClassDescriptor(0x41a774, 0x41c000, 0x1, 0, 0xffffffff, 0, 0x40, 0x41a754).
+rTTIMSVCBaseClassDescriptor(0x41a798, 0x41c024, 0, 0, 0xffffffff, 0, 0x40, 0x41a7bc).
+rTTIMSVCBaseClassDescriptor(0x41a80c, 0x41c050, 0, 0, 0xffffffff, 0, 0x40, 0x41a7f0).
+rTTIMSVCClassHierarchyDescriptor(0x41a754, 0, [0x41a774, 0x41a798]).
+rTTIMSVCClassHierarchyDescriptor(0x41a7bc, 0, [0x41a798]).
+rTTIMSVCClassHierarchyDescriptor(0x41a7f0, 0, [0x41a80c]).
+rTTIMSVCCompleteObjectLocator(0x41993c, 0x41a73c, 0x41c000, 0x41a754, 0, 0).
+rTTIMSVCCompleteObjectLocator(0x41994c, 0x41a7d8, 0x41c050, 0x41a7f0, 0, 0).
 rTTITypeDescriptor(0x41c000, 0x419950, '.?AVbad_alloc@std@@', 'std::bad_alloc').
 rTTITypeDescriptor(0x41c024, 0x419950, '.?AVexception@std@@', 'std::exception').
 rTTITypeDescriptor(0x41c050, 0x419950, '.?AVtype_info@@', type_info).

@@ -10,7 +10,7 @@
 
 namespace pharos {
 
-// Forward declaration for add_rtti_facts() prototype.
+// Forward declaration for add_msvc_rtti_facts() prototype.
 class VirtualFunctionTable;
 
 // Forward declaration of OOAnalyzer
@@ -81,8 +81,8 @@ class OOSolver {
   // Private implementation of add_facts() broken into several parts.
   void add_method_facts(const OOAnalyzer& ooa);
   void add_vftable_facts(const OOAnalyzer& ooa);
-  void add_rtti_facts(const VirtualFunctionTable* vft);
-  void add_rtti_chd_facts(const rose_addr_t addr);
+  void add_msvc_rtti_facts(const VirtualFunctionTable* vft);
+  void add_msvc_rtti_chd_facts(const rose_addr_t addr);
   void add_usage_facts(const OOAnalyzer& ooa);
   void add_call_facts(const OOAnalyzer& ooa);
   void add_thisptroffset_facts();

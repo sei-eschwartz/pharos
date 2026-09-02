@@ -1403,15 +1403,15 @@ returnsSelf(0x411600).
 returnsSelf(0x411a10).
 returnsSelf(0x411a40).
 returnsSelf(0x411ad0).
-rTTIBaseClassDescriptor(0x417554, 0x418000, 0x1, 0, 0xffffffff, 0, 0x40, 0x417534).
-rTTIBaseClassDescriptor(0x417578, 0x41801c, 0, 0, 0xffffffff, 0, 0x40, 0x41759c).
-rTTIBaseClassDescriptor(0x417604, 0x41803c, 0, 0, 0xffffffff, 0, 0x40, 0x4175e8).
-rTTIClassHierarchyDescriptor(0x417534, 0, [0x417554, 0x417578]).
-rTTIClassHierarchyDescriptor(0x41759c, 0, [0x417578]).
-rTTIClassHierarchyDescriptor(0x4175e8, 0, [0x417604]).
-rTTICompleteObjectLocator(0x41673c, 0x41751c, 0x418000, 0x417534, 0, 0).
-rTTICompleteObjectLocator(0x416750, 0x4175b8, 0x41801c, 0x41759c, 0, 0).
-rTTICompleteObjectLocator(0x416764, 0x4175d0, 0x41803c, 0x4175e8, 0, 0).
+rTTIMSVCBaseClassDescriptor(0x417554, 0x418000, 0x1, 0, 0xffffffff, 0, 0x40, 0x417534).
+rTTIMSVCBaseClassDescriptor(0x417578, 0x41801c, 0, 0, 0xffffffff, 0, 0x40, 0x41759c).
+rTTIMSVCBaseClassDescriptor(0x417604, 0x41803c, 0, 0, 0xffffffff, 0, 0x40, 0x4175e8).
+rTTIMSVCClassHierarchyDescriptor(0x417534, 0, [0x417554, 0x417578]).
+rTTIMSVCClassHierarchyDescriptor(0x41759c, 0, [0x417578]).
+rTTIMSVCClassHierarchyDescriptor(0x4175e8, 0, [0x417604]).
+rTTIMSVCCompleteObjectLocator(0x41673c, 0x41751c, 0x418000, 0x417534, 0, 0).
+rTTIMSVCCompleteObjectLocator(0x416750, 0x4175b8, 0x41801c, 0x41759c, 0, 0).
+rTTIMSVCCompleteObjectLocator(0x416764, 0x4175d0, 0x41803c, 0x4175e8, 0, 0).
 rTTITypeDescriptor(0x418000, 0x416768, '.?AVDerived@@', 'Derived').
 rTTITypeDescriptor(0x41801c, 0x416768, '.?AVBase@@', 'Base').
 rTTITypeDescriptor(0x41803c, 0x416768, '.?AVtype_info@@', type_info).

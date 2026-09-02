@@ -429,8 +429,8 @@ OOSolver::add_vftable_facts(const OOAnalyzer& ooa)
       session->add_fact("initialMemory", eaddr, slots[e]);
     }
 
-    if (vft->rtti) {
-      add_rtti_facts(vft.get());
+    if (vft->msvc_rtti) {
+      add_msvc_rtti_facts(vft.get());
     }
   }
 
@@ -463,21 +463,21 @@ OOSolver::add_vftable_facts(const OOAnalyzer& ooa)
 }
 
 void
-OOSolver::add_rtti_facts(const VirtualFunctionTable* vft)
+OOSolver::add_msvc_rtti_facts(const VirtualFunctionTable* vft)
 {
-  if (vft->rtti_confidence == ConfidenceNone) return;
+  if (vft->msvc_rtti_confidence == ConfidenceNone) return;
 
-  const TypeRTTICompleteObjectLocatorPtr rtti = vft->rtti;
+  const TypeRTTICompleteObjectLocatorPtr rtti = vft->msvc_rtti;
 
   // Check for --ignore-rtti option?
   if (rtti->signature.value != 0) return;
   if (rtti->class_desc.signature.value != 0) return;
 
-  if (visited.find(vft->rtti_addr) == visited.end()) {
-    session->add_fact("rTTICompleteObjectLocator", vft->rtti_addr, rtti->address,
+  if (visited.find(vft->msvc_rtti_addr) == visited.end()) {
+    session->add_fact("rTTIMSVCCompleteObjectLocator", vft->msvc_rtti_addr, rtti->address,
                       rtti->pTypeDescriptor.value, rtti->pClassDescriptor.value,
                       rtti->offset.value, rtti->cdOffset.value);
-    visited.insert(vft->rtti_addr);
+    visited.insert(vft->msvc_rtti_addr);
   }
 
   if (visited.find(rtti->pTypeDescriptor.value) == visited.end()) {
@@ -487,7 +487,7 @@ OOSolver::add_rtti_facts(const VirtualFunctionTable* vft)
     try {
       demangled = demangle::visual_studio_demangle(rtti->type_desc.name.value);
     } catch (demangle::Error &e) {
-      GWARN << "Unable to demangle type " << rtti->type_desc.name.value << ": " << e.what () << LEND;
+      GWARN << "Unable to demangle type " << msvc_rtti->type_desc.name.value << ": " << e.what () << LEND;
     }
 
     if (demangled) {
@@ -500,12 +500,12 @@ OOSolver::add_rtti_facts(const VirtualFunctionTable* vft)
   }
 
   if (visited.find(rtti->pClassDescriptor.value) == visited.end()) {
-    add_rtti_chd_facts(rtti->pClassDescriptor.value);
+    add_msvc_rtti_chd_facts(rtti->pClassDescriptor.value);
   }
 }
 
 void
-OOSolver::add_rtti_chd_facts(const rose_addr_t addr)
+OOSolver::add_msvc_rtti_chd_facts(const rose_addr_t addr)
 {
   visited.insert(addr);
   try {
@@ -515,7 +515,7 @@ OOSolver::add_rtti_chd_facts(const rose_addr_t addr)
     std::vector<uint32_t> base_addresses;
     for (const TypeRTTIBaseClassDescriptor& base : chd.base_classes) {
       if (visited.find(base.address) == visited.end()) {
-        session->add_fact("rTTIBaseClassDescriptor", base.address,
+        session->add_fact("rTTIMSVCBaseClassDescriptor", base.address,
                           base.pTypeDescriptor.value, base.numContainedBases.value,
                           base.where_mdisp.value, base.where_pdisp.value,
                           base.where_vdisp.value, base.attributes.value,
@@ -527,7 +527,7 @@ OOSolver::add_rtti_chd_facts(const rose_addr_t addr)
         // present.
         if (base.attributes.value & 0x40 &&
             visited.find(base.pClassDescriptor.value) == visited.end()) {
-          add_rtti_chd_facts(base.pClassDescriptor.value);
+          add_msvc_rtti_chd_facts(base.pClassDescriptor.value);
         }
       }
 
@@ -553,7 +553,7 @@ OOSolver::add_rtti_chd_facts(const rose_addr_t addr)
       base_addresses.push_back(base.address);
     }
 
-    session->add_fact("rTTIClassHierarchyDescriptor", addr,
+    session->add_fact("rTTIMSVCClassHierarchyDescriptor", addr,
                       chd.attributes.value, base_addresses);
   }
   catch (std::exception &e) {
@@ -965,10 +965,10 @@ OOSolver::dump_facts_private()
   exported += session->print_predicate(facts_file, "possibleVBTableWrite", 6);
   exported += session->print_predicate(facts_file, "possibleVTTEntry", 3);
   exported += session->print_predicate(facts_file, "initialMemory", 2);
-  exported += session->print_predicate(facts_file, "rTTICompleteObjectLocator", 6);
+  exported += session->print_predicate(facts_file, "rTTIMSVCCompleteObjectLocator", 6);
   exported += session->print_predicate(facts_file, "rTTITypeDescriptor", 4);
-  exported += session->print_predicate(facts_file, "rTTIClassHierarchyDescriptor", 3);
-  exported += session->print_predicate(facts_file, "rTTIBaseClassDescriptor", 8);
+  exported += session->print_predicate(facts_file, "rTTIMSVCClassHierarchyDescriptor", 3);
+  exported += session->print_predicate(facts_file, "rTTIMSVCBaseClassDescriptor", 8);
   exported += session->print_predicate(facts_file, "thisPtrAllocation", 5);
   exported += session->print_predicate(facts_file, "possibleVirtualFunctionCall", 5);
   exported += session->print_predicate(facts_file, "thisPtrDefinition", 4);

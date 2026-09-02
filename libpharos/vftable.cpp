@@ -8,7 +8,7 @@
 namespace pharos {
 
 TypeRTTICompleteObjectLocatorPtr
-read_RTTI(const DescriptorSet& ds, rose_addr_t addr)
+read_msvc_rtti(const DescriptorSet& ds, rose_addr_t addr)
 {
   try {
     rose_addr_t rptr = ds.memory.read_address(addr);
@@ -96,7 +96,7 @@ void VirtualBaseTable::analyze_overlaps(const VFTableAddrMap& vftables, const VB
       // Don't bound ourselves by other vftables if we know that they are invalid.
       if (!vft->has_entries) continue;
 
-      if (vft->rtti != NULL) {
+      if (vft->msvc_rtti != NULL) {
         limit = ((vft->addr - 4) - addr) / arch_bytes;
       }
       else {
@@ -169,13 +169,13 @@ rose_addr_t VirtualFunctionTable::read_entry(unsigned int entry) const {
 }
 
 // Look for RTTI structures, which should be situated directly above the vtable start
-void VirtualFunctionTable::analyze_rtti(const rose_addr_t address) {
-  rtti = read_RTTI(ds, address);
-  if (rtti) {
+void VirtualFunctionTable::analyze_msvc_rtti(const rose_addr_t address) {
+  msvc_rtti = read_msvc_rtti(ds, address);
+  if (msvc_rtti) {
     GINFO << "RTTI was found at " << addr_str(address)
-          << " with a class name: " << rtti->type_desc.name.value << LEND;
+          << " with a class name: " << msvc_rtti->type_desc.name.value << LEND;
     // checking the signatures is not a proven method
-    rtti_confidence = ConfidenceGuess;
+    msvc_rtti_confidence = ConfidenceGuess;
   }
 }
 
@@ -192,8 +192,8 @@ bool VirtualFunctionTable::analyze(VFTableAddrMap& vftables) {
   // it.  The RTTI pointer will be located immediately before the table, and because it's a
   // pointer, its size varies with the architecture.
   size_t arch_bytes = ds.get_arch_bytes();
-  rtti_addr = addr - arch_bytes;
-  analyze_rtti(rtti_addr);
+  msvc_rtti_addr = addr - arch_bytes;
+  analyze_msvc_rtti(msvc_rtti_addr);
 
   while (true) {
     // Perhaps we should call read_entry() here, but we need taddr as well...
@@ -256,7 +256,7 @@ bool VirtualFunctionTable::analyze(VFTableAddrMap& vftables) {
 
     // It's pretty common to find RTTI complete object locators in the
     //OINFO << "Looking for RTTI at " << addr_str(taddr) << LEND;
-    TypeRTTICompleteObjectLocatorPtr embedded_rtti = read_RTTI(ds, taddr);
+    TypeRTTICompleteObjectLocatorPtr embedded_rtti = read_msvc_rtti(ds, taddr);
     // If it is, then there's most likely a VFTable just pass that, and we should probably
     // analyze that table (even though we haven't found any other references to it yet).
     // This will prevent us from assigning functions found in the later VFTable to this

@@ -2538,21 +2538,21 @@ returnsSelf(0x401c6f).
 returnsSelf(0x401caf).
 returnsSelf(0x401cd6).
 returnsSelf(0x4038e0).
-rTTIBaseClassDescriptor(0x408120, 0x409000, 0, 0, 0xffffffff, 0, 0x40, 0x408108).
-rTTIBaseClassDescriptor(0x40816c, 0x409014, 0x1, 0, 0xffffffff, 0, 0x40, 0x408150).
-rTTIBaseClassDescriptor(0x4081b4, 0x40902c, 0, 0, 0xffffffff, 0, 0x40, 0x40819c).
-rTTIBaseClassDescriptor(0x408200, 0x409044, 0x1, 0, 0xffffffff, 0, 0x40, 0x4081e4).
-rTTIBaseClassDescriptor(0x40821c, 0x409060, 0, 0, 0xffffffff, 0, 0x40, 0x408238).
-rTTIClassHierarchyDescriptor(0x408108, 0, [0x408120]).
-rTTIClassHierarchyDescriptor(0x408150, 0, [0x40816c, 0x408120]).
-rTTIClassHierarchyDescriptor(0x40819c, 0, [0x4081b4]).
-rTTIClassHierarchyDescriptor(0x4081e4, 0, [0x408200, 0x40821c]).
-rTTIClassHierarchyDescriptor(0x408238, 0, [0x40821c]).
-rTTICompleteObjectLocator(0x40613c, 0x4080f4, 0x409000, 0x408108, 0, 0).
-rTTICompleteObjectLocator(0x40614c, 0x40813c, 0x409014, 0x408150, 0, 0).
-rTTICompleteObjectLocator(0x40615c, 0x408188, 0x40902c, 0x40819c, 0, 0).
-rTTICompleteObjectLocator(0x406164, 0x4081d0, 0x409044, 0x4081e4, 0, 0).
-rTTICompleteObjectLocator(0x406bb8, 0x408250, 0x409060, 0x408238, 0, 0).
+rTTIMSVCBaseClassDescriptor(0x408120, 0x409000, 0, 0, 0xffffffff, 0, 0x40, 0x408108).
+rTTIMSVCBaseClassDescriptor(0x40816c, 0x409014, 0x1, 0, 0xffffffff, 0, 0x40, 0x408150).
+rTTIMSVCBaseClassDescriptor(0x4081b4, 0x40902c, 0, 0, 0xffffffff, 0, 0x40, 0x40819c).
+rTTIMSVCBaseClassDescriptor(0x408200, 0x409044, 0x1, 0, 0xffffffff, 0, 0x40, 0x4081e4).
+rTTIMSVCBaseClassDescriptor(0x40821c, 0x409060, 0, 0, 0xffffffff, 0, 0x40, 0x408238).
+rTTIMSVCClassHierarchyDescriptor(0x408108, 0, [0x408120]).
+rTTIMSVCClassHierarchyDescriptor(0x408150, 0, [0x40816c, 0x408120]).
+rTTIMSVCClassHierarchyDescriptor(0x40819c, 0, [0x4081b4]).
+rTTIMSVCClassHierarchyDescriptor(0x4081e4, 0, [0x408200, 0x40821c]).
+rTTIMSVCClassHierarchyDescriptor(0x408238, 0, [0x40821c]).
+rTTIMSVCCompleteObjectLocator(0x40613c, 0x4080f4, 0x409000, 0x408108, 0, 0).
+rTTIMSVCCompleteObjectLocator(0x40614c, 0x40813c, 0x409014, 0x408150, 0, 0).
+rTTIMSVCCompleteObjectLocator(0x40615c, 0x408188, 0x40902c, 0x40819c, 0, 0).
+rTTIMSVCCompleteObjectLocator(0x406164, 0x4081d0, 0x409044, 0x4081e4, 0, 0).
+rTTIMSVCCompleteObjectLocator(0x406bb8, 0x408250, 0x409060, 0x408238, 0, 0).
 rTTITypeDescriptor(0x409000, 0x406160, '.?AVBase@@', 'Base').
 rTTITypeDescriptor(0x409014, 0x406160, '.?AVDerived@@', 'Derived').
 rTTITypeDescriptor(0x40902c, 0x406160, '.?AVtype_info@@', type_info).
