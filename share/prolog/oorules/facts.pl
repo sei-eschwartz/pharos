@@ -93,6 +93,10 @@ initialFact(rTTIMSVCCompleteObjectLocator/6).
 % Name of the class being described is specified (in the mangled name format).  The
 % DemangledName is also exported using the Pharos Visual Studio name demangler now.
 %
+% Both ABIs assert this fact, because both describe a type the same way.  Under the Itanium ABI
+% the Address is that of the '_ZTI' record, VFTable is the __cxxabiv1 type_info vtable that
+% says which of the three kinds of record it is, and the names come from __cxa_demangle.
+%
 initialFact(rTTITypeDescriptor/4).
 
 % rTTIMSVCClassHierarchyDescriptor(Address, Attributes, BaseClasses)
@@ -114,6 +118,43 @@ initialFact(rTTIMSVCClassHierarchyDescriptor/3).
 % particular base class' hierarchy.
 %
 initialFact(rTTIMSVCBaseClassDescriptor/8).
+
+% rTTIItaniumTypeInfo(Address, Kind)
+%
+% There's an Itanium ABI type information record at Address, and it is an instance of the
+% __cxxabiv1 class named by Kind: 'class' for a class with no base classes, 'si_class' for one
+% with a single public non-virtual base, and 'vmi_class' for anything else.  The kind decides
+% the layout of the record, and knowing it is what separates a class that provably has no base
+% classes from a record we were unable to read.
+%
+initialFact(rTTIItaniumTypeInfo/2).
+
+% rTTIItaniumVFTableTypeInfo(VFTable, TIAddress, OffsetToTop)
+%
+% The virtual function table at VFTable is described by the type information record at
+% TIAddress, and serves the subobject beginning OffsetToTop bytes from the top of the complete
+% object.  OffsetToTop is zero for a primary table and negative for a secondary one.
+%
+% This is the Itanium counterpart of rTTIMSVCCompleteObjectLocator, but there is no locator
+% structure to name: both words are simply stored below the table's address point.  Unlike the
+% MSVC case, one record can describe several tables -- every secondary component of a class,
+% and the construction vtables that other classes carry for it, name the same record.
+%
+initialFact(rTTIItaniumVFTableTypeInfo/3).
+
+% rTTIItaniumBaseTypeInfo(TIAddress, BaseTIAddress, Offset, Virtual, Public)
+%
+% The class described by the type information record at TIAddress derives directly from the one
+% at BaseTIAddress.  Virtual and Public are 'true' or 'false'.
+%
+% Only direct base classes are reported, which is the reverse of the MSVC convention: an
+% rTTIMSVCClassHierarchyDescriptor lists every ancestor and leaves directness to be worked out.
+%
+% Offset is where the base subobject begins in the derived object, EXCEPT for a virtual base,
+% where the ABI has nowhere to put a constant: it is instead the offset within the virtual
+% table of the slot that holds the real offset, which is only known at run time.
+%
+initialFact(rTTIItaniumBaseTypeInfo/5).
 
 % thisPtrAllocation(Insn, Function, ThisPtr, Type, Size).
 %

@@ -88,6 +88,13 @@ class DescriptorSet
 
   ABI abi_ = ABI::UNKNOWN;
 
+  // The symbol that each ELF data relocation names, keyed by the address the relocation
+  // writes.  A word that the dynamic linker fills in reads as zero (or as an addend) in the
+  // file, so the symbol name is the only way to know what it was going to point at.
+  std::map<rose_addr_t, std::string> reloc_symbols;
+  // The addresses of the ELF symbols that the file defines, by name.
+  std::map<std::string, rose_addr_t> defined_symbols;
+
   // I think that in the new Partitioner 2 world, it will be the most convenient to just have
   // access to the entire Partitioner 2 engine.  We'll eventually probably want to do things
   // like re-invoke the Partitioner to find additional code that might have been missed on the
@@ -271,6 +278,19 @@ class DescriptorSet
       default:           ASSERT_not_reachable("ABI was not detected");
     }
   }
+  // The name of the symbol that the ELF relocation writing to this address names.
+  boost::optional<std::string const &> get_reloc_symbol(rose_addr_t addr) const {
+    auto found = reloc_symbols.find(addr);
+    if (found == reloc_symbols.end()) return boost::none;
+    return found->second;
+  }
+  // The address of an ELF symbol that the file itself defines.
+  boost::optional<rose_addr_t> get_symbol_address(std::string const & name) const {
+    auto found = defined_symbols.find(name);
+    if (found == defined_symbols.end()) return boost::none;
+    return found->second;
+  }
+
   // Return the register that holds the this-pointer, or boost::none for ABIs that pass
   // the this-pointer on the stack (SYSV_32).
   boost::optional<RegisterDescriptor> get_this_ptr_reg() const;

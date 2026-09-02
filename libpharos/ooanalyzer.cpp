@@ -17,7 +17,7 @@
 namespace pharos {
 
 OOAnalyzer::OOAnalyzer(DescriptorSet& ds_, const ProgOptVarMap& vm_) :
-  BottomUpAnalyzer(ds_, vm_) {
+  BottomUpAnalyzer(ds_, vm_), itanium_typeinfo(ds_) {
   user_new_addrs = option_addr_list(vm, "new-method");
   user_delete_addrs = option_addr_list(vm, "delete-method");
   user_purecall_addrs = option_addr_list(vm, "purecall");
@@ -500,7 +500,7 @@ bool OOAnalyzer::analyze_possible_vtable(rose_addr_t address, bool allow_base) {
   // If we did not find a valid vitual base table, try creating a virtual function table.
   auto vftable = make_unique<VirtualFunctionTable>(ds, address);
   // If the vbtable is valid add it to the list.
-  if (vftable->analyze(vftables)) {
+  if (vftable->analyze(vftables, itanium_typeinfo)) {
     vftables[address] = std::move(vftable);
     virtual_tables[address] = true;
     return true;

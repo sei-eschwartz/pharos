@@ -46,6 +46,11 @@ class OOAnalyzer : public BottomUpAnalyzer {
   // The Itanium ABI virtual table tables, which are how the construction vtables get found.
   ItaniumVTTMap itanium_vtts;
 
+  // The Itanium ABI type information records.  One record serves every table of its class, and
+  // the record of a non-polymorphic base class belongs to no table at all, so the finder is
+  // per-program rather than per-table.
+  ItaniumTypeInfoFinder itanium_typeinfo;
+
   // This entire new/delete/purecall system needs a major rewrite.  The new design is to have a
   // FunctionFinder() class that get initialized with some properties (names, hashes, etc.),
   // finds all the functions matching the critria, and then provides the interface to query
@@ -131,6 +136,9 @@ class OOAnalyzer : public BottomUpAnalyzer {
   const VBTableAddrMap& get_vbtables() const { return vbtables; }
   const VirtualFunctionCallMap& get_vcalls() const { return vcalls; }
   const ItaniumVTTMap& get_itanium_vtts() const { return itanium_vtts; }
+  const ItaniumTypeInfoMap& get_itanium_typeinfo() const {
+    return itanium_typeinfo.get_records();
+  }
 
   // Is the provided address a new(), delete(), or purecall() method?
   bool is_new_method(rose_addr_t addr) const {

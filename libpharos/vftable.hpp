@@ -75,6 +75,63 @@ using TypeRTTICompleteObjectLocatorPtr = std::shared_ptr<TypeRTTICompleteObjectL
 
 TypeRTTICompleteObjectLocatorPtr read_msvc_rtti(const DescriptorSet& ds, rose_addr_t addr);
 
+using ItaniumTypeInfoMap = std::map<rose_addr_t, TypeItaniumTypeInfo>;
+
+// The Itanium ABI counterpart of read_msvc_rtti(), which has to be a class rather than a
+// function because it answers a question no single record can: which of the three __cxxabiv1
+// classes a record is an instance of decides its layout, and the record does not say.
+//
+// Three things can answer it, in descending order of reliability.  A relocation on the
+// record's own vtable word names the __cxxabiv1 class, which is what a binary that gets the
+// class from libstdc++ has.  A symbol names one of the three type_info vtables, which is what
+// a binary carrying its own copy has.  Failing both, the record's own shape decides, and that
+// answer is remembered per type_info vtable rather than per record, because it cannot stand on
+// its own: two adjacent 16-byte __class_type_info records are laid out exactly like one
+// __si_class_type_info naming the other.
+//
+// Records are memoized by address, since one record serves every table of its class and the
+// record of a non-polymorphic base class belongs to no table at all.
+class ItaniumTypeInfoFinder {
+ public:
+  ItaniumTypeInfoFinder(const DescriptorSet& ds_);
+
+  // Read the record at an address, and the records of its base classes.  Returns nullptr if
+  // there is no type information record there.  The returned pointer is stable.
+  const TypeItaniumTypeInfo* read(rose_addr_t addr);
+
+  // Is this the two word header that precedes a virtual table's address point?  True when the
+  // second word names a type information record and the first is a plausible offset-to-top.
+  // This is what ends the walk of the table that precedes the header.
+  bool is_address_point_header(rose_addr_t addr);
+
+  const ItaniumTypeInfoMap& get_records() const { return records; }
+
+ private:
+  const DescriptorSet& ds;
+  size_t arch_bytes;
+
+  ItaniumTypeInfoMap records;
+  // The addresses that hold no record, so that a base class pointer into another shared
+  // object is only diagnosed once.
+  AddrSet rejected;
+  // The kind of each type_info vtable, keyed by the address point that a record's vtable word
+  // holds.  Seeded from the ELF symbols, extended as records are classified structurally.
+  std::map<rose_addr_t, ItaniumTypeInfoKind> vtable_kinds;
+
+  // Seed vtable_kinds from the ELF symbols for the three __cxxabiv1 type_info vtables.
+  void find_abi_vtables();
+  // Is there a plausible mangled type name at this address?
+  bool is_name(rose_addr_t addr) const;
+  // Decide which of the three classes the record at an address is an instance of.
+  ItaniumTypeInfoKind classify(rose_addr_t addr, rose_addr_t vptr);
+  // Do the words after the name parse as an __vmi_class_type_info base class array?
+  bool reads_as_vmi(rose_addr_t addr) const;
+};
+
+// Demangle an Itanium ABI type name, as type_info::name() reports it.  Returns an empty string
+// if the name does not demangle.
+std::string demangle_itanium_type(std::string const & name);
+
 class VirtualFunctionTable {
 
   const DescriptorSet& ds;
@@ -106,15 +163,27 @@ class VirtualFunctionTable {
   // The confidence is based on the technique used to identify RTTI.
   GenericConfidence msvc_rtti_confidence;
 
+  // Under the Itanium ABI the word above the table points at the type information of the class
+  // the table serves, and the word above that says where in the object the subobject it serves
+  // begins.  The record is owned by the finder, which outlives every table.
+  const TypeItaniumTypeInfo* itanium_rtti;
+  int64_t offset_to_top;
+
   VirtualFunctionTable(const DescriptorSet& ds_, rose_addr_t a) : ds(ds_) {
     addr = a;
     non_function = 0;
     has_entries = false;
     msvc_rtti_confidence = ConfidenceNone;
+    itanium_rtti = nullptr;
+    offset_to_top = 0;
   }
 
   // Determine if RTTI is present with this virtual function table
   void analyze_msvc_rtti(const rose_addr_t address);
+
+  // The Itanium ABI equivalent, reading the type information record that the word above the
+  // table names, and the offset-to-top beside it.
+  void analyze_itanium_rtti(ItaniumTypeInfoFinder& typeinfo);
 
   // Read an entry from the table.
   rose_addr_t read_entry(unsigned int entry) const;
@@ -123,8 +192,10 @@ class VirtualFunctionTable {
   // the contents of the memory at the address of the table.  Returns true if the table is
   // valid, and false if it is not.  Requires a list of existing tables to check for overlaps,
   // and becuse of some complexity with finding the next vftable unsolicited, it also needs
-  // update access.  More cleanup is required.
-  bool analyze(VFTableAddrMap& vftables);
+  // update access.  More cleanup is required.  The type information finder is needed because
+  // under the Itanium ABI it is what says where the table ends: the next component of the
+  // group announces itself with the two word header below its own address point.
+  bool analyze(VFTableAddrMap& vftables, ItaniumTypeInfoFinder& typeinfo);
 };
 
 } // namespace pharos

@@ -83,6 +83,8 @@ class OOSolver {
   void add_vftable_facts(const OOAnalyzer& ooa);
   void add_msvc_rtti_facts(const VirtualFunctionTable* vft);
   void add_msvc_rtti_chd_facts(const rose_addr_t addr);
+  void add_itanium_rtti_facts(const OOAnalyzer& ooa, const VirtualFunctionTable* vft);
+  void add_itanium_typeinfo_facts(const OOAnalyzer& ooa, const rose_addr_t addr);
   void add_usage_facts(const OOAnalyzer& ooa);
   void add_call_facts(const OOAnalyzer& ooa);
   void add_thisptroffset_facts();

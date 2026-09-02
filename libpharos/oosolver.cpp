@@ -386,6 +386,24 @@ OOSolver::add_vftable_facts(const OOAnalyzer& ooa)
   };
   const size_t tolerance = itanium ? 3 : 0;
 
+  // The next component of a vtable group announces itself with the two word header below its
+  // address point: the offset-to-top of the subobject it serves, which is zero for a primary
+  // table and negative for a secondary one, and the pointer to the type information of its
+  // class.  That header is never an entry of the table before it, so recognizing it ends the
+  // walk exactly where the tolerance above can only guess.  Every record has been read by the
+  // time facts are exported, so the map is all that is needed to recognize one.
+  const ItaniumTypeInfoMap& typeinfo = ooa.get_itanium_typeinfo();
+  auto is_next_component = [&ooa, &typeinfo, arch_bytes](rose_addr_t addr) {
+    if (!ooa.ds.memory.is_mapped(addr) || !ooa.ds.memory.is_mapped(addr + arch_bytes)) {
+      return false;
+    }
+    int64_t offset_to_top = IntegerOps::signExtend2(
+      ooa.ds.memory.read_address(addr, Bytes(arch_bytes)), 8 * arch_bytes, 64);
+    if (offset_to_top > 0) return false;
+    return typeinfo.count(
+      ooa.ds.memory.read_address(addr + arch_bytes, Bytes(arch_bytes))) != 0;
+  };
+
   for (auto const & vft : boost::adaptors::values(vftables)) {
     // Collect before emitting, because a slot that failed the test can still turn out to be inside
     // the table.  Only the failures the table ends on should be dropped.
@@ -406,6 +424,8 @@ OOSolver::add_vftable_facts(const OOAnalyzer& ooa)
 
       // Skip this entry if it's already been proccessed.
       if (exported.find(eaddr) != exported.end()) break;
+
+      if (e != 0 && itanium && is_next_component(eaddr)) break;
 
       rose_addr_t value = vft->read_entry(e);
       if (is_entry(value)) strikes = 0;
@@ -431,6 +451,9 @@ OOSolver::add_vftable_facts(const OOAnalyzer& ooa)
 
     if (vft->msvc_rtti) {
       add_msvc_rtti_facts(vft.get());
+    }
+    else if (vft->itanium_rtti) {
+      add_itanium_rtti_facts(ooa, vft.get());
     }
   }
 
@@ -487,7 +510,7 @@ OOSolver::add_msvc_rtti_facts(const VirtualFunctionTable* vft)
     try {
       demangled = demangle::visual_studio_demangle(rtti->type_desc.name.value);
     } catch (demangle::Error &e) {
-      GWARN << "Unable to demangle type " << msvc_rtti->type_desc.name.value << ": " << e.what () << LEND;
+      GWARN << "Unable to demangle type " << rtti->type_desc.name.value << ": " << e.what () << LEND;
     }
 
     if (demangled) {
@@ -561,6 +584,53 @@ OOSolver::add_msvc_rtti_chd_facts(const rose_addr_t addr)
   }
   catch (...) {
     GERROR << "RTTI Class Hierarchy Descriptor was bad at " << addr_str(addr) << LEND;
+  }
+}
+
+// The Itanium ABI counterpart of add_msvc_rtti_facts().  The type information record takes the
+// place of both the complete object locator and the class hierarchy descriptor: it names the
+// class and lists its direct base classes, and the table points at it directly rather than
+// through a locator.  Bases are followed recursively the way add_msvc_rtti_chd_facts() follows
+// base class descriptors, because a base class' record is reported even when the base has no
+// virtual function table of its own to reach it from.
+void
+OOSolver::add_itanium_rtti_facts(const OOAnalyzer& ooa, const VirtualFunctionTable* vft)
+{
+  session->add_fact("rTTIItaniumVFTableTypeInfo", vft->addr, vft->itanium_rtti->address,
+                    vft->offset_to_top);
+
+  add_itanium_typeinfo_facts(ooa, vft->itanium_rtti->address);
+}
+
+void
+OOSolver::add_itanium_typeinfo_facts(const OOAnalyzer& ooa, const rose_addr_t addr)
+{
+  if (visited.find(addr) != visited.end()) return;
+
+  // A base class whose record is in another shared object, where the pointer to it is a
+  // relocation that the dynamic linker was going to fill in.  There is nothing to report.
+  const ItaniumTypeInfoMap& records = ooa.get_itanium_typeinfo();
+  auto found = records.find(addr);
+  if (found == records.end()) return;
+  const TypeItaniumTypeInfo& ti = found->second;
+  visited.insert(addr);
+
+  std::string demangled_name = demangle_itanium_type(ti.name.value);
+  if (demangled_name.empty()) {
+    GWARN << "Unable to demangle type " << ti.name.value << LEND;
+  }
+
+  // The same fact the MSVC path asserts, because the record describes the same thing: the
+  // type_info vtable, the mangled name of the class, and its demangling.
+  session->add_fact("rTTITypeDescriptor", ti.address, ti.pVTable.value,
+                    ti.name.value, demangled_name);
+  session->add_fact("rTTIItaniumTypeInfo", ti.address, kind_str(ti.kind));
+
+  for (const TypeItaniumBaseTypeInfo & base : ti.base_classes) {
+    session->add_fact("rTTIItaniumBaseTypeInfo", ti.address, base.pTypeInfo.value,
+                      base.offset(), base.is_virtual() ? "true" : "false",
+                      base.is_public() ? "true" : "false");
+    add_itanium_typeinfo_facts(ooa, base.pTypeInfo.value);
   }
 }
 
@@ -969,6 +1039,9 @@ OOSolver::dump_facts_private()
   exported += session->print_predicate(facts_file, "rTTITypeDescriptor", 4);
   exported += session->print_predicate(facts_file, "rTTIMSVCClassHierarchyDescriptor", 3);
   exported += session->print_predicate(facts_file, "rTTIMSVCBaseClassDescriptor", 8);
+  exported += session->print_predicate(facts_file, "rTTIItaniumTypeInfo", 2);
+  exported += session->print_predicate(facts_file, "rTTIItaniumVFTableTypeInfo", 3);
+  exported += session->print_predicate(facts_file, "rTTIItaniumBaseTypeInfo", 5);
   exported += session->print_predicate(facts_file, "thisPtrAllocation", 5);
   exported += session->print_predicate(facts_file, "possibleVirtualFunctionCall", 5);
   exported += session->print_predicate(facts_file, "thisPtrDefinition", 4);

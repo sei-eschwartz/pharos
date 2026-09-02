@@ -11,6 +11,7 @@ set(PHAROS_SOURCES
   cdg.cpp
   config.cpp
   convention.cpp
+  datatypes.cpp
   defuse.cpp
   demangle.cpp
   demangle_json.cpp

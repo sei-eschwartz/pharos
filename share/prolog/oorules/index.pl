@@ -68,6 +68,9 @@
 :- index(rTTIMSVCClassHierarchyDescriptor/3, [1]).
 :- index(rTTIMSVCCompleteObjectLocator/6, [1,3,5]).
 :- index(rTTITypeDescriptor/4, [1]).
+:- index(rTTIItaniumTypeInfo/2, [1]).
+:- index(rTTIItaniumVFTableTypeInfo/3, [1,2]).
+:- index(rTTIItaniumBaseTypeInfo/5, [1,2]).
 :- index(reportPredicate/1, [1]).
 :- index(returnsSelf/1, [1]).
 :- index(symbolClass/4, [1,3]).
