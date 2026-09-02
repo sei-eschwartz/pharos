@@ -163,7 +163,7 @@ rTTIInheritsVirtuallyFrom(DerivedTDA, AncestorTDA, Attributes, M, P, V) :-
 % the class' own primary component: a construction vtable for B-in-D holds the offset of the
 % virtual base within a D, not within a B.
 %
-% The words below an address point are not exported as initialMemory yet (issue #356), so this
+% The words below an address point are not exported as initialMemory yet (issue #358), so this
 % finds nothing today.  Virtual inheritance starts being recovered when they are, with no
 % further change here.
 :- table rTTIItaniumVirtualBaseOffset/3 as opaque.
@@ -172,7 +172,7 @@ rTTIItaniumVirtualBaseOffset(DerivedTDA, AncestorTDA, Offset) :-
     rTTIItaniumVFTableTypeInfo(VFTable, DerivedTDA, 0),
     not(possibleConstructionVFTable(VFTable)),
     SlotAddress is VFTable + SlotOffset,
-    % BUG these are not currently exported #356
+    % BUG these are not currently exported #358
     initialMemory(SlotAddress, Offset).
 
 :- table rTTIInheritsFrom/6 as opaque.
