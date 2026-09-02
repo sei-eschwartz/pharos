@@ -22,6 +22,16 @@ rTTITDA2VFTable(TDA, VFTable) :-
     pointerSize(PtrSize),
     VFTable is Pointer + PtrSize.
 
+% Under the Itanium ABI the table points at the record directly, with no locator in between.
+% Every component of the class' virtual table group names the same record -- the primary, the
+% secondaries, and the construction vtables that other classes carry for the class -- and the
+% offset-to-top is ignored here for the same reason the MSVC clause above ignores the locator's
+% Offset: a table is a table of its class wherever in the object it is installed.  Taking all of
+% them is what lets reasonMergeClasses_J tie a group together, and what gives an abstract class
+% an identity at all, since such a class often has no table but the construction vtables.
+rTTITDA2VFTable(TDA, VFTable) :-
+    rTTIItaniumVFTableTypeInfo(VFTable, TDA, _OffsetToTop).
+
 % This rule must be tabled incremental because of the find() clause.
 :- table rTTITDA2Class/2 as incremental.
 rTTITDA2Class(TDA, Class) :-
@@ -67,12 +77,31 @@ rTTINoBase(TDA) :-
     rTTITypeDescriptor(TDA, _TIVTable, _Name, _DName),
     rTTIMSVCBaseClassDescriptor(_BCDA, TDA, 0, _M, _P, _V, _BaseAttributes, _ECHDA).
 
+% The Itanium ABI says so outright.  A class with no base classes is described by a plain
+% __class_type_info, which is the only kind of record that has nowhere to put one.  This is
+% what the exported kind is for: it separates a class that provably has no bases from a record
+% we were unable to read.
+rTTINoBase(TDA) :-
+    rTTIItaniumTypeInfo(TDA, class).
+
 :- table rTTIAncestorOf/2 as opaque.
 rTTIAncestorOf(DerivedTDA, AncestorTDA) :-
     rTTIMSVCCompleteObjectLocator(_Pointer, _COLA, DerivedTDA, CHDA, _Offset, _O2),
     rTTIMSVCClassHierarchyDescriptor(CHDA, _HierarchyAttributes, Bases),
     member(BCDA, Bases),
     rTTIMSVCBaseClassDescriptor(BCDA, AncestorTDA, _NumBases, _M, _P, _V, _BaseAttributes, _ECHDA),
+    AncestorTDA \= DerivedTDA.
+
+% An Itanium record lists only the direct base classes, where a class hierarchy descriptor
+% lists every ancestor, so the closure has to be taken explicitly.  Completeness matters more
+% than usual here, because reasonClassHasNoDerived uses this predicate negatively.
+rTTIAncestorOf(DerivedTDA, AncestorTDA) :-
+    rTTIItaniumBaseTypeInfo(DerivedTDA, AncestorTDA, _Offset, _Virtual, _Public),
+    AncestorTDA \= DerivedTDA.
+
+rTTIAncestorOf(DerivedTDA, AncestorTDA) :-
+    rTTIItaniumBaseTypeInfo(DerivedTDA, MiddleTDA, _Offset, _Virtual, _Public),
+    rTTIAncestorOf(MiddleTDA, AncestorTDA),
     AncestorTDA \= DerivedTDA.
 
 :- table rTTIInheritsIndirectlyFrom/2 as opaque.
@@ -128,10 +157,44 @@ rTTIInheritsVirtuallyFrom(DerivedTDA, AncestorTDA, Attributes, M, P, V) :-
     true.
 
 
+% Which offset a virtual base lands at depends on the complete object being built, so the
+% Itanium ABI keeps it in the virtual table rather than in the type information record, and the
+% record gives the position of the slot that holds it.  Read the slot.  It has to be read from
+% the class' own primary component: a construction vtable for B-in-D holds the offset of the
+% virtual base within a D, not within a B.
+%
+% The words below an address point are not exported as initialMemory yet (issue #356), so this
+% finds nothing today.  Virtual inheritance starts being recovered when they are, with no
+% further change here.
+:- table rTTIItaniumVirtualBaseOffset/3 as opaque.
+rTTIItaniumVirtualBaseOffset(DerivedTDA, AncestorTDA, Offset) :-
+    rTTIItaniumBaseTypeInfo(DerivedTDA, AncestorTDA, SlotOffset, true, _Public),
+    rTTIItaniumVFTableTypeInfo(VFTable, DerivedTDA, 0),
+    not(possibleConstructionVFTable(VFTable)),
+    SlotAddress is VFTable + SlotOffset,
+    % BUG these are not currently exported #356
+    initialMemory(SlotAddress, Offset).
+
 :- table rTTIInheritsFrom/6 as opaque.
 rTTIInheritsFrom(DerivedTDA, AncestorTDA, Attributes, M, P, V) :-
     (rTTIInheritsDirectlyFrom(DerivedTDA, AncestorTDA, Attributes, M, P, V);
      rTTIInheritsVirtuallyFrom(DerivedTDA, AncestorTDA, Attributes, M, P, V)).
+
+% An Itanium record states the direct base classes outright, so there is no directness to work
+% out and no hierarchy descriptor to walk.  A non-virtual base's offset is already the offset of
+% the subobject; a virtual base's has to be read out of the table first.
+%
+% Both are reported with the MSVC encoding for "not reached through a virtual base table",
+% because by this point they are the same thing: factDerivedClass and finalInheritance record
+% only an offset, and this keeps reasonDerivedClass_E and reasonVBTableEntry from matching a
+% virtual base against a virtual base table that the Itanium ABI does not have.
+rTTIInheritsFrom(DerivedTDA, AncestorTDA, 0, Offset, 0xffffffff, 0) :-
+    rTTIItaniumBaseTypeInfo(DerivedTDA, AncestorTDA, Offset, false, _Public),
+    AncestorTDA \= DerivedTDA.
+
+rTTIInheritsFrom(DerivedTDA, AncestorTDA, 0, Offset, 0xffffffff, 0) :-
+    rTTIItaniumVirtualBaseOffset(DerivedTDA, AncestorTDA, Offset),
+    AncestorTDA \= DerivedTDA.
 
 % When RTTI is enabled, valid, and reports an inheritance relationship, this is a particularly
 % strong assertion.  In particular, it represents a rare opportunity to make confident negative
@@ -161,6 +224,14 @@ reasonRTTIInformation(VFTableAddress, Pointer, RTTIName) :-
     rTTITypeDescriptor(TDAddress, _VFTableCheck, RTTIName, _DName),
     pointerSize(PtrSize),
     VFTableAddress is Pointer + PtrSize,
+    factVFTable(VFTableAddress).
+
+% The Itanium equivalent, where the record address is what there is to report -- there is no
+% locator, and the record is what the table points at.  Every component of a group is named,
+% not just the primary, so each table reports the class it serves.
+reasonRTTIInformation(VFTableAddress, TDAddress, RTTIName) :-
+    rTTIItaniumVFTableTypeInfo(VFTableAddress, TDAddress, _OffsetToTop),
+    rTTITypeDescriptor(TDAddress, _VFTableCheck, RTTIName, _DName),
     factVFTable(VFTableAddress).
 
 % ============================================================================================
@@ -265,20 +336,83 @@ rTTIHasTypeDescriptor(TDA) :-
 findNone(Pred) :-
     findall(true, Pred, R), R = [].
 
+% --------------------------------------------------------------------------------------------
+% Itanium ABI validation.
+
+% Which of the three __cxxabiv1 classes describes a record is decided by how many base classes
+% it has and what they are, so the kind and the bases have to agree.  A disagreement means we
+% read the record with the wrong layout, which makes every offset in it meaningless.
+
+rTTIItaniumInvalidClass :-
+    rTTIItaniumTypeInfo(TDA, class),
+    rTTIItaniumBaseTypeInfo(TDA, BaseTDA, _Offset, _Virtual, _Public),
+    rttiwarninvalid('__class_type_info at ~Q has a base class at ~Q', [TDA, BaseTDA]).
+
+rTTIItaniumInvalidSIClass :-
+    rTTIItaniumTypeInfo(TDA, si_class),
+    % An __si_class_type_info exists precisely for the case of one public, non-virtual base at
+    % offset zero.  Anything else would have been emitted as an __vmi_class_type_info, so
+    % collect every base before judging the shape rather than only the ones that fit.
+    findall(BaseTDA-Offset-Virtual-Public,
+            rTTIItaniumBaseTypeInfo(TDA, BaseTDA, Offset, Virtual, Public), Bases),
+    not(Bases = [_OneBase-0-false-true]),
+    rttiwarninvalid('__si_class_type_info at ~Q has bases ~Q', [TDA, Bases]).
+
+rTTIItaniumInvalidVMIClass :-
+    rTTIItaniumTypeInfo(TDA, vmi_class),
+    not(rTTIItaniumBaseTypeInfo(TDA, _BaseTDA, _Offset, _Virtual, _Public)),
+    rttiwarninvalid('__vmi_class_type_info at ~Q has no base classes', [TDA]).
+
+rTTIItaniumInvalidCycle :-
+    rTTIItaniumTypeInfo(TDA, _Kind),
+    rTTIAncestorOf(TDA, TDA),
+    rttiwarninvalid('type information at ~Q is its own ancestor', [TDA]).
+
+% Every record a virtual function table names should have been reported.  A base class whose
+% record is in another shared object is a different matter, and is not an error: the pointer to
+% it is a relocation that the dynamic linker was going to fill in, and there is nothing to read.
+rTTIItaniumMissingTypeDescriptor :-
+    rTTIItaniumVFTableTypeInfo(VFTable, TDA, _OffsetToTop),
+    not(rTTITypeDescriptor(TDA, _VFTable, _Name, _DName)),
+    rttiwarninvalid('table at ~Q names type information at ~Q, which is missing',
+                    [VFTable, TDA]).
+
+% --------------------------------------------------------------------------------------------
 % Is the RTTI information internally consistent?
+%
+% Branching on the ABI rather than making each check tolerant of its facts being absent, so
+% that an MSVC binary reaches exactly the checks it always did.  The MSVC list requires its
+% setof goals to succeed, which is why an Itanium binary could never pass it.
 :- table rTTIValid/0 as opaque.
 rTTIValid :-
-    rTTIEnabled ->
-        exclude(call, [setof(TDA, rTTIAllTypeDescriptors(TDA), TDASet1),
-                       exclude(rTTIHasTypeDescriptor, TDASet1, R1), R1 = [],
-                       setof(TDA, rTTIShouldHaveSelfRef(TDA), TDASet2),
-                       exclude(rTTIHasSelfRef, TDASet2, R2), R2 = [],
-                       findNone(rTTIInvalidBaseAttributes),
-                       findNone(rTTIInvalidHierarchyAttributes),
-                       findNone(rTTIInvalidDirectInheritanceP),
-                       findNone(rTTIInvalidDirectInheritanceV)],
-                Results),
-        Results = [].
+    rTTIEnabled,
+    itaniumABI,
+    % There has to be something to be valid.  The MSVC list below requires this implicitly,
+    % since its setof goals fail when there are no type descriptors, and without the same
+    % requirement here a binary built with -fno-rtti would vacuously pass and switch on every
+    % rule that asks whether the RTTI can be trusted.
+    rTTIItaniumTypeInfo(_TDA, _Kind),
+    exclude(call, [findNone(rTTIItaniumInvalidClass),
+                   findNone(rTTIItaniumInvalidSIClass),
+                   findNone(rTTIItaniumInvalidVMIClass),
+                   findNone(rTTIItaniumInvalidCycle),
+                   findNone(rTTIItaniumMissingTypeDescriptor)],
+            Results),
+    Results = [].
+
+rTTIValid :-
+    rTTIEnabled,
+    msvcABI,
+    exclude(call, [setof(TDA, rTTIAllTypeDescriptors(TDA), TDASet1),
+                   exclude(rTTIHasTypeDescriptor, TDASet1, R1), R1 = [],
+                   setof(TDA, rTTIShouldHaveSelfRef(TDA), TDASet2),
+                   exclude(rTTIHasSelfRef, TDASet2, R2), R2 = [],
+                   findNone(rTTIInvalidBaseAttributes),
+                   findNone(rTTIInvalidHierarchyAttributes),
+                   findNone(rTTIInvalidDirectInheritanceP),
+                   findNone(rTTIInvalidDirectInheritanceV)],
+            Results),
+    Results = [].
 
 % ============================================================================================
 % Reporting
@@ -332,7 +466,10 @@ rTTIPresent(Count) :-
     aggregate_all(count, rTTIMSVCCompleteObjectLocator(_, _, _, _, _, _), Count2),
     aggregate_all(count, rTTIMSVCBaseClassDescriptor(_, _, _, _, _, _, _, _), Count3),
     aggregate_all(count, rTTIMSVCClassHierarchyDescriptor(_, _, _), Count4),
-    Count is Count1 + Count2 + Count3 + Count4.
+    aggregate_all(count, rTTIItaniumTypeInfo(_, _), Count5),
+    aggregate_all(count, rTTIItaniumVFTableTypeInfo(_, _, _), Count6),
+    aggregate_all(count, rTTIItaniumBaseTypeInfo(_, _, _, _, _), Count7),
+    Count is Count1 + Count2 + Count3 + Count4 + Count5 + Count6 + Count7.
 
 reportRTTIResults :-
     % Always enable RTTI before attempting to report on it.

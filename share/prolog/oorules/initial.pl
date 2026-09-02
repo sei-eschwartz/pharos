@@ -82,6 +82,11 @@ possibleVFTableSlot(VFTable, 0) :-
     VFTable is Pointer + PtrSize,
     initialMemory(VFTable, _Value).
 
+% The Itanium ABI equivalent, where the type information record is named by the table directly.
+possibleVFTableSlot(VFTable, 0) :-
+    rTTIItaniumVFTableTypeInfo(VFTable, _TDAddress, _OffsetToTop),
+    initialMemory(VFTable, _Value).
+
 % A construction vtable is usually named only by a VTT slot, since the constructor reads its
 % address point from the VTT rather than naming it as a constant.
 % XXX this will change soon
