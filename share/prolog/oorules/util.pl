@@ -23,7 +23,7 @@ minof(A, B) :-
     ->
         (bagof(A, B, Cp),
          sort(Cp, Cp2),
-         nth0(1, Cp2, A))
+         nth0(0, Cp2, A))
     ;   B.
 
 tuple_to_list((A,B), L) :-
