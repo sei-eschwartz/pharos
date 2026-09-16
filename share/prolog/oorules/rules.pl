@@ -2119,29 +2119,29 @@ reasonDerivedClassRelationship(D, B) :- reasonDerivedClassRelationship(D, B, _O)
 % It is certain that there is a class relationship between the two classes (either through
 % inheritance or embedding).
 
-% reasonClassRelationship_internal(_, _) is generally a small table, but it can be very
-% expensive to maintain all variants.  So we have a front-end here that always queries
-% reasonClassRelationship(_, _).
+% Avoid a separate incremental table for each bound pair by querying with an unbound second
+% argument and filtering the answers. Other call modes retain their original table variants.
 
-reasonClassRelationship_fe(Class1, Class2) :- var(Class1), var(Class2), !,
+reasonClassRelationship(Class1, Class2) :- var(Class1), var(Class2), !,
    reasonClassRelationship_internal(Class1, Class2).
 
-reasonClassRelationship_fe(Class1, Class2) :- integer(Class1), var(Class2), !,
+reasonClassRelationship(Class1, Class2) :- integer(Class1), var(Class2), !,
    % Unbound call
    reasonClassRelationship_internal(Class1, Class2UB),
    % Unification
    Class2=Class2UB.
 
-reasonClassRelationship_fe(Class1, Class2) :- integer(Class1), integer(Class2), !,
+reasonClassRelationship(Class1, Class2) :- integer(Class1), integer(Class2), !,
    % Unbound call
-   reasonClassRelationship(Class1, Class2UB),
+   reasonClassRelationship_internal(Class1, Class2UB),
    % Unification
    %Class1=Class1UB,
    Class2=Class2UB.
 
-reasonClassRelationship_fe(_, _) :- throw(system_error(reasonClassRelationship)).
+reasonClassRelationship(Class1, Class2) :- var(Class1), integer(Class2), !,
+   reasonClassRelationship_internal(Class1, Class2).
 
-reasonClassRelationship(A,B) :- reasonClassRelationship_internal(A,B).
+reasonClassRelationship(_, _) :- throw(system_error(reasonClassRelationship)).
 
 % This causes a huge amount of tabling space in FireFall.
 :- table reasonClassRelationship_internal/2 as incremental.

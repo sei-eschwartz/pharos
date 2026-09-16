@@ -21,6 +21,7 @@ set(PROLOG_UNIT_TESTS
   tests/vtt_slice_tests.pl
   tests/vftable_slot_tests.pl
   tests/constructor_tests.pl
+  tests/class_relationship_tests.pl
   tests/itanium_rtti_tests.pl)
 
 foreach(test_file ${PROLOG_UNIT_TESTS})
