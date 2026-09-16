@@ -257,10 +257,10 @@ methodCallAtOffset(Insn, Caller, Callee, 0) :-
 :- table thisPtrUsage/4 as opaque.
 
 thisPtrUsage(Insn, Function, ThisPtr, Method) :-
+    callParameter(Insn, Function, Param, ThisPtr),
     callTarget(Insn, Function, Thunk),
     dethunk(Thunk, Method),
     thisPtrParam(Method, Param),
-    callParameter(Insn, Function, Param, ThisPtr),
     %loginfoln('~Q.', thisPtrUsage(Insn, Function, ThisPtr, Method)),
     true.
 
